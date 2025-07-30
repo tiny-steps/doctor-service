@@ -1,13 +1,13 @@
-package com.tinysteps.doctorservice;
+package com.tintsteps.doctorsevice;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 @SpringBootApplication
-public class Application {
+public class DoctorSeviceApplication {
 
 	public static void main(String[] args) {
-		SpringApplication.run(Application.class, args);
+		SpringApplication.run(DoctorSeviceApplication.class, args);
 	}
 
 }
