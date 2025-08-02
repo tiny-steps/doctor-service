@@ -109,9 +109,9 @@ public interface RecommendationRepository extends JpaRepository<Recommendation, 
     Page<Recommendation> findByRecommendationCountGreaterThanEqual(Integer minCount, Pageable pageable);
 
     // Missing methods with Pageable
-    Page<Recommendation> findByReviewTextContainingIgnoreCase(String reviewText, Pageable pageable);
-    Page<Recommendation> findByReviewTextIsNotNullAndReviewTextNot(String excludeText, Pageable pageable);
-    Page<Recommendation> findByReviewTextIsNull(Pageable pageable);
+    Page<Recommendation> findByReviewContainingIgnoreCase(String reviewText, Pageable pageable);
+    Page<Recommendation> findByReviewIsNotNullAndReviewNot(String excludeText, Pageable pageable);
+    Page<Recommendation> findByReviewIsNull(Pageable pageable);
     Page<Recommendation> findAllByOrderByRatingDesc(Pageable pageable);
     Page<Recommendation> findAllByOrderByRecommendationCountDesc(Pageable pageable);
 

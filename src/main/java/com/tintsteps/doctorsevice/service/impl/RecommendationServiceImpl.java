@@ -154,17 +154,17 @@ public class RecommendationServiceImpl implements RecommendationService {
 
     @Override
     public Page<RecommendationResponseDto> findByReviewText(String reviewText, Pageable pageable) {
-        return recommendationRepository.findByReviewTextContainingIgnoreCase(reviewText, pageable).map(recommendationMapper::toResponseDto);
+        return recommendationRepository.findByReviewContainingIgnoreCase(reviewText, pageable).map(recommendationMapper::toResponseDto);
     }
 
     @Override
     public Page<RecommendationResponseDto> findRecommendationsWithReviews(Pageable pageable) {
-        return recommendationRepository.findByReviewTextIsNotNullAndReviewTextNot("", pageable).map(recommendationMapper::toResponseDto);
+        return recommendationRepository.findByReviewIsNotNullAndReviewNot("", pageable).map(recommendationMapper::toResponseDto);
     }
 
     @Override
     public Page<RecommendationResponseDto> findRecommendationsWithoutReviews(Pageable pageable) {
-        return recommendationRepository.findByReviewTextIsNull(pageable).map(recommendationMapper::toResponseDto);
+        return recommendationRepository.findByReviewIsNull(pageable).map(recommendationMapper::toResponseDto);
     }
 
     @Override

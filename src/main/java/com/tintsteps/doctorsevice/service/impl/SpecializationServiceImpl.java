@@ -102,7 +102,7 @@ public class SpecializationServiceImpl implements SpecializationService {
 
     @Override
     public Page<SpecializationResponseDto> findBySubspecialization(String subspecialization, Pageable pageable) {
-        return specializationRepository.findBySubSpecializationContainingIgnoreCase(subspecialization, pageable).map(specializationMapper::toResponseDto);
+        return specializationRepository.findBySubspecializationContainingIgnoreCase(subspecialization, pageable).map(specializationMapper::toResponseDto);
     }
 
     @Override
@@ -129,7 +129,7 @@ public class SpecializationServiceImpl implements SpecializationService {
 
     @Override
     public List<String> findSubspecializationsBySpeciality(String speciality) {
-        return specializationRepository.findSubSpecializationsBySpeciality(speciality);
+        return specializationRepository.findSubspecializationsBySpeciality(speciality);
     }
 
     @Override
@@ -164,7 +164,7 @@ public class SpecializationServiceImpl implements SpecializationService {
 
     @Override
     public long countBySubspecialization(String subspecialization) {
-        return specializationRepository.countBySubSpecializationContainingIgnoreCase(subspecialization);
+        return specializationRepository.countBySubspecializationContainingIgnoreCase(subspecialization);
     }
 
     @Override
@@ -208,7 +208,7 @@ public class SpecializationServiceImpl implements SpecializationService {
 
     @Override
     public List<UUID> findDoctorsBySubspecialization(String subspecialization) {
-        return specializationRepository.findDoctorIdsBySubSpecialization(subspecialization);
+        return specializationRepository.findDoctorIdsBySubspecialization(subspecialization);
     }
 
     @Override

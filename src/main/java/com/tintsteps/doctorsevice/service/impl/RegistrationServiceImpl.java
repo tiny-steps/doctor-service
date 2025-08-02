@@ -92,7 +92,7 @@ public class RegistrationServiceImpl implements RegistrationService {
         if (!doctorRepository.existsById(doctorId)) {
             throw new DoctorNotFoundException("Doctor not found with ID: " + doctorId);
         }
-        return registrationRepository.findByDoctorIdOrderByYearDesc(doctorId).stream()
+        return registrationRepository.findByDoctorIdOrderByRegistrationYearDesc(doctorId).stream()
                 .map(registrationMapper::toResponseDto)
                 .collect(Collectors.toList());
     }
@@ -107,7 +107,7 @@ public class RegistrationServiceImpl implements RegistrationService {
 
     @Override
     public Page<RegistrationResponseDto> findByCouncilName(String councilName, Pageable pageable) {
-        return registrationRepository.findByCouncilNameContainingIgnoreCase(councilName, pageable).map(registrationMapper::toResponseDto);
+        return registrationRepository.findByRegistrationCouncilNameContainingIgnoreCase(councilName, pageable).map(registrationMapper::toResponseDto);
     }
 
     @Override
@@ -119,17 +119,17 @@ public class RegistrationServiceImpl implements RegistrationService {
 
     @Override
     public Page<RegistrationResponseDto> findByRegistrationYear(Integer year, Pageable pageable) {
-        return registrationRepository.findByYear(year, pageable).map(registrationMapper::toResponseDto);
+        return registrationRepository.findByRegistrationYear(year, pageable).map(registrationMapper::toResponseDto);
     }
 
     @Override
     public Page<RegistrationResponseDto> findByYearRange(Integer startYear, Integer endYear, Pageable pageable) {
-        return registrationRepository.findByYearBetween(startYear, endYear, pageable).map(registrationMapper::toResponseDto);
+        return registrationRepository.findByRegistrationYearBetween(startYear, endYear, pageable).map(registrationMapper::toResponseDto);
     }
 
     @Override
     public List<RegistrationResponseDto> findByDoctorIdAndCouncilName(UUID doctorId, String councilName) {
-        return registrationRepository.findByDoctorIdAndCouncilNameContainingIgnoreCase(doctorId, councilName).stream()
+        return registrationRepository.findByDoctorIdAndRegistrationCouncilNameContainingIgnoreCase(doctorId, councilName).stream()
                 .map(registrationMapper::toResponseDto)
                 .collect(Collectors.toList());
     }
@@ -143,7 +143,7 @@ public class RegistrationServiceImpl implements RegistrationService {
 
     @Override
     public Page<RegistrationResponseDto> findRecentRegistrations(Integer startYear, Pageable pageable) {
-        return registrationRepository.findByYearGreaterThanEqual(startYear, pageable).map(registrationMapper::toResponseDto);
+        return registrationRepository.findByRegistrationYearGreaterThanEqual(startYear, pageable).map(registrationMapper::toResponseDto);
     }
 
     @Override
@@ -163,7 +163,7 @@ public class RegistrationServiceImpl implements RegistrationService {
 
     @Override
     public boolean hasDoctorRegistrationWithCouncil(UUID doctorId, String councilName) {
-        return registrationRepository.existsByDoctorIdAndCouncilNameContainingIgnoreCase(doctorId, councilName);
+        return registrationRepository.existsByDoctorIdAndRegistrationCouncilNameContainingIgnoreCase(doctorId, councilName);
     }
 
     @Override
@@ -178,12 +178,12 @@ public class RegistrationServiceImpl implements RegistrationService {
 
     @Override
     public long countByCouncilName(String councilName) {
-        return registrationRepository.countByCouncilNameContainingIgnoreCase(councilName);
+        return registrationRepository.countByRegistrationCouncilNameContainingIgnoreCase(councilName);
     }
 
     @Override
     public long countByRegistrationYear(Integer year) {
-        return registrationRepository.countByYear(year);
+        return registrationRepository.countByRegistrationYear(year);
     }
 
     @Override
@@ -222,7 +222,7 @@ public class RegistrationServiceImpl implements RegistrationService {
 
     @Override
     public List<RegistrationResponseDto> findDoctorRegistrationsInYearRange(UUID doctorId, Integer startYear, Integer endYear) {
-        return registrationRepository.findByDoctorIdAndYearBetween(doctorId, startYear, endYear).stream()
+        return registrationRepository.findByDoctorIdAndRegistrationYearBetween(doctorId, startYear, endYear).stream()
                 .map(registrationMapper::toResponseDto)
                 .collect(Collectors.toList());
     }

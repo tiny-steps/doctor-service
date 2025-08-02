@@ -136,22 +136,22 @@ public class PricingServiceImpl implements PricingService {
 
     @Override
     public Page<PricingResponseDto> findByPriceRange(BigDecimal minPrice, BigDecimal maxPrice, Pageable pageable) {
-        return pricingRepository.findByPriceBetween(minPrice, maxPrice, pageable).map(pricingMapper::toResponseDto);
+        return pricingRepository.findByCustomPriceBetween(minPrice, maxPrice, pageable).map(pricingMapper::toResponseDto);
     }
 
     @Override
     public Page<PricingResponseDto> findActivePricingByPriceRange(BigDecimal minPrice, BigDecimal maxPrice, Pageable pageable) {
-        return pricingRepository.findByPriceBetweenAndIsActive(minPrice, maxPrice, true, pageable).map(pricingMapper::toResponseDto);
+        return pricingRepository.findByCustomPriceBetweenAndIsActive(minPrice, maxPrice, true, pageable).map(pricingMapper::toResponseDto);
     }
 
     @Override
     public Page<PricingResponseDto> findByMinPrice(BigDecimal minPrice, Pageable pageable) {
-        return pricingRepository.findByPriceGreaterThanEqual(minPrice, pageable).map(pricingMapper::toResponseDto);
+        return pricingRepository.findByCustomPriceGreaterThanEqual(minPrice, pageable).map(pricingMapper::toResponseDto);
     }
 
     @Override
     public Page<PricingResponseDto> findByMaxPrice(BigDecimal maxPrice, Pageable pageable) {
-        return pricingRepository.findByPriceLessThanEqual(maxPrice, pageable).map(pricingMapper::toResponseDto);
+        return pricingRepository.findByCustomPriceLessThanEqual(maxPrice, pageable).map(pricingMapper::toResponseDto);
     }
 
     @Override

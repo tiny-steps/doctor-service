@@ -83,6 +83,9 @@ public interface PhotoRepository extends JpaRepository<Photo, UUID> {
     boolean existsByDoctorIdAndIsDefault(UUID doctorId, Boolean isDefault);
     void deleteByDoctorId(UUID doctorId);
     long countByIsDefault(Boolean isDefault);
+
+    @Query("SELECT d.id FROM Doctor d WHERE d.id NOT IN (SELECT DISTINCT p.doctor.id FROM Photo p WHERE p.isDefault = true)")
     List<UUID> findDoctorsWithoutDefaultPhoto();
+
     Optional<Photo> findFirstByDoctorId(UUID doctorId);
 }

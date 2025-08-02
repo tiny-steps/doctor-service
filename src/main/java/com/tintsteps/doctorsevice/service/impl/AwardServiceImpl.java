@@ -111,21 +111,21 @@ public class AwardServiceImpl implements AwardService {
     }
 
     @Override
-    public Page<AwardResponseDto> findByYear(Integer year, Pageable pageable) {
+    public Page<AwardResponseDto> findByAwardedYear(Integer year, Pageable pageable) {
         return awardRepository.findByAwardedYear(year, pageable).map(awardMapper::toResponseDto);
     }
 
     @Override
-    public Page<AwardResponseDto> findByYearRange(Integer startYear, Integer endYear, Pageable pageable) {
+    public Page<AwardResponseDto> findByAwardedYearRange(Integer startYear, Integer endYear, Pageable pageable) {
         return awardRepository.findByAwardedYearBetween(startYear, endYear, pageable).map(awardMapper::toResponseDto);
     }
 
     @Override
-    public List<AwardResponseDto> findByDoctorIdAndYear(UUID doctorId, Integer year) {
+    public List<AwardResponseDto> findByDoctorIdAndAwardedYear(UUID doctorId, Integer year) {
         if (!doctorRepository.existsById(doctorId)) {
             throw new DoctorNotFoundException("Doctor not found with ID: " + doctorId);
         }
-        return awardRepository.findByDoctorIdAndYear(doctorId, year).stream()
+        return awardRepository.findByDoctorIdAndAwardedYear(doctorId, year).stream()
                 .map(awardMapper::toResponseDto)
                 .collect(Collectors.toList());
     }
@@ -154,8 +154,8 @@ public class AwardServiceImpl implements AwardService {
     }
 
     @Override
-    public long countByYear(Integer year) {
-        return awardRepository.countByYear(year);
+    public long countByAwardedYear(Integer year) {
+        return awardRepository.countByAwardedYear(year);
     }
 
     @Override
@@ -205,6 +205,6 @@ public class AwardServiceImpl implements AwardService {
         if (!doctorRepository.existsById(doctorId)) {
             throw new DoctorNotFoundException("Doctor not found with ID: " + doctorId);
         }
-        return awardRepository.existsByDoctorIdAndYear(doctorId, year);
+        return awardRepository.existsByDoctorIdAndAwardedYear(doctorId, year);
     }
 }

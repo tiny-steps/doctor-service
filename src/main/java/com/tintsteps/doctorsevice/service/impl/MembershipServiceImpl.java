@@ -97,12 +97,12 @@ public class MembershipServiceImpl implements MembershipService {
 
     @Override
     public Page<MembershipResponseDto> findByCouncilName(String councilName, Pageable pageable) {
-        return membershipRepository.findByCouncilNameContainingIgnoreCase(councilName, pageable).map(membershipMapper::toResponseDto);
+        return membershipRepository.findByMembershipCouncilNameContainingIgnoreCase(councilName, pageable).map(membershipMapper::toResponseDto);
     }
 
     @Override
     public List<MembershipResponseDto> findByDoctorIdAndCouncilName(UUID doctorId, String councilName) {
-        return membershipRepository.findByDoctorIdAndCouncilNameContainingIgnoreCase(doctorId, councilName).stream()
+        return membershipRepository.findByDoctorIdAndMembershipCouncilNameContainingIgnoreCase(doctorId, councilName).stream()
                 .map(membershipMapper::toResponseDto)
                 .collect(Collectors.toList());
     }
@@ -119,7 +119,7 @@ public class MembershipServiceImpl implements MembershipService {
 
     @Override
     public boolean hasDoctorMembershipInCouncil(UUID doctorId, String councilName) {
-        return membershipRepository.existsByDoctorIdAndCouncilNameContainingIgnoreCase(doctorId, councilName);
+        return membershipRepository.existsByDoctorIdAndMembershipCouncilNameContainingIgnoreCase(doctorId, councilName);
     }
 
     @Override
@@ -129,7 +129,7 @@ public class MembershipServiceImpl implements MembershipService {
 
     @Override
     public long countByCouncilName(String councilName) {
-        return membershipRepository.countByCouncilNameContainingIgnoreCase(councilName);
+        return membershipRepository.countByMembershipCouncilNameContainingIgnoreCase(councilName);
     }
 
     @Override
@@ -163,7 +163,7 @@ public class MembershipServiceImpl implements MembershipService {
 
     @Override
     public List<String> getUniqueCouncilNames() {
-        return membershipRepository.findDistinctCouncilNames();
+        return membershipRepository.findDistinctMembershipCouncilNames();
     }
 
     @Override

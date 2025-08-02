@@ -106,6 +106,10 @@ public interface PracticeRepository extends JpaRepository<Practice, UUID> {
     Page<Practice> findByCreatedAtGreaterThanEqual(Timestamp startDate, Pageable pageable);
     boolean existsByDoctorId(UUID doctorId);
     void deleteByDoctorId(UUID doctorId);
+
+    @Query("SELECT DISTINCT p.practiceType FROM Practice p WHERE p.practiceType IS NOT NULL ORDER BY p.practiceType")
     List<String> findDistinctPracticeTypes();
+
+    @Query("SELECT DISTINCT p.addressId FROM Practice p WHERE p.addressId IS NOT NULL")
     List<UUID> findDistinctAddressIds();
 }

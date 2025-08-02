@@ -5,7 +5,7 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import org.hibernate.annotations.GenericGenerator;
+
 
 import java.math.BigDecimal;
 import java.sql.Timestamp;
@@ -21,11 +21,7 @@ import java.util.UUID;
 public class Doctor {
 
     @Id
-    @GeneratedValue(generator = "UUID")
-    @GenericGenerator(
-            name = "UUID",
-            strategy = "org.hibernate.id.UUIDGenerator"
-    )
+    @GeneratedValue(strategy = GenerationType.UUID)
     @Column(updatable = false, nullable = false)
     private UUID id;
 
@@ -41,10 +37,10 @@ public class Doctor {
     @Column(length = 10)
     private String gender;
 
-    @Lob
+    @Column(columnDefinition = "TEXT")
     private String summary;
 
-    @Lob
+    @Column(columnDefinition = "TEXT")
     private String about;
 
     @Column(name = "image_url", length = 255)

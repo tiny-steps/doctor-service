@@ -69,6 +69,10 @@ public interface QualificationRepository extends JpaRepository<Qualification, UU
     long countByCollegeNameContainingIgnoreCase(String collegeName);
     void deleteByDoctorId(UUID doctorId);
     List<Qualification> findByDoctorIdAndCompletionYearBetween(UUID doctorId, Integer startYear, Integer endYear);
+
+    @Query("SELECT DISTINCT q.qualificationName FROM Qualification q WHERE q.qualificationName IS NOT NULL ORDER BY q.qualificationName")
     List<String> findDistinctQualificationNames();
+
+    @Query("SELECT DISTINCT q.collegeName FROM Qualification q WHERE q.collegeName IS NOT NULL ORDER BY q.collegeName")
     List<String> findDistinctCollegeNames();
 }

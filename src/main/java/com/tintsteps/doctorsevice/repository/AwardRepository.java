@@ -49,11 +49,11 @@ public interface AwardRepository extends JpaRepository<Award, UUID> {
     @Query("SELECT a FROM Award a WHERE a.doctor.id = :doctorId AND a.awardedYear = :year")
     List<Award> findByDoctorIdAndYear(@Param("doctorId") UUID doctorId, @Param("year") Integer year);
 
-    boolean existsByDoctorIdAndYear(UUID doctorId, Integer year);
+    boolean existsByDoctorIdAndAwardedYear(UUID doctorId, Integer year);
 
     void deleteByDoctorId(UUID doctorId);
 
-    long countByYear(Integer year);
+    long countByAwardedYear(Integer year);
 
     boolean existsByDoctorId(UUID doctorId);
     

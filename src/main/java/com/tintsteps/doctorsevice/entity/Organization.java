@@ -52,6 +52,6 @@ public class Organization {
     @Column(name = "tenure_end")
     private Date tenureEnd;
 
-    @Lob
+    @Column(columnDefinition = "TEXT")
     private String summary;
 }

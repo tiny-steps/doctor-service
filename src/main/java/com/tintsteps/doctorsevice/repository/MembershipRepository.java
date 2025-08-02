@@ -46,11 +46,13 @@ public interface MembershipRepository extends JpaRepository<Membership, UUID> {
     
     // Additional missing methods
     Page<Membership> findByDoctorId(UUID doctorId, Pageable pageable);
-    Page<Membership> findByCouncilNameContainingIgnoreCase(String councilName, Pageable pageable);
-    List<Membership> findByDoctorIdAndCouncilNameContainingIgnoreCase(UUID doctorId, String councilName);
+    Page<Membership> findByMembershipCouncilNameContainingIgnoreCase(String councilName, Pageable pageable);
     boolean existsByDoctorId(UUID doctorId);
-    boolean existsByDoctorIdAndCouncilNameContainingIgnoreCase(UUID doctorId, String councilName);
-    long countByCouncilNameContainingIgnoreCase(String councilName);
+    boolean existsByDoctorIdAndMembershipCouncilNameContainingIgnoreCase(UUID doctorId, String councilName);
+    long countByMembershipCouncilNameContainingIgnoreCase(String councilName);
     void deleteByDoctorId(UUID doctorId);
-    List<String> findDistinctCouncilNames();
+
+    // Find distinct council names using @Query
+    @Query("SELECT DISTINCT m.membershipCouncilName FROM Membership m WHERE m.membershipCouncilName IS NOT NULL ORDER BY m.membershipCouncilName")
+    List<String> findDistinctMembershipCouncilNames();
 }

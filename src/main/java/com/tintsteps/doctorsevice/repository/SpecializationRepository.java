@@ -79,17 +79,30 @@ public interface SpecializationRepository extends JpaRepository<Specialization, 
     // Additional missing methods
     Page<Specialization> findByDoctorId(UUID doctorId, Pageable pageable);
     Page<Specialization> findBySpecialityContainingIgnoreCase(String speciality, Pageable pageable);
-    Page<Specialization> findBySubSpecializationContainingIgnoreCase(String subSpecialization, Pageable pageable);
+    Page<Specialization> findBySubspecializationContainingIgnoreCase(String subSpecialization, Pageable pageable);
     boolean existsByDoctorId(UUID doctorId);
     long countBySpecialityContainingIgnoreCase(String speciality);
     void deleteByDoctorId(UUID doctorId);
+
+    @Query("SELECT DISTINCT s.speciality FROM Specialization s WHERE s.speciality IS NOT NULL ORDER BY s.speciality")
     List<String> findDistinctSpecialities();
+
+    @Query("SELECT DISTINCT s.subspecialization FROM Specialization s WHERE s.subspecialization IS NOT NULL ORDER BY s.subspecialization")
     List<String> findDistinctSubSpecializations();
+
     boolean existsByDoctorIdAndSpecialityContainingIgnoreCase(UUID doctorId, String speciality);
-    List<String> findSubSpecializationsBySpeciality(String speciality);
-    long countBySubSpecializationContainingIgnoreCase(String subSpecialization);
+
+    long countBySubspecializationContainingIgnoreCase(String subSpecialization);
+
+    @Query("SELECT COUNT(DISTINCT s.speciality) FROM Specialization s WHERE s.speciality IS NOT NULL")
     long countDistinctSpecialities();
-    List<UUID> findDoctorIdsBySpeciality(String speciality);
-    List<UUID> findDoctorIdsBySubSpecialization(String subSpecialization);
+
+    @Query("SELECT DISTINCT s.doctor.id FROM Specialization s WHERE LOWER(s.speciality) = LOWER(:speciality)")
+    List<UUID> findDoctorIdsBySpeciality(@Param("speciality") String speciality);
+
+    @Query("SELECT DISTINCT s.doctor.id FROM Specialization s WHERE LOWER(s.subspecialization) = LOWER(:subspecialization)")
+    List<UUID> findDoctorIdsBySubspecialization(@Param("subspecialization") String subspecialization);
+
+    @Query("SELECT d.id FROM Doctor d WHERE d.id NOT IN (SELECT DISTINCT s.doctor.id FROM Specialization s)")
     List<UUID> findDoctorsWithoutSpecializations();
 }

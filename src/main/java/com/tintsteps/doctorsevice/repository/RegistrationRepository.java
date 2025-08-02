@@ -69,20 +69,23 @@ public interface RegistrationRepository extends JpaRepository<Registration, UUID
                                                  @Param("startYear") Integer startYear, 
                                                  @Param("endYear") Integer endYear);
 
-    long countByYear(Integer year);
+    long countByRegistrationYear(Integer year);
     
     // Additional missing methods
     Page<Registration> findByDoctorId(UUID doctorId, Pageable pageable);
-    Page<Registration> findByCouncilNameContainingIgnoreCase(String councilName, Pageable pageable);
-    Page<Registration> findByYear(Integer year, Pageable pageable);
-    Page<Registration> findByYearBetween(Integer startYear, Integer endYear, Pageable pageable);
-    List<Registration> findByDoctorIdAndCouncilNameContainingIgnoreCase(UUID doctorId, String councilName);
-    Page<Registration> findByYearGreaterThanEqual(Integer startYear, Pageable pageable);
+    Page<Registration> findByRegistrationCouncilNameContainingIgnoreCase(String councilName, Pageable pageable);
+    Page<Registration> findByRegistrationYear(Integer year, Pageable pageable);
+    Page<Registration> findByRegistrationYearBetween(Integer startYear, Integer endYear, Pageable pageable);
+
+    Page<Registration> findByRegistrationYearGreaterThanEqual(Integer startYear, Pageable pageable);
     boolean existsByDoctorId(UUID doctorId);
-    boolean existsByDoctorIdAndCouncilNameContainingIgnoreCase(UUID doctorId, String councilName);
-    long countByCouncilNameContainingIgnoreCase(String councilName);
+    boolean existsByDoctorIdAndRegistrationCouncilNameContainingIgnoreCase(UUID doctorId, String councilName);
+    long countByRegistrationCouncilNameContainingIgnoreCase(String councilName);
     void deleteByDoctorId(UUID doctorId);
+
+    @Query("SELECT DISTINCT r.registrationCouncilName FROM Registration r WHERE r.registrationCouncilName IS NOT NULL ORDER BY r.registrationCouncilName")
     List<String> findDistinctCouncilNames();
-    List<Registration> findByDoctorIdAndYearBetween(UUID doctorId, Integer startYear, Integer endYear);
-    List<Registration> findByDoctorIdOrderByYearDesc(UUID doctorId);
+
+    List<Registration> findByDoctorIdAndRegistrationYearBetween(UUID doctorId, Integer startYear, Integer endYear);
+
 }

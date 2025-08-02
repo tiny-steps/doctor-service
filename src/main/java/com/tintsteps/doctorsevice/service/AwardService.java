@@ -28,9 +28,9 @@ public interface AwardService {
 
     // Search Operations
     Page<AwardResponseDto> findByTitle(String title, Pageable pageable);
-    Page<AwardResponseDto> findByYear(Integer year, Pageable pageable);
-    Page<AwardResponseDto> findByYearRange(Integer startYear, Integer endYear, Pageable pageable);
-    List<AwardResponseDto> findByDoctorIdAndYear(UUID doctorId, Integer year);
+    Page<AwardResponseDto> findByAwardedYear(Integer year, Pageable pageable);
+    Page<AwardResponseDto> findByAwardedYearRange(Integer startYear, Integer endYear, Pageable pageable);
+    List<AwardResponseDto> findByDoctorIdAndAwardedYear(UUID doctorId, Integer year);
     Page<AwardResponseDto> findRecentAwards(Integer startYear, Pageable pageable);
 
     // Validation Operations
@@ -39,7 +39,7 @@ public interface AwardService {
 
     // Statistics Operations
     long countByDoctorId(UUID doctorId);
-    long countByYear(Integer year);
+    long countByAwardedYear(Integer year);
     long countAll();
 
     // Bulk Operations

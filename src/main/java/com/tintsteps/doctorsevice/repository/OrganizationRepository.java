@@ -93,7 +93,12 @@ public interface OrganizationRepository extends JpaRepository<Organization, UUID
     long countByDoctorIdAndTenureEndIsNull(UUID doctorId);
     long countByOrganizationNameContainingIgnoreCase(String organizationName);
     void deleteByDoctorId(UUID doctorId);
+
+    @Query("SELECT DISTINCT o.organizationName FROM Organization o WHERE o.organizationName IS NOT NULL ORDER BY o.organizationName")
     List<String> findDistinctOrganizationNames();
+
+    @Query("SELECT DISTINCT o.role FROM Organization o WHERE o.role IS NOT NULL ORDER BY o.role")
     List<String> findDistinctRoles();
+
     boolean existsByDoctorIdAndOrganizationNameContainingIgnoreCase(UUID doctorId, String organizationName);
 }

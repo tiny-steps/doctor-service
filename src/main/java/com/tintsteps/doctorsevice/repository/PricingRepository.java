@@ -87,13 +87,15 @@ public interface PricingRepository extends JpaRepository<Pricing, UUID> {
     
     // Additional missing methods
     Page<Pricing> findByDoctorId(UUID doctorId, Pageable pageable);
-    Page<Pricing> findByPriceBetween(BigDecimal minPrice, BigDecimal maxPrice, Pageable pageable);
-    Page<Pricing> findByPriceBetweenAndIsActive(BigDecimal minPrice, BigDecimal maxPrice, boolean isActive, Pageable pageable);
-    Page<Pricing> findByPriceGreaterThanEqual(BigDecimal minPrice, Pageable pageable);
-    Page<Pricing> findByPriceLessThanEqual(BigDecimal maxPrice, Pageable pageable);
+    Page<Pricing> findByCustomPriceBetween(BigDecimal minPrice, BigDecimal maxPrice, Pageable pageable);
+    Page<Pricing> findByCustomPriceBetweenAndIsActive(BigDecimal minPrice, BigDecimal maxPrice, boolean isActive, Pageable pageable);
+    Page<Pricing> findByCustomPriceGreaterThanEqual(BigDecimal minPrice, Pageable pageable);
+    Page<Pricing> findByCustomPriceLessThanEqual(BigDecimal maxPrice, Pageable pageable);
     Page<Pricing> findByIsActive(boolean isActive, Pageable pageable);
     boolean existsByDoctorId(UUID doctorId);
     void deleteByDoctorId(UUID doctorId);
+
+    @Query("SELECT DISTINCT p.sessionTypeId FROM Pricing p WHERE p.sessionTypeId IS NOT NULL")
     List<UUID> findDistinctSessionTypeIds();
 
     // Missing methods for compilation errors
