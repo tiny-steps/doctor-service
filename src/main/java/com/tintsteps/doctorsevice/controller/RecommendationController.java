@@ -42,7 +42,7 @@ public class RecommendationController {
             @ApiResponse(responseCode = "404", description = "Doctor not found")
     })
     @PostMapping("/doctor/{doctorId}")
-    @PreAuthorize("hasRole('USER') or hasRole('ADMIN')")
+    @PreAuthorize("hasRole('PATIENT') or hasRole('ADMIN')")
     public ResponseEntity<ResponseModel<RecommendationResponseDto>> createRecommendation(
             @Parameter(description = "Doctor ID", required = true) @PathVariable UUID doctorId,
             @Parameter(description = "Recommendation details", required = true) @Valid @RequestBody RecommendationRequestDto requestDto) {
@@ -451,7 +451,7 @@ public class RecommendationController {
 
     @Operation(summary = "Create batch recommendations", description = "Creates multiple recommendations for a doctor")
     @PostMapping("/doctor/{doctorId}/batch")
-    @PreAuthorize("hasRole('USER') or hasRole('ADMIN')")
+    @PreAuthorize("hasRole('PATIENT') or hasRole('ADMIN')")
     public ResponseEntity<ResponseModel<List<RecommendationResponseDto>>> createBatchRecommendations(
             @Parameter(description = "Doctor ID", required = true) @PathVariable UUID doctorId,
             @Parameter(description = "List of recommendation details", required = true) @Valid @RequestBody List<RecommendationRequestDto> requestDtos) {

@@ -1,0 +1,3049 @@
+{
+  "_type": "export",
+  "__export_format": 4,
+  "__export_date": "2025-08-02T17:30:00.000Z",
+  "__export_source": "insomnia.desktop.app:v2023.5.8",
+  "resources": [
+    {
+      "_id": "req_group_doctors",
+      "_type": "request_group",
+      "parentId": "wrk_doctor_service",
+      "modified": 1691000000000,
+      "created": 1691000000000,
+      "name": "Doctor Management",
+      "description": "APIs for managing doctor profiles",
+      "environment": {},
+      "environmentPropertyOrder": null,
+      "metaSortKey": -1691000000000
+    },
+    {
+      "_id": "req_create_doctor",
+      "_type": "request",
+      "parentId": "req_group_doctors",
+      "modified": 1691000000000,
+      "created": 1691000000000,
+      "url": "{{ _.base_url }}/api/v1/doctors",
+      "name": "Create Doctor",
+      "description": "Creates a new doctor profile",
+      "method": "POST",
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"userId\": \"123e4567-e89b-12d3-a456-426614174000\",\n  \"name\": \"Dr. John Smith\",\n  \"slug\": \"dr-john-smith\",\n  \"gender\": \"MALE\",\n  \"summary\": \"Experienced cardiologist\",\n  \"about\": \"Dr. John Smith is a board-certified cardiologist with over 15 years of experience.\",\n  \"imageUrl\": \"https://example.com/doctor-image.jpg\",\n  \"experienceYears\": 15,\n  \"isVerified\": true,\n  \"ratingAverage\": 4.5,\n  \"reviewCount\": 120,\n  \"status\": \"ACTIVE\"\n}"
+      },
+      "parameters": [],
+      "headers": [
+        {
+          "name": "Content-Type",
+          "value": "application/json"
+        },
+        {
+          "name": "Authorization",
+          "value": "Bearer {{ _.access_token }}"
+        }
+      ],
+      "authentication": {},
+      "metaSortKey": -1691000000000,
+      "isPrivate": false,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestBody": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global"
+    },
+    {
+      "_id": "req_get_doctor_by_id",
+      "_type": "request",
+      "parentId": "req_group_doctors",
+      "modified": 1691000000000,
+      "created": 1691000000000,
+      "url": "{{ _.base_url }}/api/v1/doctors/{{ _.doctor_id }}",
+      "name": "Get Doctor by ID",
+      "description": "Retrieves a doctor profile by their unique identifier",
+      "method": "GET",
+      "body": {},
+      "parameters": [],
+      "headers": [
+        {
+          "name": "Authorization",
+          "value": "Bearer {{ _.access_token }}"
+        }
+      ],
+      "authentication": {},
+      "metaSortKey": -1690999000000,
+      "isPrivate": false,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestBody": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global"
+    },
+    {
+      "_id": "req_get_all_doctors",
+      "_type": "request",
+      "parentId": "req_group_doctors",
+      "modified": 1691000000000,
+      "created": 1691000000000,
+      "url": "{{ _.base_url }}/api/v1/doctors",
+      "name": "Get All Doctors",
+      "description": "Retrieves a paginated list of all doctors",
+      "method": "GET",
+      "body": {},
+      "parameters": [
+        {
+          "name": "page",
+          "value": "0",
+          "description": "Page number"
+        },
+        {
+          "name": "size",
+          "value": "20",
+          "description": "Page size"
+        },
+        {
+          "name": "sort",
+          "value": "name,asc",
+          "description": "Sort criteria"
+        }
+      ],
+      "headers": [
+        {
+          "name": "Authorization",
+          "value": "Bearer {{ _.access_token }}"
+        }
+      ],
+      "authentication": {},
+      "metaSortKey": -1690998000000,
+      "isPrivate": false,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestBody": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global"
+    },
+    {
+      "_id": "req_update_doctor",
+      "_type": "request",
+      "parentId": "req_group_doctors",
+      "modified": 1691000000000,
+      "created": 1691000000000,
+      "url": "{{ _.base_url }}/api/v1/doctors/{{ _.doctor_id }}",
+      "name": "Update Doctor",
+      "description": "Updates an existing doctor profile",
+      "method": "PUT",
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"userId\": \"123e4567-e89b-12d3-a456-426614174000\",\n  \"name\": \"Dr. John Smith Updated\",\n  \"slug\": \"dr-john-smith-updated\",\n  \"gender\": \"MALE\",\n  \"summary\": \"Senior cardiologist\",\n  \"about\": \"Dr. John Smith is a senior board-certified cardiologist with over 20 years of experience.\",\n  \"imageUrl\": \"https://example.com/doctor-image-updated.jpg\",\n  \"experienceYears\": 20,\n  \"isVerified\": true,\n  \"ratingAverage\": 4.8,\n  \"reviewCount\": 150,\n  \"status\": \"ACTIVE\"\n}"
+      },
+      "parameters": [],
+      "headers": [
+        {
+          "name": "Content-Type",
+          "value": "application/json"
+        },
+        {
+          "name": "Authorization",
+          "value": "Bearer {{ _.access_token }}"
+        }
+      ],
+      "authentication": {},
+      "metaSortKey": -1690997000000,
+      "isPrivate": false,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestBody": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global"
+    },
+    {
+      "_id": "req_search_doctors",
+      "_type": "request",
+      "parentId": "req_group_doctors",
+      "modified": 1691000000000,
+      "created": 1691000000000,
+      "url": "{{ _.base_url }}/api/v1/doctors/search",
+      "name": "Search Doctors",
+      "description": "Advanced search for doctors with multiple criteria",
+      "method": "GET",
+      "body": {},
+      "parameters": [
+        {
+          "name": "name",
+          "value": "John",
+          "description": "Doctor name"
+        },
+        {
+          "name": "speciality",
+          "value": "Cardiology",
+          "description": "Speciality"
+        },
+        {
+          "name": "isVerified",
+          "value": "true",
+          "description": "Verification status"
+        },
+        {
+          "name": "minRating",
+          "value": "4.0",
+          "description": "Minimum rating"
+        },
+        {
+          "name": "page",
+          "value": "0",
+          "description": "Page number"
+        },
+        {
+          "name": "size",
+          "value": "20",
+          "description": "Page size"
+        }
+      ],
+      "headers": [
+        {
+          "name": "Authorization",
+          "value": "Bearer {{ _.access_token }}"
+        }
+      ],
+      "authentication": {},
+      "metaSortKey": -1690996000000,
+      "isPrivate": false,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestBody": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global"
+    },
+    {
+      "_id": "req_delete_doctor",
+      "_type": "request",
+      "parentId": "req_group_doctors",
+      "modified": 1691000000000,
+      "created": 1691000000000,
+      "url": "{{ _.base_url }}/api/v1/doctors/{{ _.doctor_id }}",
+      "name": "Delete Doctor",
+      "description": "Deletes a doctor profile",
+      "method": "DELETE",
+      "body": {},
+      "parameters": [],
+      "headers": [
+        {
+          "name": "Authorization",
+          "value": "Bearer {{ _.access_token }}"
+        }
+      ],
+      "authentication": {},
+      "metaSortKey": -1690995000000,
+      "isPrivate": false,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestBody": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global"
+    },
+    {
+      "_id": "req_partial_update_doctor",
+      "_type": "request",
+      "parentId": "req_group_doctors",
+      "modified": 1691000000000,
+      "created": 1691000000000,
+      "url": "{{ _.base_url }}/api/v1/doctors/{{ _.doctor_id }}",
+      "name": "Partial Update Doctor",
+      "description": "Partially updates a doctor profile",
+      "method": "PATCH",
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"name\": \"Dr. John Smith Updated\",\n  \"experienceYears\": 20\n}"
+      },
+      "parameters": [],
+      "headers": [
+        {
+          "name": "Content-Type",
+          "value": "application/json"
+        },
+        {
+          "name": "Authorization",
+          "value": "Bearer {{ _.access_token }}"
+        }
+      ],
+      "authentication": {},
+      "metaSortKey": -1690994000000,
+      "isPrivate": false,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestBody": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global"
+    },
+    {
+      "_id": "req_get_top_rated_doctors",
+      "_type": "request",
+      "parentId": "req_group_doctors",
+      "modified": 1691000000000,
+      "created": 1691000000000,
+      "url": "{{ _.base_url }}/api/v1/doctors/top-rated",
+      "name": "Get Top Rated Doctors",
+      "description": "Retrieves top rated doctors",
+      "method": "GET",
+      "body": {},
+      "parameters": [
+        {
+          "name": "page",
+          "value": "0",
+          "description": "Page number"
+        },
+        {
+          "name": "size",
+          "value": "10",
+          "description": "Page size"
+        }
+      ],
+      "headers": [
+        {
+          "name": "Authorization",
+          "value": "Bearer {{ _.access_token }}"
+        }
+      ],
+      "authentication": {},
+      "metaSortKey": -1690993000000,
+      "isPrivate": false,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestBody": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global"
+    },
+    {
+      "_id": "req_get_profile_completeness",
+      "_type": "request",
+      "parentId": "req_group_doctors",
+      "modified": 1691000000000,
+      "created": 1691000000000,
+      "url": "{{ _.base_url }}/api/v1/doctors/{{ _.doctor_id }}/profile-completeness",
+      "name": "Get Profile Completeness",
+      "description": "Calculates the profile completeness percentage",
+      "method": "GET",
+      "body": {},
+      "parameters": [],
+      "headers": [
+        {
+          "name": "Authorization",
+          "value": "Bearer {{ _.access_token }}"
+        }
+      ],
+      "authentication": {},
+      "metaSortKey": -1690992000000,
+      "isPrivate": false,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestBody": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global"
+    },
+    {
+      "_id": "req_get_doctors_by_status",
+      "_type": "request",
+      "parentId": "req_group_doctors",
+      "modified": 1691000000000,
+      "created": 1691000000000,
+      "url": "{{ _.base_url }}/api/v1/doctors/status/ACTIVE",
+      "name": "Get Doctors by Status",
+      "description": "Retrieves doctors by status",
+      "method": "GET",
+      "body": {},
+      "parameters": [
+        {
+          "name": "page",
+          "value": "0",
+          "description": "Page number"
+        },
+        {
+          "name": "size",
+          "value": "20",
+          "description": "Page size"
+        }
+      ],
+      "headers": [
+        {
+          "name": "Authorization",
+          "value": "Bearer {{ _.access_token }}"
+        }
+      ],
+      "authentication": {},
+      "metaSortKey": -1690991000000,
+      "isPrivate": false,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestBody": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global"
+    },
+    {
+      "_id": "req_get_doctors_by_verification",
+      "_type": "request",
+      "parentId": "req_group_doctors",
+      "modified": 1691000000000,
+      "created": 1691000000000,
+      "url": "{{ _.base_url }}/api/v1/doctors/verification/true",
+      "name": "Get Doctors by Verification Status",
+      "description": "Retrieves doctors by verification status",
+      "method": "GET",
+      "body": {},
+      "parameters": [
+        {
+          "name": "page",
+          "value": "0",
+          "description": "Page number"
+        },
+        {
+          "name": "size",
+          "value": "20",
+          "description": "Page size"
+        }
+      ],
+      "headers": [
+        {
+          "name": "Authorization",
+          "value": "Bearer {{ _.access_token }}"
+        }
+      ],
+      "authentication": {},
+      "metaSortKey": -1690990000000,
+      "isPrivate": false,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestBody": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global"
+    },
+    {
+      "_id": "req_get_doctors_by_gender",
+      "_type": "request",
+      "parentId": "req_group_doctors",
+      "modified": 1691000000000,
+      "created": 1691000000000,
+      "url": "{{ _.base_url }}/api/v1/doctors/gender/MALE",
+      "name": "Get Doctors by Gender",
+      "description": "Retrieves doctors by gender",
+      "method": "GET",
+      "body": {},
+      "parameters": [
+        {
+          "name": "page",
+          "value": "0",
+          "description": "Page number"
+        },
+        {
+          "name": "size",
+          "value": "20",
+          "description": "Page size"
+        }
+      ],
+      "headers": [
+        {
+          "name": "Authorization",
+          "value": "Bearer {{ _.access_token }}"
+        }
+      ],
+      "authentication": {},
+      "metaSortKey": -1690989000000,
+      "isPrivate": false,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestBody": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global"
+    },
+    {
+      "_id": "req_get_doctors_by_min_rating",
+      "_type": "request",
+      "parentId": "req_group_doctors",
+      "modified": 1691000000000,
+      "created": 1691000000000,
+      "url": "{{ _.base_url }}/api/v1/doctors/min-rating/4.0",
+      "name": "Get Doctors by Min Rating",
+      "description": "Retrieves doctors with minimum rating",
+      "method": "GET",
+      "body": {},
+      "parameters": [
+        {
+          "name": "page",
+          "value": "0",
+          "description": "Page number"
+        },
+        {
+          "name": "size",
+          "value": "20",
+          "description": "Page size"
+        }
+      ],
+      "headers": [
+        {
+          "name": "Authorization",
+          "value": "Bearer {{ _.access_token }}"
+        }
+      ],
+      "authentication": {},
+      "metaSortKey": -1690988000000,
+      "isPrivate": false,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestBody": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global"
+    },
+    {
+      "_id": "req_activate_doctor",
+      "_type": "request",
+      "parentId": "req_group_doctors",
+      "modified": 1691000000000,
+      "created": 1691000000000,
+      "url": "{{ _.base_url }}/api/v1/doctors/{{ _.doctor_id }}/activate",
+      "name": "Activate Doctor",
+      "description": "Activates a doctor",
+      "method": "POST",
+      "body": {},
+      "parameters": [],
+      "headers": [
+        {
+          "name": "Authorization",
+          "value": "Bearer {{ _.access_token }}"
+        }
+      ],
+      "authentication": {},
+      "metaSortKey": -1690987000000,
+      "isPrivate": false,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestBody": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global"
+    },
+    {
+      "_id": "req_deactivate_doctor",
+      "_type": "request",
+      "parentId": "req_group_doctors",
+      "modified": 1691000000000,
+      "created": 1691000000000,
+      "url": "{{ _.base_url }}/api/v1/doctors/{{ _.doctor_id }}/deactivate",
+      "name": "Deactivate Doctor",
+      "description": "Deactivates a doctor",
+      "method": "POST",
+      "body": {},
+      "parameters": [],
+      "headers": [
+        {
+          "name": "Authorization",
+          "value": "Bearer {{ _.access_token }}"
+        }
+      ],
+      "authentication": {},
+      "metaSortKey": -1690986000000,
+      "isPrivate": false,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestBody": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global"
+    },
+    {
+      "_id": "req_verify_doctor",
+      "_type": "request",
+      "parentId": "req_group_doctors",
+      "modified": 1691000000000,
+      "created": 1691000000000,
+      "url": "{{ _.base_url }}/api/v1/doctors/{{ _.doctor_id }}/verify",
+      "name": "Verify Doctor",
+      "description": "Verifies a doctor",
+      "method": "POST",
+      "body": {},
+      "parameters": [],
+      "headers": [
+        {
+          "name": "Authorization",
+          "value": "Bearer {{ _.access_token }}"
+        }
+      ],
+      "authentication": {},
+      "metaSortKey": -1690985000000,
+      "isPrivate": false,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestBody": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global"
+    },
+    {
+      "_id": "req_create_batch_doctors",
+      "_type": "request",
+      "parentId": "req_group_doctors",
+      "modified": 1691000000000,
+      "created": 1691000000000,
+      "url": "{{ _.base_url }}/api/v1/doctors/batch",
+      "name": "Create Batch Doctors",
+      "description": "Creates multiple doctors",
+      "method": "POST",
+      "body": {
+        "mimeType": "application/json",
+        "text": "[\n  {\n    \"userId\": \"123e4567-e89b-12d3-a456-426614174000\",\n    \"name\": \"Dr. John Smith\",\n    \"slug\": \"dr-john-smith\",\n    \"gender\": \"MALE\",\n    \"experienceYears\": 15,\n    \"status\": \"ACTIVE\"\n  },\n  {\n    \"userId\": \"123e4567-e89b-12d3-a456-426614174001\",\n    \"name\": \"Dr. Jane Doe\",\n    \"slug\": \"dr-jane-doe\",\n    \"gender\": \"FEMALE\",\n    \"experienceYears\": 10,\n    \"status\": \"ACTIVE\"\n  }\n]"
+      },
+      "parameters": [],
+      "headers": [
+        {
+          "name": "Content-Type",
+          "value": "application/json"
+        },
+        {
+          "name": "Authorization",
+          "value": "Bearer {{ _.access_token }}"
+        }
+      ],
+      "authentication": {},
+      "metaSortKey": -1690984000000,
+      "isPrivate": false,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestBody": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global"
+    },
+    {
+      "_id": "req_group_awards",
+      "_type": "request_group",
+      "parentId": "wrk_doctor_service",
+      "modified": 1691000000000,
+      "created": 1691000000000,
+      "name": "Award Management",
+      "description": "APIs for managing doctor awards",
+      "environment": {},
+      "environmentPropertyOrder": null,
+      "metaSortKey": -1690000000000
+    },
+    {
+      "_id": "req_create_award",
+      "_type": "request",
+      "parentId": "req_group_awards",
+      "modified": 1691000000000,
+      "created": 1691000000000,
+      "url": "{{ _.base_url }}/api/v1/awards/doctor/{{ _.doctor_id }}",
+      "name": "Create Award",
+      "description": "Creates a new award for a doctor",
+      "method": "POST",
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"title\": \"Best Cardiologist Award\",\n  \"description\": \"Awarded for excellence in cardiology\",\n  \"awardedBy\": \"Medical Association\",\n  \"year\": 2023,\n  \"category\": \"Excellence\"\n}"
+      },
+      "parameters": [],
+      "headers": [
+        {
+          "name": "Content-Type",
+          "value": "application/json"
+        },
+        {
+          "name": "Authorization",
+          "value": "Bearer {{ _.access_token }}"
+        }
+      ],
+      "authentication": {},
+      "metaSortKey": -1690000000000,
+      "isPrivate": false,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestBody": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global"
+    },
+    {
+      "_id": "req_get_award_by_id",
+      "_type": "request",
+      "parentId": "req_group_awards",
+      "modified": 1691000000000,
+      "created": 1691000000000,
+      "url": "{{ _.base_url }}/api/v1/awards/{{ _.award_id }}",
+      "name": "Get Award by ID",
+      "description": "Retrieves an award by its unique identifier",
+      "method": "GET",
+      "body": {},
+      "parameters": [],
+      "headers": [
+        {
+          "name": "Authorization",
+          "value": "Bearer {{ _.access_token }}"
+        }
+      ],
+      "authentication": {},
+      "metaSortKey": -1689999000000,
+      "isPrivate": false,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestBody": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global"
+    },
+    {
+      "_id": "req_get_awards_by_doctor",
+      "_type": "request",
+      "parentId": "req_group_awards",
+      "modified": 1691000000000,
+      "created": 1691000000000,
+      "url": "{{ _.base_url }}/api/v1/awards/doctor/{{ _.doctor_id }}",
+      "name": "Get Awards by Doctor",
+      "description": "Retrieves all awards for a specific doctor",
+      "method": "GET",
+      "body": {},
+      "parameters": [],
+      "headers": [
+        {
+          "name": "Authorization",
+          "value": "Bearer {{ _.access_token }}"
+        }
+      ],
+      "authentication": {},
+      "metaSortKey": -1689998000000,
+      "isPrivate": false,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestBody": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global"
+    },
+    {
+      "_id": "req_update_award",
+      "_type": "request",
+      "parentId": "req_group_awards",
+      "modified": 1691000000000,
+      "created": 1691000000000,
+      "url": "{{ _.base_url }}/api/v1/awards/{{ _.award_id }}",
+      "name": "Update Award",
+      "description": "Updates an existing award",
+      "method": "PUT",
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"title\": \"Outstanding Cardiologist Award\",\n  \"description\": \"Awarded for outstanding excellence in cardiology\",\n  \"awardedBy\": \"National Medical Association\",\n  \"year\": 2023,\n  \"category\": \"Outstanding Excellence\"\n}"
+      },
+      "parameters": [],
+      "headers": [
+        {
+          "name": "Content-Type",
+          "value": "application/json"
+        },
+        {
+          "name": "Authorization",
+          "value": "Bearer {{ _.access_token }}"
+        }
+      ],
+      "authentication": {},
+      "metaSortKey": -1689997000000,
+      "isPrivate": false,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestBody": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global"
+    },
+    {
+      "_id": "req_delete_award",
+      "_type": "request",
+      "parentId": "req_group_awards",
+      "modified": 1691000000000,
+      "created": 1691000000000,
+      "url": "{{ _.base_url }}/api/v1/awards/{{ _.award_id }}",
+      "name": "Delete Award",
+      "description": "Deletes an award",
+      "method": "DELETE",
+      "body": {},
+      "parameters": [],
+      "headers": [
+        {
+          "name": "Authorization",
+          "value": "Bearer {{ _.access_token }}"
+        }
+      ],
+      "authentication": {},
+      "metaSortKey": -1689996000000,
+      "isPrivate": false,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestBody": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global"
+    },
+    {
+      "_id": "req_get_all_awards",
+      "_type": "request",
+      "parentId": "req_group_awards",
+      "modified": 1691000000000,
+      "created": 1691000000000,
+      "url": "{{ _.base_url }}/api/v1/awards",
+      "name": "Get All Awards",
+      "description": "Retrieves a paginated list of all awards",
+      "method": "GET",
+      "body": {},
+      "parameters": [
+        {
+          "name": "page",
+          "value": "0",
+          "description": "Page number"
+        },
+        {
+          "name": "size",
+          "value": "20",
+          "description": "Page size"
+        }
+      ],
+      "headers": [
+        {
+          "name": "Authorization",
+          "value": "Bearer {{ _.access_token }}"
+        }
+      ],
+      "authentication": {},
+      "metaSortKey": -1689995000000,
+      "isPrivate": false,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestBody": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global"
+    },
+    {
+      "_id": "req_update_award_put",
+      "_type": "request",
+      "parentId": "req_group_awards",
+      "modified": 1691000000000,
+      "created": 1691000000000,
+      "url": "{{ _.base_url }}/api/v1/awards/{{ _.award_id }}",
+      "name": "Update Award (PUT)",
+      "description": "Updates an existing award completely",
+      "method": "PUT",
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"title\": \"Outstanding Cardiologist Award Updated\",\n  \"description\": \"Updated award for outstanding excellence in cardiology\",\n  \"awardedBy\": \"International Medical Association\",\n  \"year\": 2023,\n  \"category\": \"Outstanding Excellence\"\n}"
+      },
+      "parameters": [],
+      "headers": [
+        {
+          "name": "Content-Type",
+          "value": "application/json"
+        },
+        {
+          "name": "Authorization",
+          "value": "Bearer {{ _.access_token }}"
+        }
+      ],
+      "authentication": {},
+      "metaSortKey": -1689994000000,
+      "isPrivate": false,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestBody": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global"
+    },
+    {
+      "_id": "req_partial_update_award",
+      "_type": "request",
+      "parentId": "req_group_awards",
+      "modified": 1691000000000,
+      "created": 1691000000000,
+      "url": "{{ _.base_url }}/api/v1/awards/{{ _.award_id }}",
+      "name": "Partial Update Award",
+      "description": "Partially updates an award",
+      "method": "PATCH",
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"title\": \"Updated Award Title\",\n  \"year\": 2024\n}"
+      },
+      "parameters": [],
+      "headers": [
+        {
+          "name": "Content-Type",
+          "value": "application/json"
+        },
+        {
+          "name": "Authorization",
+          "value": "Bearer {{ _.access_token }}"
+        }
+      ],
+      "authentication": {},
+      "metaSortKey": -1689993000000,
+      "isPrivate": false,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestBody": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global"
+    },
+    {
+      "_id": "req_get_awards_by_year",
+      "_type": "request",
+      "parentId": "req_group_awards",
+      "modified": 1691000000000,
+      "created": 1691000000000,
+      "url": "{{ _.base_url }}/api/v1/awards/year/2023",
+      "name": "Get Awards by Year",
+      "description": "Retrieves awards by specific year",
+      "method": "GET",
+      "body": {},
+      "parameters": [
+        {
+          "name": "page",
+          "value": "0",
+          "description": "Page number"
+        },
+        {
+          "name": "size",
+          "value": "20",
+          "description": "Page size"
+        }
+      ],
+      "headers": [
+        {
+          "name": "Authorization",
+          "value": "Bearer {{ _.access_token }}"
+        }
+      ],
+      "authentication": {},
+      "metaSortKey": -1689992000000,
+      "isPrivate": false,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestBody": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global"
+    },
+    {
+      "_id": "req_create_batch_awards",
+      "_type": "request",
+      "parentId": "req_group_awards",
+      "modified": 1691000000000,
+      "created": 1691000000000,
+      "url": "{{ _.base_url }}/api/v1/awards/doctor/{{ _.doctor_id }}/batch",
+      "name": "Create Batch Awards",
+      "description": "Creates multiple awards for a doctor",
+      "method": "POST",
+      "body": {
+        "mimeType": "application/json",
+        "text": "[\n  {\n    \"title\": \"Best Cardiologist Award\",\n    \"description\": \"Awarded for excellence in cardiology\",\n    \"awardedBy\": \"Medical Association\",\n    \"year\": 2023,\n    \"category\": \"Excellence\"\n  },\n  {\n    \"title\": \"Research Excellence Award\",\n    \"description\": \"Awarded for outstanding research\",\n    \"awardedBy\": \"Research Institute\",\n    \"year\": 2022,\n    \"category\": \"Research\"\n  }\n]"
+      },
+      "parameters": [],
+      "headers": [
+        {
+          "name": "Content-Type",
+          "value": "application/json"
+        },
+        {
+          "name": "Authorization",
+          "value": "Bearer {{ _.access_token }}"
+        }
+      ],
+      "authentication": {},
+      "metaSortKey": -1689991000000,
+      "isPrivate": false,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestBody": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global"
+    },
+    {
+      "_id": "req_group_qualifications",
+      "_type": "request_group",
+      "parentId": "wrk_doctor_service",
+      "modified": 1691000000000,
+      "created": 1691000000000,
+      "name": "Qualification Management",
+      "description": "APIs for managing doctor qualifications",
+      "environment": {},
+      "environmentPropertyOrder": null,
+      "metaSortKey": -1689000000000
+    },
+    {
+      "_id": "req_create_qualification",
+      "_type": "request",
+      "parentId": "req_group_qualifications",
+      "modified": 1691000000000,
+      "created": 1691000000000,
+      "url": "{{ _.base_url }}/api/v1/qualifications/doctor/{{ _.doctor_id }}",
+      "name": "Create Qualification",
+      "description": "Creates a new qualification for a doctor",
+      "method": "POST",
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"degree\": \"MBBS\",\n  \"field\": \"Medicine\",\n  \"institution\": \"Harvard Medical School\",\n  \"year\": 2010,\n  \"grade\": \"First Class\",\n  \"description\": \"Bachelor of Medicine and Bachelor of Surgery\"\n}"
+      },
+      "parameters": [],
+      "headers": [
+        {
+          "name": "Content-Type",
+          "value": "application/json"
+        },
+        {
+          "name": "Authorization",
+          "value": "Bearer {{ _.access_token }}"
+        }
+      ],
+      "authentication": {},
+      "metaSortKey": -1689000000000,
+      "isPrivate": false,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestBody": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global"
+    },
+    {
+      "_id": "req_get_qualifications_by_doctor",
+      "_type": "request",
+      "parentId": "req_group_qualifications",
+      "modified": 1691000000000,
+      "created": 1691000000000,
+      "url": "{{ _.base_url }}/api/v1/qualifications/doctor/{{ _.doctor_id }}",
+      "name": "Get Qualifications by Doctor",
+      "description": "Retrieves all qualifications for a specific doctor",
+      "method": "GET",
+      "body": {},
+      "parameters": [],
+      "headers": [
+        {
+          "name": "Authorization",
+          "value": "Bearer {{ _.access_token }}"
+        }
+      ],
+      "authentication": {},
+      "metaSortKey": -1688999000000,
+      "isPrivate": false,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestBody": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global"
+    },
+    {
+      "_id": "req_get_all_qualifications",
+      "_type": "request",
+      "parentId": "req_group_qualifications",
+      "modified": 1691000000000,
+      "created": 1691000000000,
+      "url": "{{ _.base_url }}/api/v1/qualifications",
+      "name": "Get All Qualifications",
+      "description": "Retrieves a paginated list of all qualifications",
+      "method": "GET",
+      "body": {},
+      "parameters": [
+        {
+          "name": "page",
+          "value": "0",
+          "description": "Page number"
+        },
+        {
+          "name": "size",
+          "value": "20",
+          "description": "Page size"
+        }
+      ],
+      "headers": [
+        {
+          "name": "Authorization",
+          "value": "Bearer {{ _.access_token }}"
+        }
+      ],
+      "authentication": {},
+      "metaSortKey": -1688998000000,
+      "isPrivate": false,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestBody": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global"
+    },
+    {
+      "_id": "req_get_qualification_by_id",
+      "_type": "request",
+      "parentId": "req_group_qualifications",
+      "modified": 1691000000000,
+      "created": 1691000000000,
+      "url": "{{ _.base_url }}/api/v1/qualifications/{{ _.qualification_id }}",
+      "name": "Get Qualification by ID",
+      "description": "Retrieves a qualification by its unique identifier",
+      "method": "GET",
+      "body": {},
+      "parameters": [],
+      "headers": [
+        {
+          "name": "Authorization",
+          "value": "Bearer {{ _.access_token }}"
+        }
+      ],
+      "authentication": {},
+      "metaSortKey": -1688997000000,
+      "isPrivate": false,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestBody": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global"
+    },
+    {
+      "_id": "req_update_qualification",
+      "_type": "request",
+      "parentId": "req_group_qualifications",
+      "modified": 1691000000000,
+      "created": 1691000000000,
+      "url": "{{ _.base_url }}/api/v1/qualifications/{{ _.qualification_id }}",
+      "name": "Update Qualification",
+      "description": "Updates an existing qualification",
+      "method": "PUT",
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"degree\": \"MD\",\n  \"field\": \"Cardiology\",\n  \"institution\": \"Johns Hopkins University\",\n  \"year\": 2012,\n  \"grade\": \"Summa Cum Laude\",\n  \"description\": \"Doctor of Medicine with specialization in Cardiology\"\n}"
+      },
+      "parameters": [],
+      "headers": [
+        {
+          "name": "Content-Type",
+          "value": "application/json"
+        },
+        {
+          "name": "Authorization",
+          "value": "Bearer {{ _.access_token }}"
+        }
+      ],
+      "authentication": {},
+      "metaSortKey": -1688996000000,
+      "isPrivate": false,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestBody": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global"
+    },
+    {
+      "_id": "req_delete_qualification",
+      "_type": "request",
+      "parentId": "req_group_qualifications",
+      "modified": 1691000000000,
+      "created": 1691000000000,
+      "url": "{{ _.base_url }}/api/v1/qualifications/{{ _.qualification_id }}",
+      "name": "Delete Qualification",
+      "description": "Deletes a qualification",
+      "method": "DELETE",
+      "body": {},
+      "parameters": [],
+      "headers": [
+        {
+          "name": "Authorization",
+          "value": "Bearer {{ _.access_token }}"
+        }
+      ],
+      "authentication": {},
+      "metaSortKey": -1688995000000,
+      "isPrivate": false,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestBody": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global"
+    },
+    {
+      "_id": "req_create_batch_qualifications",
+      "_type": "request",
+      "parentId": "req_group_qualifications",
+      "modified": 1691000000000,
+      "created": 1691000000000,
+      "url": "{{ _.base_url }}/api/v1/qualifications/doctor/{{ _.doctor_id }}/batch",
+      "name": "Create Batch Qualifications",
+      "description": "Creates multiple qualifications for a doctor",
+      "method": "POST",
+      "body": {
+        "mimeType": "application/json",
+        "text": "[\n  {\n    \"degree\": \"MBBS\",\n    \"field\": \"Medicine\",\n    \"institution\": \"Harvard Medical School\",\n    \"year\": 2010,\n    \"grade\": \"First Class\"\n  },\n  {\n    \"degree\": \"MD\",\n    \"field\": \"Cardiology\",\n    \"institution\": \"Johns Hopkins\",\n    \"year\": 2014,\n    \"grade\": \"Distinction\"\n  }\n]"
+      },
+      "parameters": [],
+      "headers": [
+        {
+          "name": "Content-Type",
+          "value": "application/json"
+        },
+        {
+          "name": "Authorization",
+          "value": "Bearer {{ _.access_token }}"
+        }
+      ],
+      "authentication": {},
+      "metaSortKey": -1688994000000,
+      "isPrivate": false,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestBody": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global"
+    },
+    {
+      "_id": "req_group_memberships",
+      "_type": "request_group",
+      "parentId": "wrk_doctor_service",
+      "modified": 1691000000000,
+      "created": 1691000000000,
+      "name": "Membership Management",
+      "description": "APIs for managing doctor memberships",
+      "environment": {},
+      "environmentPropertyOrder": null,
+      "metaSortKey": -1688000000000
+    },
+    {
+      "_id": "req_create_membership",
+      "_type": "request",
+      "parentId": "req_group_memberships",
+      "modified": 1691000000000,
+      "created": 1691000000000,
+      "url": "{{ _.base_url }}/api/v1/memberships/doctor/{{ _.doctor_id }}",
+      "name": "Create Membership",
+      "description": "Creates a new membership for a doctor",
+      "method": "POST",
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"organizationName\": \"American Medical Association\",\n  \"membershipType\": \"Professional\",\n  \"startDate\": \"2020-01-01\",\n  \"endDate\": \"2025-12-31\",\n  \"membershipNumber\": \"AMA123456\",\n  \"status\": \"ACTIVE\"\n}"
+      },
+      "parameters": [],
+      "headers": [
+        {
+          "name": "Content-Type",
+          "value": "application/json"
+        },
+        {
+          "name": "Authorization",
+          "value": "Bearer {{ _.access_token }}"
+        }
+      ],
+      "authentication": {},
+      "metaSortKey": -1688000000000,
+      "isPrivate": false,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestBody": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global"
+    },
+    {
+      "_id": "req_get_memberships_by_doctor",
+      "_type": "request",
+      "parentId": "req_group_memberships",
+      "modified": 1691000000000,
+      "created": 1691000000000,
+      "url": "{{ _.base_url }}/api/v1/memberships/doctor/{{ _.doctor_id }}",
+      "name": "Get Memberships by Doctor",
+      "description": "Retrieves all memberships for a specific doctor",
+      "method": "GET",
+      "body": {},
+      "parameters": [],
+      "headers": [
+        {
+          "name": "Authorization",
+          "value": "Bearer {{ _.access_token }}"
+        }
+      ],
+      "authentication": {},
+      "metaSortKey": -1687999000000,
+      "isPrivate": false,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestBody": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global"
+    },
+    {
+      "_id": "req_get_all_memberships",
+      "_type": "request",
+      "parentId": "req_group_memberships",
+      "modified": 1691000000000,
+      "created": 1691000000000,
+      "url": "{{ _.base_url }}/api/v1/memberships",
+      "name": "Get All Memberships",
+      "description": "Retrieves a paginated list of all memberships",
+      "method": "GET",
+      "body": {},
+      "parameters": [
+        {
+          "name": "page",
+          "value": "0",
+          "description": "Page number"
+        },
+        {
+          "name": "size",
+          "value": "20",
+          "description": "Page size"
+        }
+      ],
+      "headers": [
+        {
+          "name": "Authorization",
+          "value": "Bearer {{ _.access_token }}"
+        }
+      ],
+      "authentication": {},
+      "metaSortKey": -1687998000000,
+      "isPrivate": false,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestBody": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global"
+    },
+    {
+      "_id": "req_get_membership_by_id",
+      "_type": "request",
+      "parentId": "req_group_memberships",
+      "modified": 1691000000000,
+      "created": 1691000000000,
+      "url": "{{ _.base_url }}/api/v1/memberships/{{ _.membership_id }}",
+      "name": "Get Membership by ID",
+      "description": "Retrieves a membership by its unique identifier",
+      "method": "GET",
+      "body": {},
+      "parameters": [],
+      "headers": [
+        {
+          "name": "Authorization",
+          "value": "Bearer {{ _.access_token }}"
+        }
+      ],
+      "authentication": {},
+      "metaSortKey": -1687997000000,
+      "isPrivate": false,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestBody": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global"
+    },
+    {
+      "_id": "req_update_membership",
+      "_type": "request",
+      "parentId": "req_group_memberships",
+      "modified": 1691000000000,
+      "created": 1691000000000,
+      "url": "{{ _.base_url }}/api/v1/memberships/{{ _.membership_id }}",
+      "name": "Update Membership",
+      "description": "Updates an existing membership",
+      "method": "PUT",
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"organizationName\": \"International Medical Association\",\n  \"membershipType\": \"Senior Professional\",\n  \"startDate\": \"2020-01-01\",\n  \"endDate\": \"2026-12-31\",\n  \"membershipNumber\": \"IMA789012\",\n  \"status\": \"ACTIVE\"\n}"
+      },
+      "parameters": [],
+      "headers": [
+        {
+          "name": "Content-Type",
+          "value": "application/json"
+        },
+        {
+          "name": "Authorization",
+          "value": "Bearer {{ _.access_token }}"
+        }
+      ],
+      "authentication": {},
+      "metaSortKey": -1687996000000,
+      "isPrivate": false,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestBody": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global"
+    },
+    {
+      "_id": "req_partial_update_membership",
+      "_type": "request",
+      "parentId": "req_group_memberships",
+      "modified": 1691000000000,
+      "created": 1691000000000,
+      "url": "{{ _.base_url }}/api/v1/memberships/{{ _.membership_id }}",
+      "name": "Partial Update Membership",
+      "description": "Partially updates a membership",
+      "method": "PATCH",
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"status\": \"EXPIRED\",\n  \"endDate\": \"2024-12-31\"\n}"
+      },
+      "parameters": [],
+      "headers": [
+        {
+          "name": "Content-Type",
+          "value": "application/json"
+        },
+        {
+          "name": "Authorization",
+          "value": "Bearer {{ _.access_token }}"
+        }
+      ],
+      "authentication": {},
+      "metaSortKey": -1687995000000,
+      "isPrivate": false,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestBody": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global"
+    },
+    {
+      "_id": "req_delete_membership",
+      "_type": "request",
+      "parentId": "req_group_memberships",
+      "modified": 1691000000000,
+      "created": 1691000000000,
+      "url": "{{ _.base_url }}/api/v1/memberships/{{ _.membership_id }}",
+      "name": "Delete Membership",
+      "description": "Deletes a membership",
+      "method": "DELETE",
+      "body": {},
+      "parameters": [],
+      "headers": [
+        {
+          "name": "Authorization",
+          "value": "Bearer {{ _.access_token }}"
+        }
+      ],
+      "authentication": {},
+      "metaSortKey": -1687994000000,
+      "isPrivate": false,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestBody": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global"
+    },
+    {
+      "_id": "req_group_organizations",
+      "_type": "request_group",
+      "parentId": "wrk_doctor_service",
+      "modified": 1691000000000,
+      "created": 1691000000000,
+      "name": "Organization Management",
+      "description": "APIs for managing doctor organizations",
+      "environment": {},
+      "environmentPropertyOrder": null,
+      "metaSortKey": -1687000000000
+    },
+    {
+      "_id": "req_create_organization",
+      "_type": "request",
+      "parentId": "req_group_organizations",
+      "modified": 1691000000000,
+      "created": 1691000000000,
+      "url": "{{ _.base_url }}/api/v1/organizations/doctor/{{ _.doctor_id }}",
+      "name": "Create Organization",
+      "description": "Creates a new organization for a doctor",
+      "method": "POST",
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"name\": \"City General Hospital\",\n  \"position\": \"Senior Cardiologist\",\n  \"startDate\": \"2020-01-01\",\n  \"endDate\": \"2023-12-31\",\n  \"description\": \"Senior position in cardiology department\",\n  \"location\": \"New York, NY\"\n}"
+      },
+      "parameters": [],
+      "headers": [
+        {
+          "name": "Content-Type",
+          "value": "application/json"
+        },
+        {
+          "name": "Authorization",
+          "value": "Bearer {{ _.access_token }}"
+        }
+      ],
+      "authentication": {},
+      "metaSortKey": -1687000000000,
+      "isPrivate": false,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestBody": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global"
+    },
+    {
+      "_id": "req_get_all_organizations",
+      "_type": "request",
+      "parentId": "req_group_organizations",
+      "modified": 1691000000000,
+      "created": 1691000000000,
+      "url": "{{ _.base_url }}/api/v1/organizations",
+      "name": "Get All Organizations",
+      "description": "Retrieves a paginated list of all organizations",
+      "method": "GET",
+      "body": {},
+      "parameters": [
+        {
+          "name": "page",
+          "value": "0",
+          "description": "Page number"
+        },
+        {
+          "name": "size",
+          "value": "20",
+          "description": "Page size"
+        }
+      ],
+      "headers": [
+        {
+          "name": "Authorization",
+          "value": "Bearer {{ _.access_token }}"
+        }
+      ],
+      "authentication": {},
+      "metaSortKey": -1686999000000,
+      "isPrivate": false,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestBody": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global"
+    },
+    {
+      "_id": "req_get_organization_by_id",
+      "_type": "request",
+      "parentId": "req_group_organizations",
+      "modified": 1691000000000,
+      "created": 1691000000000,
+      "url": "{{ _.base_url }}/api/v1/organizations/{{ _.organization_id }}",
+      "name": "Get Organization by ID",
+      "description": "Retrieves an organization by its unique identifier",
+      "method": "GET",
+      "body": {},
+      "parameters": [],
+      "headers": [
+        {
+          "name": "Authorization",
+          "value": "Bearer {{ _.access_token }}"
+        }
+      ],
+      "authentication": {},
+      "metaSortKey": -1686998000000,
+      "isPrivate": false,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestBody": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global"
+    },
+    {
+      "_id": "req_get_organizations_by_doctor",
+      "_type": "request",
+      "parentId": "req_group_organizations",
+      "modified": 1691000000000,
+      "created": 1691000000000,
+      "url": "{{ _.base_url }}/api/v1/organizations/doctor/{{ _.doctor_id }}",
+      "name": "Get Organizations by Doctor",
+      "description": "Retrieves all organizations for a specific doctor",
+      "method": "GET",
+      "body": {},
+      "parameters": [],
+      "headers": [
+        {
+          "name": "Authorization",
+          "value": "Bearer {{ _.access_token }}"
+        }
+      ],
+      "authentication": {},
+      "metaSortKey": -1686997000000,
+      "isPrivate": false,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestBody": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global"
+    },
+    {
+      "_id": "req_update_organization",
+      "_type": "request",
+      "parentId": "req_group_organizations",
+      "modified": 1691000000000,
+      "created": 1691000000000,
+      "url": "{{ _.base_url }}/api/v1/organizations/{{ _.organization_id }}",
+      "name": "Update Organization",
+      "description": "Updates an existing organization",
+      "method": "PUT",
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"name\": \"Metropolitan General Hospital\",\n  \"position\": \"Chief of Cardiology\",\n  \"startDate\": \"2020-01-01\",\n  \"endDate\": \"2024-12-31\",\n  \"description\": \"Chief position in cardiology department\",\n  \"location\": \"New York, NY\"\n}"
+      },
+      "parameters": [],
+      "headers": [
+        {
+          "name": "Content-Type",
+          "value": "application/json"
+        },
+        {
+          "name": "Authorization",
+          "value": "Bearer {{ _.access_token }}"
+        }
+      ],
+      "authentication": {},
+      "metaSortKey": -1686996000000,
+      "isPrivate": false,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestBody": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global"
+    },
+    {
+      "_id": "req_delete_organization",
+      "_type": "request",
+      "parentId": "req_group_organizations",
+      "modified": 1691000000000,
+      "created": 1691000000000,
+      "url": "{{ _.base_url }}/api/v1/organizations/{{ _.organization_id }}",
+      "name": "Delete Organization",
+      "description": "Deletes an organization",
+      "method": "DELETE",
+      "body": {},
+      "parameters": [],
+      "headers": [
+        {
+          "name": "Authorization",
+          "value": "Bearer {{ _.access_token }}"
+        }
+      ],
+      "authentication": {},
+      "metaSortKey": -1686995000000,
+      "isPrivate": false,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestBody": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global"
+    },
+    {
+      "_id": "req_group_photos",
+      "_type": "request_group",
+      "parentId": "wrk_doctor_service",
+      "modified": 1691000000000,
+      "created": 1691000000000,
+      "name": "Photo Management",
+      "description": "APIs for managing doctor photos",
+      "environment": {},
+      "environmentPropertyOrder": null,
+      "metaSortKey": -1686000000000
+    },
+    {
+      "_id": "req_create_photo",
+      "_type": "request",
+      "parentId": "req_group_photos",
+      "modified": 1691000000000,
+      "created": 1691000000000,
+      "url": "{{ _.base_url }}/api/v1/photos/doctor/{{ _.doctor_id }}",
+      "name": "Create Photo",
+      "description": "Creates a new photo for a doctor",
+      "method": "POST",
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"url\": \"https://example.com/doctor-photo.jpg\",\n  \"caption\": \"Professional headshot\",\n  \"type\": \"PROFILE\",\n  \"isPrimary\": true\n}"
+      },
+      "parameters": [],
+      "headers": [
+        {
+          "name": "Content-Type",
+          "value": "application/json"
+        },
+        {
+          "name": "Authorization",
+          "value": "Bearer {{ _.access_token }}"
+        }
+      ],
+      "authentication": {},
+      "metaSortKey": -1686000000000,
+      "isPrivate": false,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestBody": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global"
+    },
+    {
+      "_id": "req_get_all_photos",
+      "_type": "request",
+      "parentId": "req_group_photos",
+      "modified": 1691000000000,
+      "created": 1691000000000,
+      "url": "{{ _.base_url }}/api/v1/photos",
+      "name": "Get All Photos",
+      "description": "Retrieves a paginated list of all photos",
+      "method": "GET",
+      "body": {},
+      "parameters": [
+        {
+          "name": "page",
+          "value": "0",
+          "description": "Page number"
+        },
+        {
+          "name": "size",
+          "value": "20",
+          "description": "Page size"
+        }
+      ],
+      "headers": [
+        {
+          "name": "Authorization",
+          "value": "Bearer {{ _.access_token }}"
+        }
+      ],
+      "authentication": {},
+      "metaSortKey": -1685999000000,
+      "isPrivate": false,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestBody": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global"
+    },
+    {
+      "_id": "req_get_photo_by_id",
+      "_type": "request",
+      "parentId": "req_group_photos",
+      "modified": 1691000000000,
+      "created": 1691000000000,
+      "url": "{{ _.base_url }}/api/v1/photos/{{ _.photo_id }}",
+      "name": "Get Photo by ID",
+      "description": "Retrieves a photo by its unique identifier",
+      "method": "GET",
+      "body": {},
+      "parameters": [],
+      "headers": [
+        {
+          "name": "Authorization",
+          "value": "Bearer {{ _.access_token }}"
+        }
+      ],
+      "authentication": {},
+      "metaSortKey": -1685998000000,
+      "isPrivate": false,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestBody": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global"
+    },
+    {
+      "_id": "req_get_photos_by_doctor",
+      "_type": "request",
+      "parentId": "req_group_photos",
+      "modified": 1691000000000,
+      "created": 1691000000000,
+      "url": "{{ _.base_url }}/api/v1/photos/doctor/{{ _.doctor_id }}",
+      "name": "Get Photos by Doctor",
+      "description": "Retrieves all photos for a specific doctor",
+      "method": "GET",
+      "body": {},
+      "parameters": [],
+      "headers": [
+        {
+          "name": "Authorization",
+          "value": "Bearer {{ _.access_token }}"
+        }
+      ],
+      "authentication": {},
+      "metaSortKey": -1685997000000,
+      "isPrivate": false,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestBody": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global"
+    },
+    {
+      "_id": "req_update_photo",
+      "_type": "request",
+      "parentId": "req_group_photos",
+      "modified": 1691000000000,
+      "created": 1691000000000,
+      "url": "{{ _.base_url }}/api/v1/photos/{{ _.photo_id }}",
+      "name": "Update Photo",
+      "description": "Updates an existing photo",
+      "method": "PUT",
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"url\": \"https://example.com/updated-doctor-photo.jpg\",\n  \"caption\": \"Updated professional headshot\",\n  \"type\": \"PROFILE\",\n  \"isPrimary\": true\n}"
+      },
+      "parameters": [],
+      "headers": [
+        {
+          "name": "Content-Type",
+          "value": "application/json"
+        },
+        {
+          "name": "Authorization",
+          "value": "Bearer {{ _.access_token }}"
+        }
+      ],
+      "authentication": {},
+      "metaSortKey": -1685996000000,
+      "isPrivate": false,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestBody": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global"
+    },
+    {
+      "_id": "req_delete_photo",
+      "_type": "request",
+      "parentId": "req_group_photos",
+      "modified": 1691000000000,
+      "created": 1691000000000,
+      "url": "{{ _.base_url }}/api/v1/photos/{{ _.photo_id }}",
+      "name": "Delete Photo",
+      "description": "Deletes a photo",
+      "method": "DELETE",
+      "body": {},
+      "parameters": [],
+      "headers": [
+        {
+          "name": "Authorization",
+          "value": "Bearer {{ _.access_token }}"
+        }
+      ],
+      "authentication": {},
+      "metaSortKey": -1685995000000,
+      "isPrivate": false,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestBody": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global"
+    },
+    {
+      "_id": "req_group_practices",
+      "_type": "request_group",
+      "parentId": "wrk_doctor_service",
+      "modified": 1691000000000,
+      "created": 1691000000000,
+      "name": "Practice Management",
+      "description": "APIs for managing doctor practices",
+      "environment": {},
+      "environmentPropertyOrder": null,
+      "metaSortKey": -1685000000000
+    },
+    {
+      "_id": "req_create_practice",
+      "_type": "request",
+      "parentId": "req_group_practices",
+      "modified": 1691000000000,
+      "created": 1691000000000,
+      "url": "{{ _.base_url }}/api/v1/practices/doctor/{{ _.doctor_id }}",
+      "name": "Create Practice",
+      "description": "Creates a new practice for a doctor",
+      "method": "POST",
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"name\": \"Heart Care Clinic\",\n  \"address\": \"123 Medical Center Dr, New York, NY 10001\",\n  \"phone\": \"+1-555-123-4567\",\n  \"email\": \"info@heartcareclinic.com\",\n  \"website\": \"https://heartcareclinic.com\",\n  \"description\": \"Specialized cardiology practice\"\n}"
+      },
+      "parameters": [],
+      "headers": [
+        {
+          "name": "Content-Type",
+          "value": "application/json"
+        },
+        {
+          "name": "Authorization",
+          "value": "Bearer {{ _.access_token }}"
+        }
+      ],
+      "authentication": {},
+      "metaSortKey": -1685000000000,
+      "isPrivate": false,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestBody": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global"
+    },
+    {
+      "_id": "req_get_all_practices",
+      "_type": "request",
+      "parentId": "req_group_practices",
+      "modified": 1691000000000,
+      "created": 1691000000000,
+      "url": "{{ _.base_url }}/api/v1/practices",
+      "name": "Get All Practices",
+      "description": "Retrieves a paginated list of all practices",
+      "method": "GET",
+      "body": {},
+      "parameters": [
+        {
+          "name": "page",
+          "value": "0",
+          "description": "Page number"
+        },
+        {
+          "name": "size",
+          "value": "20",
+          "description": "Page size"
+        }
+      ],
+      "headers": [
+        {
+          "name": "Authorization",
+          "value": "Bearer {{ _.access_token }}"
+        }
+      ],
+      "authentication": {},
+      "metaSortKey": -1684999000000,
+      "isPrivate": false,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestBody": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global"
+    },
+    {
+      "_id": "req_get_practice_by_id",
+      "_type": "request",
+      "parentId": "req_group_practices",
+      "modified": 1691000000000,
+      "created": 1691000000000,
+      "url": "{{ _.base_url }}/api/v1/practices/{{ _.practice_id }}",
+      "name": "Get Practice by ID",
+      "description": "Retrieves a practice by its unique identifier",
+      "method": "GET",
+      "body": {},
+      "parameters": [],
+      "headers": [
+        {
+          "name": "Authorization",
+          "value": "Bearer {{ _.access_token }}"
+        }
+      ],
+      "authentication": {},
+      "metaSortKey": -1684998000000,
+      "isPrivate": false,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestBody": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global"
+    },
+    {
+      "_id": "req_get_practices_by_doctor",
+      "_type": "request",
+      "parentId": "req_group_practices",
+      "modified": 1691000000000,
+      "created": 1691000000000,
+      "url": "{{ _.base_url }}/api/v1/practices/doctor/{{ _.doctor_id }}",
+      "name": "Get Practices by Doctor",
+      "description": "Retrieves all practices for a specific doctor",
+      "method": "GET",
+      "body": {},
+      "parameters": [],
+      "headers": [
+        {
+          "name": "Authorization",
+          "value": "Bearer {{ _.access_token }}"
+        }
+      ],
+      "authentication": {},
+      "metaSortKey": -1684997000000,
+      "isPrivate": false,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestBody": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global"
+    },
+    {
+      "_id": "req_update_practice",
+      "_type": "request",
+      "parentId": "req_group_practices",
+      "modified": 1691000000000,
+      "created": 1691000000000,
+      "url": "{{ _.base_url }}/api/v1/practices/{{ _.practice_id }}",
+      "name": "Update Practice",
+      "description": "Updates an existing practice",
+      "method": "PUT",
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"name\": \"Advanced Heart Care Clinic\",\n  \"address\": \"456 Medical Plaza, New York, NY 10001\",\n  \"phone\": \"+1-555-987-6543\",\n  \"email\": \"info@advancedheartcare.com\",\n  \"website\": \"https://advancedheartcare.com\",\n  \"description\": \"Advanced specialized cardiology practice\"\n}"
+      },
+      "parameters": [],
+      "headers": [
+        {
+          "name": "Content-Type",
+          "value": "application/json"
+        },
+        {
+          "name": "Authorization",
+          "value": "Bearer {{ _.access_token }}"
+        }
+      ],
+      "authentication": {},
+      "metaSortKey": -1684996000000,
+      "isPrivate": false,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestBody": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global"
+    },
+    {
+      "_id": "req_delete_practice",
+      "_type": "request",
+      "parentId": "req_group_practices",
+      "modified": 1691000000000,
+      "created": 1691000000000,
+      "url": "{{ _.base_url }}/api/v1/practices/{{ _.practice_id }}",
+      "name": "Delete Practice",
+      "description": "Deletes a practice",
+      "method": "DELETE",
+      "body": {},
+      "parameters": [],
+      "headers": [
+        {
+          "name": "Authorization",
+          "value": "Bearer {{ _.access_token }}"
+        }
+      ],
+      "authentication": {},
+      "metaSortKey": -1684995000000,
+      "isPrivate": false,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestBody": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global"
+    },
+    {
+      "_id": "req_group_pricing",
+      "_type": "request_group",
+      "parentId": "wrk_doctor_service",
+      "modified": 1691000000000,
+      "created": 1691000000000,
+      "name": "Pricing Management",
+      "description": "APIs for managing doctor session pricing",
+      "environment": {},
+      "environmentPropertyOrder": null,
+      "metaSortKey": -1684000000000
+    },
+    {
+      "_id": "req_create_pricing",
+      "_type": "request",
+      "parentId": "req_group_pricing",
+      "modified": 1691000000000,
+      "created": 1691000000000,
+      "url": "{{ _.base_url }}/api/v1/pricing/doctor/{{ _.doctor_id }}",
+      "name": "Create Pricing",
+      "description": "Creates new pricing for a doctor",
+      "method": "POST",
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"sessionTypeId\": \"123e4567-e89b-12d3-a456-426614174001\",\n  \"price\": 150.00,\n  \"currency\": \"USD\",\n  \"duration\": 60,\n  \"isActive\": true,\n  \"description\": \"Standard consultation\"\n}"
+      },
+      "parameters": [],
+      "headers": [
+        {
+          "name": "Content-Type",
+          "value": "application/json"
+        },
+        {
+          "name": "Authorization",
+          "value": "Bearer {{ _.access_token }}"
+        }
+      ],
+      "authentication": {},
+      "metaSortKey": -1684000000000,
+      "isPrivate": false,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestBody": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global"
+    },
+    {
+      "_id": "req_get_all_pricing",
+      "_type": "request",
+      "parentId": "req_group_pricing",
+      "modified": 1691000000000,
+      "created": 1691000000000,
+      "url": "{{ _.base_url }}/api/v1/pricing",
+      "name": "Get All Pricing",
+      "description": "Retrieves a paginated list of all pricing",
+      "method": "GET",
+      "body": {},
+      "parameters": [
+        {
+          "name": "page",
+          "value": "0",
+          "description": "Page number"
+        },
+        {
+          "name": "size",
+          "value": "20",
+          "description": "Page size"
+        }
+      ],
+      "headers": [
+        {
+          "name": "Authorization",
+          "value": "Bearer {{ _.access_token }}"
+        }
+      ],
+      "authentication": {},
+      "metaSortKey": -1683999000000,
+      "isPrivate": false,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestBody": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global"
+    },
+    {
+      "_id": "req_get_pricing_by_id",
+      "_type": "request",
+      "parentId": "req_group_pricing",
+      "modified": 1691000000000,
+      "created": 1691000000000,
+      "url": "{{ _.base_url }}/api/v1/pricing/{{ _.pricing_id }}",
+      "name": "Get Pricing by ID",
+      "description": "Retrieves pricing by its unique identifier",
+      "method": "GET",
+      "body": {},
+      "parameters": [],
+      "headers": [
+        {
+          "name": "Authorization",
+          "value": "Bearer {{ _.access_token }}"
+        }
+      ],
+      "authentication": {},
+      "metaSortKey": -1683998000000,
+      "isPrivate": false,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestBody": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global"
+    },
+    {
+      "_id": "req_get_pricing_by_doctor",
+      "_type": "request",
+      "parentId": "req_group_pricing",
+      "modified": 1691000000000,
+      "created": 1691000000000,
+      "url": "{{ _.base_url }}/api/v1/pricing/doctor/{{ _.doctor_id }}",
+      "name": "Get Pricing by Doctor",
+      "description": "Retrieves all pricing for a specific doctor",
+      "method": "GET",
+      "body": {},
+      "parameters": [],
+      "headers": [
+        {
+          "name": "Authorization",
+          "value": "Bearer {{ _.access_token }}"
+        }
+      ],
+      "authentication": {},
+      "metaSortKey": -1683997000000,
+      "isPrivate": false,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestBody": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global"
+    },
+    {
+      "_id": "req_update_pricing",
+      "_type": "request",
+      "parentId": "req_group_pricing",
+      "modified": 1691000000000,
+      "created": 1691000000000,
+      "url": "{{ _.base_url }}/api/v1/pricing/{{ _.pricing_id }}",
+      "name": "Update Pricing",
+      "description": "Updates existing pricing",
+      "method": "PUT",
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"sessionTypeId\": \"123e4567-e89b-12d3-a456-426614174001\",\n  \"price\": 200.00,\n  \"currency\": \"USD\",\n  \"duration\": 90,\n  \"isActive\": true,\n  \"description\": \"Extended consultation\"\n}"
+      },
+      "parameters": [],
+      "headers": [
+        {
+          "name": "Content-Type",
+          "value": "application/json"
+        },
+        {
+          "name": "Authorization",
+          "value": "Bearer {{ _.access_token }}"
+        }
+      ],
+      "authentication": {},
+      "metaSortKey": -1683996000000,
+      "isPrivate": false,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestBody": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global"
+    },
+    {
+      "_id": "req_delete_pricing",
+      "_type": "request",
+      "parentId": "req_group_pricing",
+      "modified": 1691000000000,
+      "created": 1691000000000,
+      "url": "{{ _.base_url }}/api/v1/pricing/{{ _.pricing_id }}",
+      "name": "Delete Pricing",
+      "description": "Deletes pricing",
+      "method": "DELETE",
+      "body": {},
+      "parameters": [],
+      "headers": [
+        {
+          "name": "Authorization",
+          "value": "Bearer {{ _.access_token }}"
+        }
+      ],
+      "authentication": {},
+      "metaSortKey": -1683995000000,
+      "isPrivate": false,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestBody": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global"
+    },
+    {
+      "_id": "req_group_recommendations",
+      "_type": "request_group",
+      "parentId": "wrk_doctor_service",
+      "modified": 1691000000000,
+      "created": 1691000000000,
+      "name": "Recommendation Management",
+      "description": "APIs for managing doctor recommendations and reviews",
+      "environment": {},
+      "environmentPropertyOrder": null,
+      "metaSortKey": -1683000000000
+    },
+    {
+      "_id": "req_create_recommendation",
+      "_type": "request",
+      "parentId": "req_group_recommendations",
+      "modified": 1691000000000,
+      "created": 1691000000000,
+      "url": "{{ _.base_url }}/api/v1/recommendations/doctor/{{ _.doctor_id }}",
+      "name": "Create Recommendation",
+      "description": "Creates a new recommendation for a doctor",
+      "method": "POST",
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"reviewerName\": \"John Patient\",\n  \"rating\": 5,\n  \"comment\": \"Excellent doctor, very professional and caring\",\n  \"reviewDate\": \"2023-08-02\",\n  \"isVerified\": true\n}"
+      },
+      "parameters": [],
+      "headers": [
+        {
+          "name": "Content-Type",
+          "value": "application/json"
+        },
+        {
+          "name": "Authorization",
+          "value": "Bearer {{ _.access_token }}"
+        }
+      ],
+      "authentication": {},
+      "metaSortKey": -1683000000000,
+      "isPrivate": false,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestBody": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global"
+    },
+    {
+      "_id": "req_get_all_recommendations",
+      "_type": "request",
+      "parentId": "req_group_recommendations",
+      "modified": 1691000000000,
+      "created": 1691000000000,
+      "url": "{{ _.base_url }}/api/v1/recommendations",
+      "name": "Get All Recommendations",
+      "description": "Retrieves a paginated list of all recommendations",
+      "method": "GET",
+      "body": {},
+      "parameters": [
+        {
+          "name": "page",
+          "value": "0",
+          "description": "Page number"
+        },
+        {
+          "name": "size",
+          "value": "20",
+          "description": "Page size"
+        }
+      ],
+      "headers": [
+        {
+          "name": "Authorization",
+          "value": "Bearer {{ _.access_token }}"
+        }
+      ],
+      "authentication": {},
+      "metaSortKey": -1682999000000,
+      "isPrivate": false,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestBody": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global"
+    },
+    {
+      "_id": "req_get_recommendation_by_id",
+      "_type": "request",
+      "parentId": "req_group_recommendations",
+      "modified": 1691000000000,
+      "created": 1691000000000,
+      "url": "{{ _.base_url }}/api/v1/recommendations/{{ _.recommendation_id }}",
+      "name": "Get Recommendation by ID",
+      "description": "Retrieves a recommendation by its unique identifier",
+      "method": "GET",
+      "body": {},
+      "parameters": [],
+      "headers": [
+        {
+          "name": "Authorization",
+          "value": "Bearer {{ _.access_token }}"
+        }
+      ],
+      "authentication": {},
+      "metaSortKey": -1682998000000,
+      "isPrivate": false,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestBody": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global"
+    },
+    {
+      "_id": "req_get_recommendations_by_doctor",
+      "_type": "request",
+      "parentId": "req_group_recommendations",
+      "modified": 1691000000000,
+      "created": 1691000000000,
+      "url": "{{ _.base_url }}/api/v1/recommendations/doctor/{{ _.doctor_id }}",
+      "name": "Get Recommendations by Doctor",
+      "description": "Retrieves all recommendations for a specific doctor",
+      "method": "GET",
+      "body": {},
+      "parameters": [],
+      "headers": [
+        {
+          "name": "Authorization",
+          "value": "Bearer {{ _.access_token }}"
+        }
+      ],
+      "authentication": {},
+      "metaSortKey": -1682997000000,
+      "isPrivate": false,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestBody": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global"
+    },
+    {
+      "_id": "req_update_recommendation",
+      "_type": "request",
+      "parentId": "req_group_recommendations",
+      "modified": 1691000000000,
+      "created": 1691000000000,
+      "url": "{{ _.base_url }}/api/v1/recommendations/{{ _.recommendation_id }}",
+      "name": "Update Recommendation",
+      "description": "Updates an existing recommendation",
+      "method": "PUT",
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"reviewerName\": \"John Patient Updated\",\n  \"rating\": 5,\n  \"comment\": \"Outstanding doctor, extremely professional and caring. Highly recommended!\",\n  \"reviewDate\": \"2023-08-02\",\n  \"isVerified\": true\n}"
+      },
+      "parameters": [],
+      "headers": [
+        {
+          "name": "Content-Type",
+          "value": "application/json"
+        },
+        {
+          "name": "Authorization",
+          "value": "Bearer {{ _.access_token }}"
+        }
+      ],
+      "authentication": {},
+      "metaSortKey": -1682996000000,
+      "isPrivate": false,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestBody": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global"
+    },
+    {
+      "_id": "req_delete_recommendation",
+      "_type": "request",
+      "parentId": "req_group_recommendations",
+      "modified": 1691000000000,
+      "created": 1691000000000,
+      "url": "{{ _.base_url }}/api/v1/recommendations/{{ _.recommendation_id }}",
+      "name": "Delete Recommendation",
+      "description": "Deletes a recommendation",
+      "method": "DELETE",
+      "body": {},
+      "parameters": [],
+      "headers": [
+        {
+          "name": "Authorization",
+          "value": "Bearer {{ _.access_token }}"
+        }
+      ],
+      "authentication": {},
+      "metaSortKey": -1682995000000,
+      "isPrivate": false,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestBody": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global"
+    },
+    {
+      "_id": "req_get_recommendations_by_rating",
+      "_type": "request",
+      "parentId": "req_group_recommendations",
+      "modified": 1691000000000,
+      "created": 1691000000000,
+      "url": "{{ _.base_url }}/api/v1/recommendations/rating/5",
+      "name": "Get Recommendations by Rating",
+      "description": "Retrieves recommendations by specific rating",
+      "method": "GET",
+      "body": {},
+      "parameters": [
+        {
+          "name": "page",
+          "value": "0",
+          "description": "Page number"
+        },
+        {
+          "name": "size",
+          "value": "20",
+          "description": "Page size"
+        }
+      ],
+      "headers": [
+        {
+          "name": "Authorization",
+          "value": "Bearer {{ _.access_token }}"
+        }
+      ],
+      "authentication": {},
+      "metaSortKey": -1682994000000,
+      "isPrivate": false,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestBody": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global"
+    },
+    {
+      "_id": "req_group_specializations",
+      "_type": "request_group",
+      "parentId": "wrk_doctor_service",
+      "modified": 1691000000000,
+      "created": 1691000000000,
+      "name": "Specialization Management",
+      "description": "APIs for managing doctor specializations",
+      "environment": {},
+      "environmentPropertyOrder": null,
+      "metaSortKey": -1682000000000
+    },
+    {
+      "_id": "req_create_specialization",
+      "_type": "request",
+      "parentId": "req_group_specializations",
+      "modified": 1691000000000,
+      "created": 1691000000000,
+      "url": "{{ _.base_url }}/api/v1/specializations/doctor/{{ _.doctor_id }}",
+      "name": "Create Specialization",
+      "description": "Creates a new specialization for a doctor",
+      "method": "POST",
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"name\": \"Cardiology\",\n  \"subspecialization\": \"Interventional Cardiology\",\n  \"certificationDate\": \"2015-06-01\",\n  \"certifyingBody\": \"American Board of Internal Medicine\",\n  \"isActive\": true\n}"
+      },
+      "parameters": [],
+      "headers": [
+        {
+          "name": "Content-Type",
+          "value": "application/json"
+        },
+        {
+          "name": "Authorization",
+          "value": "Bearer {{ _.access_token }}"
+        }
+      ],
+      "authentication": {},
+      "metaSortKey": -1682000000000,
+      "isPrivate": false,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestBody": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global"
+    },
+    {
+      "_id": "req_get_all_specializations",
+      "_type": "request",
+      "parentId": "req_group_specializations",
+      "modified": 1691000000000,
+      "created": 1691000000000,
+      "url": "{{ _.base_url }}/api/v1/specializations",
+      "name": "Get All Specializations",
+      "description": "Retrieves a paginated list of all specializations",
+      "method": "GET",
+      "body": {},
+      "parameters": [
+        {
+          "name": "page",
+          "value": "0",
+          "description": "Page number"
+        },
+        {
+          "name": "size",
+          "value": "20",
+          "description": "Page size"
+        }
+      ],
+      "headers": [
+        {
+          "name": "Authorization",
+          "value": "Bearer {{ _.access_token }}"
+        }
+      ],
+      "authentication": {},
+      "metaSortKey": -1681999000000,
+      "isPrivate": false,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestBody": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global"
+    },
+    {
+      "_id": "req_get_specialization_by_id",
+      "_type": "request",
+      "parentId": "req_group_specializations",
+      "modified": 1691000000000,
+      "created": 1691000000000,
+      "url": "{{ _.base_url }}/api/v1/specializations/{{ _.specialization_id }}",
+      "name": "Get Specialization by ID",
+      "description": "Retrieves a specialization by its unique identifier",
+      "method": "GET",
+      "body": {},
+      "parameters": [],
+      "headers": [
+        {
+          "name": "Authorization",
+          "value": "Bearer {{ _.access_token }}"
+        }
+      ],
+      "authentication": {},
+      "metaSortKey": -1681998000000,
+      "isPrivate": false,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestBody": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global"
+    },
+    {
+      "_id": "req_get_specializations_by_doctor",
+      "_type": "request",
+      "parentId": "req_group_specializations",
+      "modified": 1691000000000,
+      "created": 1691000000000,
+      "url": "{{ _.base_url }}/api/v1/specializations/doctor/{{ _.doctor_id }}",
+      "name": "Get Specializations by Doctor",
+      "description": "Retrieves all specializations for a specific doctor",
+      "method": "GET",
+      "body": {},
+      "parameters": [],
+      "headers": [
+        {
+          "name": "Authorization",
+          "value": "Bearer {{ _.access_token }}"
+        }
+      ],
+      "authentication": {},
+      "metaSortKey": -1681997000000,
+      "isPrivate": false,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestBody": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global"
+    },
+    {
+      "_id": "req_update_specialization",
+      "_type": "request",
+      "parentId": "req_group_specializations",
+      "modified": 1691000000000,
+      "created": 1691000000000,
+      "url": "{{ _.base_url }}/api/v1/specializations/{{ _.specialization_id }}",
+      "name": "Update Specialization",
+      "description": "Updates an existing specialization",
+      "method": "PUT",
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"name\": \"Advanced Cardiology\",\n  \"subspecialization\": \"Pediatric Interventional Cardiology\",\n  \"certificationDate\": \"2016-06-01\",\n  \"certifyingBody\": \"American Board of Pediatric Cardiology\",\n  \"isActive\": true\n}"
+      },
+      "parameters": [],
+      "headers": [
+        {
+          "name": "Content-Type",
+          "value": "application/json"
+        },
+        {
+          "name": "Authorization",
+          "value": "Bearer {{ _.access_token }}"
+        }
+      ],
+      "authentication": {},
+      "metaSortKey": -1681996000000,
+      "isPrivate": false,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestBody": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global"
+    },
+    {
+      "_id": "req_delete_specialization",
+      "_type": "request",
+      "parentId": "req_group_specializations",
+      "modified": 1691000000000,
+      "created": 1691000000000,
+      "url": "{{ _.base_url }}/api/v1/specializations/{{ _.specialization_id }}",
+      "name": "Delete Specialization",
+      "description": "Deletes a specialization",
+      "method": "DELETE",
+      "body": {},
+      "parameters": [],
+      "headers": [
+        {
+          "name": "Authorization",
+          "value": "Bearer {{ _.access_token }}"
+        }
+      ],
+      "authentication": {},
+      "metaSortKey": -1681995000000,
+      "isPrivate": false,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestBody": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global"
+    },
+    {
+      "_id": "req_get_unique_specialities",
+      "_type": "request",
+      "parentId": "req_group_specializations",
+      "modified": 1691000000000,
+      "created": 1691000000000,
+      "url": "{{ _.base_url }}/api/v1/specializations/unique/specialities",
+      "name": "Get Unique Specialities",
+      "description": "Retrieves all unique specialities",
+      "method": "GET",
+      "body": {},
+      "parameters": [],
+      "headers": [
+        {
+          "name": "Authorization",
+          "value": "Bearer {{ _.access_token }}"
+        }
+      ],
+      "authentication": {},
+      "metaSortKey": -1681994000000,
+      "isPrivate": false,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestBody": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global"
+    },
+    {
+      "_id": "req_group_registrations",
+      "_type": "request_group",
+      "parentId": "wrk_doctor_service",
+      "modified": 1691000000000,
+      "created": 1691000000000,
+      "name": "Registration Management",
+      "description": "APIs for managing doctor registrations",
+      "environment": {},
+      "environmentPropertyOrder": null,
+      "metaSortKey": -1681000000000
+    },
+    {
+      "_id": "req_create_registration",
+      "_type": "request",
+      "parentId": "req_group_registrations",
+      "modified": 1691000000000,
+      "created": 1691000000000,
+      "url": "{{ _.base_url }}/api/v1/registrations/doctor/{{ _.doctor_id }}",
+      "name": "Create Registration",
+      "description": "Creates a new registration for a doctor",
+      "method": "POST",
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"registrationNumber\": \"REG123456\",\n  \"registrationBody\": \"Medical Council of India\",\n  \"registrationDate\": \"2010-07-15\",\n  \"expiryDate\": \"2025-07-15\",\n  \"status\": \"ACTIVE\",\n  \"state\": \"New York\"\n}"
+      },
+      "parameters": [],
+      "headers": [
+        {
+          "name": "Content-Type",
+          "value": "application/json"
+        },
+        {
+          "name": "Authorization",
+          "value": "Bearer {{ _.access_token }}"
+        }
+      ],
+      "authentication": {},
+      "metaSortKey": -1681000000000,
+      "isPrivate": false,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestBody": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global"
+    },
+    {
+      "_id": "req_get_registrations_by_doctor",
+      "_type": "request",
+      "parentId": "req_group_registrations",
+      "modified": 1691000000000,
+      "created": 1691000000000,
+      "url": "{{ _.base_url }}/api/v1/registrations/doctor/{{ _.doctor_id }}",
+      "name": "Get Registrations by Doctor",
+      "description": "Retrieves all registrations for a specific doctor",
+      "method": "GET",
+      "body": {},
+      "parameters": [],
+      "headers": [
+        {
+          "name": "Authorization",
+          "value": "Bearer {{ _.access_token }}"
+        }
+      ],
+      "authentication": {},
+      "metaSortKey": -1680999000000,
+      "isPrivate": false,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestBody": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global"
+    },
+    {
+      "_id": "req_get_all_registrations",
+      "_type": "request",
+      "parentId": "req_group_registrations",
+      "modified": 1691000000000,
+      "created": 1691000000000,
+      "url": "{{ _.base_url }}/api/v1/registrations",
+      "name": "Get All Registrations",
+      "description": "Retrieves a paginated list of all registrations",
+      "method": "GET",
+      "body": {},
+      "parameters": [
+        {
+          "name": "page",
+          "value": "0",
+          "description": "Page number"
+        },
+        {
+          "name": "size",
+          "value": "20",
+          "description": "Page size"
+        }
+      ],
+      "headers": [
+        {
+          "name": "Authorization",
+          "value": "Bearer {{ _.access_token }}"
+        }
+      ],
+      "authentication": {},
+      "metaSortKey": -1680998000000,
+      "isPrivate": false,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestBody": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global"
+    },
+    {
+      "_id": "req_get_registration_by_id",
+      "_type": "request",
+      "parentId": "req_group_registrations",
+      "modified": 1691000000000,
+      "created": 1691000000000,
+      "url": "{{ _.base_url }}/api/v1/registrations/{{ _.registration_id }}",
+      "name": "Get Registration by ID",
+      "description": "Retrieves a registration by its unique identifier",
+      "method": "GET",
+      "body": {},
+      "parameters": [],
+      "headers": [
+        {
+          "name": "Authorization",
+          "value": "Bearer {{ _.access_token }}"
+        }
+      ],
+      "authentication": {},
+      "metaSortKey": -1680997000000,
+      "isPrivate": false,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestBody": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global"
+    },
+    {
+      "_id": "req_update_registration",
+      "_type": "request",
+      "parentId": "req_group_registrations",
+      "modified": 1691000000000,
+      "created": 1691000000000,
+      "url": "{{ _.base_url }}/api/v1/registrations/{{ _.registration_id }}",
+      "name": "Update Registration",
+      "description": "Updates an existing registration",
+      "method": "PUT",
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"registrationNumber\": \"REG789012\",\n  \"registrationBody\": \"New York State Medical Board\",\n  \"registrationDate\": \"2011-07-15\",\n  \"expiryDate\": \"2026-07-15\",\n  \"status\": \"ACTIVE\",\n  \"state\": \"New York\"\n}"
+      },
+      "parameters": [],
+      "headers": [
+        {
+          "name": "Content-Type",
+          "value": "application/json"
+        },
+        {
+          "name": "Authorization",
+          "value": "Bearer {{ _.access_token }}"
+        }
+      ],
+      "authentication": {},
+      "metaSortKey": -1680996000000,
+      "isPrivate": false,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestBody": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global"
+    },
+    {
+      "_id": "req_delete_registration",
+      "_type": "request",
+      "parentId": "req_group_registrations",
+      "modified": 1691000000000,
+      "created": 1691000000000,
+      "url": "{{ _.base_url }}/api/v1/registrations/{{ _.registration_id }}",
+      "name": "Delete Registration",
+      "description": "Deletes a registration",
+      "method": "DELETE",
+      "body": {},
+      "parameters": [],
+      "headers": [
+        {
+          "name": "Authorization",
+          "value": "Bearer {{ _.access_token }}"
+        }
+      ],
+      "authentication": {},
+      "metaSortKey": -1680995000000,
+      "isPrivate": false,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestBody": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global"
+    },
+    {
+      "_id": "req_get_registrations_by_status",
+      "_type": "request",
+      "parentId": "req_group_registrations",
+      "modified": 1691000000000,
+      "created": 1691000000000,
+      "url": "{{ _.base_url }}/api/v1/registrations/status/ACTIVE",
+      "name": "Get Registrations by Status",
+      "description": "Retrieves registrations by status",
+      "method": "GET",
+      "body": {},
+      "parameters": [
+        {
+          "name": "page",
+          "value": "0",
+          "description": "Page number"
+        },
+        {
+          "name": "size",
+          "value": "20",
+          "description": "Page size"
+        }
+      ],
+      "headers": [
+        {
+          "name": "Authorization",
+          "value": "Bearer {{ _.access_token }}"
+        }
+      ],
+      "authentication": {},
+      "metaSortKey": -1680994000000,
+      "isPrivate": false,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestBody": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global"
+    },
+    {
+      "_id": "wrk_doctor_service",
+      "_type": "workspace",
+      "parentId": null,
+      "modified": 1691000000000,
+      "created": 1691000000000,
+      "name": "Doctor Service API",
+      "description": "Comprehensive API collection for the Doctor Service microservice",
+      "scope": "collection"
+    },
+    {
+      "_id": "env_doctor_service",
+      "_type": "environment",
+      "parentId": "wrk_doctor_service",
+      "modified": 1691000000000,
+      "created": 1691000000000,
+      "name": "Doctor Service Environment",
+      "data": {
+        "base_url": "http://localhost:8084",
+        "access_token": "your_jwt_token_here",
+        "doctor_id": "123e4567-e89b-12d3-a456-426614174000",
+        "award_id": "123e4567-e89b-12d3-a456-426614174001",
+        "qualification_id": "123e4567-e89b-12d3-a456-426614174002",
+        "membership_id": "123e4567-e89b-12d3-a456-426614174003",
+        "organization_id": "123e4567-e89b-12d3-a456-426614174004",
+        "photo_id": "123e4567-e89b-12d3-a456-426614174005",
+        "practice_id": "123e4567-e89b-12d3-a456-426614174006",
+        "pricing_id": "123e4567-e89b-12d3-a456-426614174007",
+        "recommendation_id": "123e4567-e89b-12d3-a456-426614174008",
+        "specialization_id": "123e4567-e89b-12d3-a456-426614174009",
+        "registration_id": "123e4567-e89b-12d3-a456-426614174010"
+      },
+      "dataPropertyOrder": {
+        "&": [
+          "base_url",
+          "access_token",
+          "doctor_id",
+          "award_id",
+          "qualification_id",
+          "membership_id",
+          "organization_id",
+          "photo_id",
+          "practice_id",
+          "pricing_id",
+          "recommendation_id",
+          "specialization_id",
+          "registration_id"
+        ]
+      },
+      "color": null,
+      "isPrivate": false,
+      "metaSortKey": 1691000000000
+    }
+  ]
+}

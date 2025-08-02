@@ -94,7 +94,7 @@ public class OrganizationController {
             @ApiResponse(responseCode = "404", description = "Organization not found")
     })
     @PutMapping("/{id}")
-    @PreAuthorize("@organizationSecurity.isOrganizationOwner(authentication, #id) or hasRole('ADMIN')")
+    @PreAuthorize("@doctorSecurity.isDoctorOwner(authentication, #id) or hasRole('ADMIN')")
     public ResponseEntity<ResponseModel<OrganizationResponseDto>> updateOrganization(
             @Parameter(description = "Organization ID", required = true) @PathVariable UUID id,
             @Parameter(description = "Updated organization details", required = true) @Valid @RequestBody OrganizationRequestDto requestDto) {
@@ -112,7 +112,7 @@ public class OrganizationController {
             @ApiResponse(responseCode = "404", description = "Organization not found")
     })
     @PatchMapping("/{id}")
-    @PreAuthorize("@organizationSecurity.isOrganizationOwner(authentication, #id) or hasRole('ADMIN')")
+    @PreAuthorize("@doctorSecurity.isDoctorOwner(authentication, #id) or hasRole('ADMIN')")
     public ResponseEntity<ResponseModel<OrganizationResponseDto>> partialUpdateOrganization(
             @Parameter(description = "Organization ID", required = true) @PathVariable UUID id,
             @Parameter(description = "Partial organization details", required = true) @Valid @RequestBody OrganizationRequestDto requestDto) {
@@ -130,7 +130,7 @@ public class OrganizationController {
             @ApiResponse(responseCode = "404", description = "Organization not found")
     })
     @DeleteMapping("/{id}")
-    @PreAuthorize("@organizationSecurity.isOrganizationOwner(authentication, #id) or hasRole('ADMIN')")
+    @PreAuthorize("@doctorSecurity.isDoctorOwner(authentication, #id) or hasRole('ADMIN')")
     public ResponseEntity<ResponseModel<Void>> deleteOrganization(
             @Parameter(description = "Organization ID", required = true) @PathVariable UUID id) {
         organizationService.delete(id);
