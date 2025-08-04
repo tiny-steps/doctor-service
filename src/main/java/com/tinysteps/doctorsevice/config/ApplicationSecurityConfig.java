@@ -1,9 +1,7 @@
 package com.tinysteps.doctorsevice.config;
 
-import com.tintsteps.doctorsevice.entity.*;
 import com.tinysteps.doctorsevice.entity.*;
 import com.tinysteps.doctorsevice.exception.EntityNotFoundException;
-import com.tintsteps.doctorsevice.repository.*;
 import com.tinysteps.doctorsevice.repository.*;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Component;
