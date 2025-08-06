@@ -14,7 +14,7 @@ spec:
     spec:
       containers:
         - name: ts-doctor-service
-          image: subhankarm2312/ts-doctor-service:f6b0bf3-20250805102201 # This will be updated by the pipeline
+          image: subhankarm2312/ts-doctor-service:e1535ff-20250806121025 # This will be updated by the pipeline
           ports:
             - containerPort: 8084
           envFrom:
