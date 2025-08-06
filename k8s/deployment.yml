@@ -1,0 +1,24 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ts-doctor-service-deployment
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: ts-doctor-service
+  template:
+    metadata:
+      labels:
+        app: ts-doctor-service
+    spec:
+      containers:
+        - name: ts-doctor-service
+          image: subhankarm2312/ts-doctor-service:f6b0bf3-20250805102201 # This will be updated by the pipeline
+          ports:
+            - containerPort: 8084
+          envFrom:
+            - configMapRef:
+                name: ts-doctor-service-config
+            - secretRef:
+                name: ts-doctor-db-credentials
