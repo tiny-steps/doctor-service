@@ -14,7 +14,7 @@ spec:
     spec:
       containers:
         - name: ts-doctor-service
-          image: subhankarm2312/ts-doctor-service:85d5ad0-20250806135945 # This will be updated by the pipeline
+          image: subhankarm2312/ts-doctor-service:62d7421-20250808063319 # This will be updated by the pipeline
           env:
             - name: JAVA_TOOL_OPTIONS
               value: "-Xms128m -Xmx256m"
