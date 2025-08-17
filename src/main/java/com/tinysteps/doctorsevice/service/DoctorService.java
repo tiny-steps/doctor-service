@@ -1,5 +1,6 @@
 package com.tinysteps.doctorsevice.service;
 
+import com.tinysteps.doctorsevice.model.DoctorDto;
 import com.tinysteps.doctorsevice.model.DoctorRequestDto;
 import com.tinysteps.doctorsevice.model.DoctorResponseDto;
 import org.springframework.data.domain.Page;
@@ -16,6 +17,9 @@ public interface DoctorService {
 
     // CRUD Operations
     DoctorResponseDto create(DoctorRequestDto requestDto);
+
+    // Add registration method
+    DoctorResponseDto registerDoctor(DoctorDto requestDto);
     DoctorResponseDto findById(UUID id);
     Page<DoctorResponseDto> findAll(Pageable pageable);
     DoctorResponseDto update(UUID id, DoctorRequestDto requestDto);

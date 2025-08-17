@@ -3,10 +3,14 @@ package com.tinysteps.doctorsevice.service.impl;
 import com.tinysteps.doctorsevice.entity.Doctor;
 import com.tinysteps.doctorsevice.exception.DoctorNotFoundException;
 import com.tinysteps.doctorsevice.mapper.DoctorMapper;
+import com.tinysteps.doctorsevice.model.DoctorDto;
 import com.tinysteps.doctorsevice.model.DoctorRequestDto;
 import com.tinysteps.doctorsevice.model.DoctorResponseDto;
 import com.tinysteps.doctorsevice.repository.DoctorRepository;
 import com.tinysteps.doctorsevice.service.DoctorService;
+import com.tinysteps.doctorsevice.dto.UserRegistrationRequest;
+import com.tinysteps.doctorsevice.dto.UserRegistrationResponse;
+import com.tinysteps.doctorsevice.integration.service.AuthServiceIntegration;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -22,10 +26,12 @@ public class DoctorServiceImpl implements DoctorService {
 
     private final DoctorRepository doctorRepository;
     private final DoctorMapper doctorMapper;
+    private final AuthServiceIntegration authServiceIntegration;
 
-    public DoctorServiceImpl(DoctorRepository doctorRepository, DoctorMapper doctorMapper) {
+    public DoctorServiceImpl(DoctorRepository doctorRepository, DoctorMapper doctorMapper, AuthServiceIntegration authServiceIntegration) {
         this.doctorRepository = doctorRepository;
         this.doctorMapper = doctorMapper;
+        this.authServiceIntegration = authServiceIntegration;
     }
 
     @Override
@@ -311,4 +317,36 @@ public class DoctorServiceImpl implements DoctorService {
 
         return missingFields;
     }
+
+@Override
+public DoctorResponseDto registerDoctor(DoctorDto requestDto) {
+    try {
+        // Step 1: Register user via auth-service
+        UserRegistrationRequest userRequest = UserRegistrationRequest.builder()
+                .name(requestDto.name())
+                .email(requestDto.email())
+                .password("defaultPassword123") // You may want to add password to DoctorRequestDto
+                .role("DOCTOR")
+                .build();
+
+        UserRegistrationResponse userResponse = authServiceIntegration.registerUser(userRequest).get();
+
+        if (userResponse == null || userResponse.getId() == null) {
+            throw new RuntimeException("Failed to register user - no user ID returned");
+        }
+
+        // Step 2: Create doctor with the returned user ID
+        // Create a new DoctorRequestDto with userId set
+        DoctorRequestDto doctorRequestDto = new DoctorRequestDto(
+                String.valueOf(userResponse.getId()), requestDto.slug(), requestDto.gender(), requestDto.summary(), requestDto.about(), requestDto.imageUrl(),requestDto.experienceYears(),requestDto.isVerified(),requestDto.ratingAverage(),requestDto.reviewCount(),requestDto.status());
+        var doctor = doctorMapper.fromRequestDto(doctorRequestDto);
+        doctor.setUserId(userResponse.getId());
+
+        var savedDoctor = doctorRepository.save(doctor);
+        return doctorMapper.toResponseDto(savedDoctor);
+
+    } catch (Exception e) {
+        throw new RuntimeException("Failed to register doctor", e);
+    }
+}
 }

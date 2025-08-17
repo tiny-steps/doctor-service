@@ -1,5 +1,6 @@
 package com.tinysteps.doctorsevice.controller;
 
+import com.tinysteps.doctorsevice.model.DoctorDto;
 import com.tinysteps.doctorsevice.model.DoctorRequestDto;
 import com.tinysteps.doctorsevice.model.DoctorResponseDto;
 import com.tinysteps.doctorsevice.model.ResponseModel;
@@ -52,6 +53,19 @@ public class DoctorController {
                         .status(HttpStatus.CREATED)
                         .message("Doctor profile created successfully")
                         .data(doctor)
+                        .build());
+    }
+
+    @PostMapping("/register")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<ResponseModel<DoctorResponseDto>> registerDoctor(
+            @Valid @RequestBody DoctorDto requestDto) {
+        DoctorResponseDto createdDoctor = doctorService.registerDoctor(requestDto);
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .body(ResponseModel.<DoctorResponseDto>builder()
+                        .status(HttpStatus.CREATED)
+                        .message("Doctor profile created successfully")
+                        .data(createdDoctor)
                         .build());
     }
 

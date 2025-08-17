@@ -10,10 +10,6 @@ public record DoctorRequestDto(
         @NotNull(message = "User ID is required")
         String userId,
 
-        @NotBlank(message = "Doctor name is required")
-        @Size(max = 200, message = "Doctor name must not exceed 200 characters")
-        String name,
-
         @Size(max = 200, message = "Slug must not exceed 200 characters")
         @Pattern(regexp = "^[a-z0-9-]+$", message = "Slug must contain only lowercase letters, numbers, and hyphens")
         String slug,
