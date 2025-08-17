@@ -43,7 +43,7 @@ eureka:
 # Integration service URLs
 services:
   auth-service:
-    base-url: http://ts-api-gateway
+    base-url: http://ts-auth-service
   user-service:
     base-url: http://ts-user-service
   address-service:
@@ -123,3 +123,6 @@ resilience4j:
         timeoutDuration: 5s
       ts-session-service:
         timeoutDuration: 5s
+internal:
+  api:
+    secret: "902ffc52f4ab670361e543008a5f8e86005edadfbc1df36f5cc375b433448aff"
