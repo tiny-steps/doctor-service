@@ -44,7 +44,7 @@ public class DoctorController {
             @ApiResponse(responseCode = "409", description = "Doctor already exists")
     })
     @PostMapping
-    @PreAuthorize("hasRole('USER')")
+    @PreAuthorize("hasAnyRole('PATIENT','DOCTOR','ADMIN')")
     public ResponseEntity<ResponseModel<DoctorResponseDto>> createDoctor(
             @Valid @RequestBody DoctorRequestDto requestDto) {
         DoctorResponseDto doctor = doctorService.create(requestDto);
@@ -57,7 +57,7 @@ public class DoctorController {
     }
 
     @PostMapping("/register")
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAnyRole('PATIENT','DOCTOR','ADMIN')")
     public ResponseEntity<ResponseModel<DoctorResponseDto>> registerDoctor(
             @Valid @RequestBody DoctorDto requestDto) {
         DoctorResponseDto createdDoctor = doctorService.registerDoctor(requestDto);
