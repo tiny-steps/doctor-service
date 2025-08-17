@@ -325,7 +325,8 @@ public DoctorResponseDto registerDoctor(DoctorDto requestDto) {
         UserRegistrationRequest userRequest = UserRegistrationRequest.builder()
                 .name(requestDto.name())
                 .email(requestDto.email())
-                .password("defaultPassword123") // You may want to add password to DoctorRequestDto
+                .phone(requestDto.phone())
+                .password(requestDto.password()) // You may want to add password to DoctorRequestDto
                 .role("DOCTOR")
                 .build();
 

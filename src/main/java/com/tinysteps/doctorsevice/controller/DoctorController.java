@@ -57,7 +57,7 @@ public class DoctorController {
     }
 
     @PostMapping("/register")
-    @PreAuthorize("hasAnyRole('PATIENT','DOCTOR','ADMIN')")
+    @PreAuthorize("hasAnyRole('ADMIN')")
     public ResponseEntity<ResponseModel<DoctorResponseDto>> registerDoctor(
             @Valid @RequestBody DoctorDto requestDto) {
         DoctorResponseDto createdDoctor = doctorService.registerDoctor(requestDto);

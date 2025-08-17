@@ -15,6 +15,8 @@ public record DoctorDto(
         @Email(message = "Email should be valid")
         String email,
 
+        String password,
+
         @NotBlank(message = "Phone is required")
         @Size(max = 20, message = "Phone must not exceed 20 characters")
         String phone,

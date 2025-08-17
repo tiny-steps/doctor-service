@@ -33,7 +33,7 @@ public class AuthServiceIntegration {
 
         return webClientBuilder.build()
                 .post()
-                .uri(authServiceBaseUrl + "/api/v1/auth/register")
+                .uri(authServiceBaseUrl + "/api/auth/register")
                 .body(Mono.just(registrationRequest), UserRegistrationRequest.class)
                 .retrieve()
                 .bodyToMono(UserRegistrationResponse.class)
