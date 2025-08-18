@@ -2,6 +2,7 @@ package com.tinysteps.doctorsevice.service.impl;
 
 import com.tinysteps.doctorsevice.entity.Doctor;
 import com.tinysteps.doctorsevice.exception.DoctorNotFoundException;
+import com.tinysteps.doctorsevice.integration.model.UserModel;
 import com.tinysteps.doctorsevice.mapper.DoctorMapper;
 import com.tinysteps.doctorsevice.model.DoctorDto;
 import com.tinysteps.doctorsevice.model.DoctorRequestDto;
@@ -330,18 +331,18 @@ public DoctorResponseDto registerDoctor(DoctorDto requestDto) {
                 .role("DOCTOR")
                 .build();
 
-        UserRegistrationResponse userResponse = authServiceIntegration.registerUser(userRequest).get();
+        UserModel userResponse = authServiceIntegration.registerUser(userRequest).block();
 
-        if (userResponse == null || userResponse.getId() == null) {
+        if (userResponse == null || userResponse.id() == null) {
             throw new RuntimeException("Failed to register user - no user ID returned");
         }
 
         // Step 2: Create doctor with the returned user ID
         // Create a new DoctorRequestDto with userId set
         DoctorRequestDto doctorRequestDto = new DoctorRequestDto(
-                String.valueOf(userResponse.getId()), requestDto.slug(), requestDto.gender(), requestDto.summary(), requestDto.about(), requestDto.imageUrl(),requestDto.experienceYears(),requestDto.isVerified(),requestDto.ratingAverage(),requestDto.reviewCount(),requestDto.status());
+                String.valueOf(userResponse.id()), requestDto.slug(), requestDto.gender(), requestDto.summary(), requestDto.about(), requestDto.imageUrl(),requestDto.experienceYears(),requestDto.isVerified(),requestDto.ratingAverage(),requestDto.reviewCount(),requestDto.status());
         var doctor = doctorMapper.fromRequestDto(doctorRequestDto);
-        doctor.setUserId(userResponse.getId());
+        doctor.setUserId(UUID.fromString(userResponse.id()));
 
         var savedDoctor = doctorRepository.save(doctor);
         return doctorMapper.toResponseDto(savedDoctor);

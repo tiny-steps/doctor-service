@@ -2,12 +2,14 @@ package com.tinysteps.doctorsevice.model;
 
 import lombok.Builder;
 import lombok.Data;
+import lombok.Getter;
 import org.springframework.http.HttpStatus;
 
 import java.util.List;
 
 @Data
 @Builder
+@Getter
 public class ResponseModel<T> {
     private HttpStatus status;
     private int code;
