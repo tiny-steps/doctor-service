@@ -66,16 +66,16 @@ public class ResilienceConfig {
     // Auth Service Resilience Components
     @Bean
     public CircuitBreaker authServiceCircuitBreaker(CircuitBreakerRegistry registry) {
-        return registry.circuitBreaker("ts-auth-service");
+        return registry.circuitBreaker("auth-service");
     }
 
     @Bean
     public Retry authServiceRetry(RetryRegistry registry) {
-        return registry.retry("ts-auth-service");
+        return registry.retry("auth-service");
     }
 
     @Bean
     public TimeLimiter authServiceTimeLimiter(TimeLimiterRegistry registry) {
-        return registry.timeLimiter("ts-auth-service");
+        return registry.timeLimiter("auth-service");
     }
 }

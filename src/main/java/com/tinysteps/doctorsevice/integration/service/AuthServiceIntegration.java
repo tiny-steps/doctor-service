@@ -34,14 +34,14 @@ public class AuthServiceIntegration {
     @Value("${services.auth-service.base-url:http://ts-auth-service}")
     private String authServiceBaseUrl;
 
-    @CircuitBreaker(name = "ts-auth-service", fallbackMethod = "registerUserFallback")
-    @Retry(name = "ts-auth-service")
-    @TimeLimiter(name = "ts-auth-service")
+    @CircuitBreaker(name = "auth-service", fallbackMethod = "registerUserFallback")
+    @Retry(name = "auth-service")
+    @TimeLimiter(name = "auth-service")
     public Mono<UserModel> registerUser(UserRegistrationRequest registrationRequest) {
         log.info("Registering user via auth-service with email: {}", registrationRequest.getEmail());
 
         return publicWebClient.post()
-                .uri(authServiceBaseUrl+"/api/auth/register")
+                .uri(authServiceBaseUrl)
                 .bodyValue(registrationRequest)
                 .retrieve()
                 .bodyToMono(new ParameterizedTypeReference<ResponseModel<UserModel>>() {})
@@ -49,12 +49,12 @@ public class AuthServiceIntegration {
                 .transformDeferred(RetryOperator.of(authServiceRetry))
                 .transformDeferred(CircuitBreakerOperator.of(authServiceCircuitBreaker))
                 .transformDeferred(TimeLimiterOperator.of(authServiceTimeLimiter))
-                .onErrorMap(throwable -> new AuthenticationServiceException("User service is unavailable", throwable));
+                .onErrorMap(throwable -> new AuthenticationServiceException("Auth service is unavailable", throwable));
     }
 
     // Fallback method
-    public CompletableFuture<UserRegistrationResponse> registerUserFallback(UserRegistrationRequest registrationRequest, Exception ex) {
-        log.error("Auth service fallback triggered for registerUser: {}, error: {}", registrationRequest.getEmail(), ex.getMessage());
-        throw new RuntimeException("User registration failed - auth service unavailable", ex);
+    public Mono<UserModel> registerUserFallback(UserRegistrationRequest request, Throwable t) {
+        log.warn("Fallback for registerUser: {}", request.getEmail(), t);
+        return Mono.error(new RuntimeException("User registration failed", t));
     }
 }

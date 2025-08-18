@@ -43,7 +43,7 @@ eureka:
 # Integration service URLs
 services:
   auth-service:
-    base-url: http://ts-auth-service
+    base-url: http://ts-auth-service/api/auth/register
   user-service:
     base-url: http://ts-user-service
   address-service:
@@ -55,15 +55,14 @@ services:
 resilience4j:
   circuitbreaker:
     instances:
-      ts-auth-service:
-        registerHealthIndicator: true
-        slidingWindowSize: 10
-        minimumNumberOfCalls: 5
-        permittedNumberOfCallsInHalfOpenState: 3
-        automaticTransitionFromOpenToHalfOpenEnabled: true
-        waitDurationInOpenState: 5s
-        failureRateThreshold: 50
-        eventConsumerBufferSize: 10
+      auth-service:
+              failure-rate-threshold: 50
+              sliding-window-type: COUNT_BASED
+              sliding-window-size: 10
+              minimum-number-of-calls: 5
+              wait-duration-in-open-state: 10s
+              permitted-number-of-calls-in-half-open-state: 2
+              register-health-indicator: true
       ts-user-service:
         registerHealthIndicator: true
         slidingWindowSize: 10
@@ -93,11 +92,10 @@ resilience4j:
         eventConsumerBufferSize: 10
   retry:
     instances:
-      ts-auth-service:
-        maxAttempts: 3
-        waitDuration: 2s
-        enableExponentialBackoff: true
-        exponentialBackoffMultiplier: 2
+      auth-service:
+        max-attempts: 3
+        wait-duration: 500ms
+
       ts-user-service:
         maxAttempts: 3
         waitDuration: 2s
@@ -115,8 +113,9 @@ resilience4j:
         exponentialBackoffMultiplier: 2
   timelimiter:
     instances:
-      ts-auth-service:
-        timeoutDuration: 10s
+      auth-service:
+        timeout-duration: 20s
+        cancel-running-future: true
       ts-user-service:
         timeoutDuration: 5s
       ts-address-service:

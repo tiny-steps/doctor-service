@@ -10,8 +10,8 @@ import com.tinysteps.doctorsevice.model.DoctorResponseDto;
 import com.tinysteps.doctorsevice.repository.DoctorRepository;
 import com.tinysteps.doctorsevice.service.DoctorService;
 import com.tinysteps.doctorsevice.dto.UserRegistrationRequest;
-import com.tinysteps.doctorsevice.dto.UserRegistrationResponse;
 import com.tinysteps.doctorsevice.integration.service.AuthServiceIntegration;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -22,6 +22,7 @@ import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
+@Slf4j
 @Service
 public class DoctorServiceImpl implements DoctorService {
 
@@ -35,23 +36,58 @@ public class DoctorServiceImpl implements DoctorService {
         this.authServiceIntegration = authServiceIntegration;
     }
 
+    /**
+     * Manually creates DoctorResponseDto from Doctor entity, handling null values appropriately
+     */
+    private DoctorResponseDto createDoctorResponseDto(Doctor doctor) {
+        return DoctorResponseDto.builder()
+                .id(doctor.getId() != null ? doctor.getId().toString() : null)
+                .userId(doctor.getUserId() != null ? doctor.getUserId().toString() : null)
+                .name(doctor.getName() != null ? doctor.getName() : "")
+                .slug(doctor.getSlug() != null ? doctor.getSlug() : "")
+                .gender(doctor.getGender() != null ? doctor.getGender() : "")
+                .summary(doctor.getSummary() != null ? doctor.getSummary() : "")
+                .about(doctor.getAbout() != null ? doctor.getAbout() : "")
+                .imageUrl(doctor.getImageUrl() != null ? doctor.getImageUrl() : "")
+                .experienceYears(doctor.getExperienceYears() != null ? doctor.getExperienceYears() : 0)
+                .isVerified(doctor.getIsVerified() != null ? doctor.getIsVerified() : false)
+                .ratingAverage(doctor.getRatingAverage() != null ? doctor.getRatingAverage() : BigDecimal.ZERO)
+                .reviewCount(doctor.getReviewCount() != null ? doctor.getReviewCount() : 0)
+                .status(doctor.getStatus() != null ? doctor.getStatus() : "INACTIVE")
+                .createdAt(doctor.getCreatedAt() != null ? doctor.getCreatedAt().toString() : "")
+                .updatedAt(doctor.getUpdatedAt() != null ? doctor.getUpdatedAt().toString() : "")
+                .awards(List.of()) // Empty list to avoid lazy loading issues
+                .qualifications(List.of())
+                .memberships(List.of())
+                .organizations(List.of())
+                .registrations(List.of())
+                .sessionPricings(List.of())
+                .specializations(List.of())
+                .photos(List.of())
+                .practices(List.of())
+                .recommendations(List.of())
+                .build();
+    }
+
     @Override
     public DoctorResponseDto create(DoctorRequestDto requestDto) {
         var doctor = doctorMapper.fromRequestDto(requestDto);
         var savedDoctor = doctorRepository.save(doctor);
-        return doctorMapper.toResponseDto(savedDoctor);
+        return createDoctorResponseDto(savedDoctor);
     }
 
     @Override
     public DoctorResponseDto findById(UUID id) {
         return doctorRepository.findById(id)
-                .map(doctorMapper::toResponseDto)
+                .map(this::createDoctorResponseDto)
                 .orElseThrow(() -> new DoctorNotFoundException("Doctor not found with ID: " + id));
     }
 
     @Override
     public Page<DoctorResponseDto> findAll(Pageable pageable) {
-        return doctorRepository.findAll(pageable).map(doctorMapper::toResponseDto);
+        var doctors = doctorRepository.findAll(pageable);
+        log.info("Found {} doctors", doctors.getTotalElements());
+        return doctors.map(this::createDoctorResponseDto);
     }
 
     @Override
@@ -60,7 +96,7 @@ public class DoctorServiceImpl implements DoctorService {
                 .orElseThrow(() -> new DoctorNotFoundException("Doctor not found with ID: " + id));
         doctorMapper.updateEntityFromDto(requestDto, existingDoctor);
         var updatedDoctor = doctorRepository.save(existingDoctor);
-        return doctorMapper.toResponseDto(updatedDoctor);
+        return createDoctorResponseDto(updatedDoctor);
     }
 
     @Override
@@ -69,7 +105,7 @@ public class DoctorServiceImpl implements DoctorService {
                 .orElseThrow(() -> new DoctorNotFoundException("Doctor not found with ID: " + id));
         doctorMapper.updateEntityFromDto(requestDto, existingDoctor);
         var updatedDoctor = doctorRepository.save(existingDoctor);
-        return doctorMapper.toResponseDto(updatedDoctor);
+        return createDoctorResponseDto(updatedDoctor);
     }
 
     @Override
@@ -83,47 +119,47 @@ public class DoctorServiceImpl implements DoctorService {
     @Override
     public DoctorResponseDto findBySlug(String slug) {
         return doctorRepository.findBySlug(slug)
-                .map(doctorMapper::toResponseDto)
+                .map(this::createDoctorResponseDto)
                 .orElseThrow(() -> new DoctorNotFoundException("Doctor not found with slug: " + slug));
     }
 
     @Override
     public DoctorResponseDto findByUserId(UUID userId) {
         return doctorRepository.findByUserId(userId)
-                .map(doctorMapper::toResponseDto)
+                .map(this::createDoctorResponseDto)
                 .orElseThrow(() -> new DoctorNotFoundException("Doctor not found with user ID: " + userId));
     }
 
     @Override
     public List<DoctorResponseDto> findByName(String name) {
         return doctorRepository.findByNameContainingIgnoreCase(name).stream()
-                .map(doctorMapper::toResponseDto)
+                .map(this::createDoctorResponseDto)
                 .collect(Collectors.toList());
     }
 
     @Override
     public Page<DoctorResponseDto> findByStatus(String status, Pageable pageable) {
-        return doctorRepository.findByStatus(status, pageable).map(doctorMapper::toResponseDto);
+        return doctorRepository.findByStatus(status, pageable).map(this::createDoctorResponseDto);
     }
 
     @Override
     public Page<DoctorResponseDto> findByVerificationStatus(Boolean isVerified, Pageable pageable) {
-        return doctorRepository.findByIsVerified(isVerified, pageable).map(doctorMapper::toResponseDto);
+        return doctorRepository.findByIsVerified(isVerified, pageable).map(this::createDoctorResponseDto);
     }
 
     @Override
     public Page<DoctorResponseDto> findByGender(String gender, Pageable pageable) {
-        return doctorRepository.findByGender(gender, pageable).map(doctorMapper::toResponseDto);
+        return doctorRepository.findByGender(gender, pageable).map(this::createDoctorResponseDto);
     }
 
     @Override
     public Page<DoctorResponseDto> findByExperienceRange(Integer minYears, Integer maxYears, Pageable pageable) {
-        return doctorRepository.findByExperienceYearsBetween(minYears, maxYears, pageable).map(doctorMapper::toResponseDto);
+        return doctorRepository.findByExperienceYearsBetween(minYears, maxYears, pageable).map(this::createDoctorResponseDto);
     }
 
     @Override
     public Page<DoctorResponseDto> findByMinRating(BigDecimal minRating, Pageable pageable) {
-        return doctorRepository.findByRatingAverageGreaterThanEqual(minRating, pageable).map(doctorMapper::toResponseDto);
+        return doctorRepository.findByRatingAverageGreaterThanEqual(minRating, pageable).map(this::createDoctorResponseDto);
     }
 
     @Override
@@ -151,12 +187,12 @@ public class DoctorServiceImpl implements DoctorService {
 
     @Override
     public Page<DoctorResponseDto> findTopRatedDoctors(Pageable pageable) {
-        return doctorRepository.findAllByOrderByRatingAverageDesc(pageable).map(doctorMapper::toResponseDto);
+        return doctorRepository.findAllByOrderByRatingAverageDesc(pageable).map(this::createDoctorResponseDto);
     }
 
     @Override
     public Page<DoctorResponseDto> findVerifiedDoctorsWithMinRating(BigDecimal minRating, Pageable pageable) {
-        return doctorRepository.findByIsVerifiedAndRatingAverageGreaterThanEqual(true, minRating, pageable).map(doctorMapper::toResponseDto);
+        return doctorRepository.findByIsVerifiedAndRatingAverageGreaterThanEqual(true, minRating, pageable).map(this::createDoctorResponseDto);
     }
 
     @Override
@@ -165,7 +201,7 @@ public class DoctorServiceImpl implements DoctorService {
                 .orElseThrow(() -> new DoctorNotFoundException("Doctor not found with ID: " + id));
         doctor.setIsVerified(true);
         var updatedDoctor = doctorRepository.save(doctor);
-        return doctorMapper.toResponseDto(updatedDoctor);
+        return createDoctorResponseDto(updatedDoctor);
     }
 
     @Override
@@ -174,7 +210,7 @@ public class DoctorServiceImpl implements DoctorService {
                 .orElseThrow(() -> new DoctorNotFoundException("Doctor not found with ID: " + id));
         doctor.setIsVerified(false);
         var updatedDoctor = doctorRepository.save(doctor);
-        return doctorMapper.toResponseDto(updatedDoctor);
+        return createDoctorResponseDto(updatedDoctor);
     }
 
     @Override
@@ -183,7 +219,7 @@ public class DoctorServiceImpl implements DoctorService {
                 .orElseThrow(() -> new DoctorNotFoundException("Doctor not found with ID: " + id));
         doctor.setStatus("ACTIVE");
         var updatedDoctor = doctorRepository.save(doctor);
-        return doctorMapper.toResponseDto(updatedDoctor);
+        return createDoctorResponseDto(updatedDoctor);
     }
 
     @Override
@@ -192,7 +228,7 @@ public class DoctorServiceImpl implements DoctorService {
                 .orElseThrow(() -> new DoctorNotFoundException("Doctor not found with ID: " + id));
         doctor.setStatus("INACTIVE");
         var updatedDoctor = doctorRepository.save(doctor);
-        return doctorMapper.toResponseDto(updatedDoctor);
+        return createDoctorResponseDto(updatedDoctor);
     }
 
     @Override
@@ -201,7 +237,7 @@ public class DoctorServiceImpl implements DoctorService {
                 .orElseThrow(() -> new DoctorNotFoundException("Doctor not found with ID: " + id));
         doctor.setStatus("SUSPENDED");
         var updatedDoctor = doctorRepository.save(doctor);
-        return doctorMapper.toResponseDto(updatedDoctor);
+        return createDoctorResponseDto(updatedDoctor);
     }
 
     @Override
@@ -275,7 +311,7 @@ public class DoctorServiceImpl implements DoctorService {
                 .collect(Collectors.toList());
         var savedDoctors = doctorRepository.saveAll(doctors);
         return savedDoctors.stream()
-                .map(doctorMapper::toResponseDto)
+                .map(this::createDoctorResponseDto)
                 .collect(Collectors.toList());
     }
 
@@ -319,36 +355,51 @@ public class DoctorServiceImpl implements DoctorService {
         return missingFields;
     }
 
-@Override
-public DoctorResponseDto registerDoctor(DoctorDto requestDto) {
-    try {
-        // Step 1: Register user via auth-service
-        UserRegistrationRequest userRequest = UserRegistrationRequest.builder()
-                .name(requestDto.name())
-                .email(requestDto.email())
-                .phone(requestDto.phone())
-                .password(requestDto.password()) // You may want to add password to DoctorRequestDto
-                .role("DOCTOR")
-                .build();
+    @Override
+    public DoctorResponseDto registerDoctor(DoctorDto requestDto) {
+        try {
+            // Step 1: Register user via auth-service
+            UserRegistrationRequest userRequest = UserRegistrationRequest.builder()
+                    .name(requestDto.name())
+                    .email(requestDto.email())
+                    .phone(requestDto.phone())
+                    .password(requestDto.password())
+                    .role("DOCTOR")
+                    .build();
 
-        UserModel userResponse = authServiceIntegration.registerUser(userRequest).block();
+            UserModel userResponse = authServiceIntegration.registerUser(userRequest).block();
 
-        if (userResponse == null || userResponse.id() == null) {
-            throw new RuntimeException("Failed to register user - no user ID returned");
+            if (userResponse == null || userResponse.id() == null) {
+                throw new RuntimeException("Failed to register user - no user ID returned");
+            }
+
+            log.info("Registered user with ID: {}", userResponse);
+
+            // Step 2: Create doctor with the returned user ID
+            // Create a new DoctorRequestDto with userId set
+            DoctorRequestDto doctorRequestDto = new DoctorRequestDto(
+                    userResponse.id(),
+                    requestDto.name(), // Use requestDto.name() as fallback
+                    requestDto.slug(),
+                    requestDto.gender(),
+                    requestDto.summary(),
+                    requestDto.about(),
+                    requestDto.imageUrl(),
+                    requestDto.experienceYears(),
+                    requestDto.isVerified(),
+                    requestDto.ratingAverage(),
+                    requestDto.reviewCount(),
+
+                    requestDto.status());
+            log.info("Creating doctor with request: {}", doctorRequestDto);
+            var doctor = doctorMapper.fromRequestDto(doctorRequestDto);
+            log.info("Doctor from mapper :{}", doctor);
+//            doctor.setUserId(UUID.fromString(userResponse.id()));
+            var savedDoctor = doctorRepository.save(doctor);
+            return createDoctorResponseDto(savedDoctor);
+        } catch (Exception e) {
+
+            throw new RuntimeException("Failed to register doctor", e);
         }
-
-        // Step 2: Create doctor with the returned user ID
-        // Create a new DoctorRequestDto with userId set
-        DoctorRequestDto doctorRequestDto = new DoctorRequestDto(
-                String.valueOf(userResponse.id()), requestDto.slug(), requestDto.gender(), requestDto.summary(), requestDto.about(), requestDto.imageUrl(),requestDto.experienceYears(),requestDto.isVerified(),requestDto.ratingAverage(),requestDto.reviewCount(),requestDto.status());
-        var doctor = doctorMapper.fromRequestDto(doctorRequestDto);
-        doctor.setUserId(UUID.fromString(userResponse.id()));
-
-        var savedDoctor = doctorRepository.save(doctor);
-        return doctorMapper.toResponseDto(savedDoctor);
-
-    } catch (Exception e) {
-        throw new RuntimeException("Failed to register doctor", e);
     }
-}
 }

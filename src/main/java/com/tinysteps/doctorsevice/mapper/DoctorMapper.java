@@ -38,6 +38,7 @@ public interface DoctorMapper {
     DoctorResponseDto toResponseDto(Doctor doctor);
 
     @Mapping(target = "id", ignore = true)
+    @Mapping(target = "name", source = "name")
     @Mapping(target = "userId", source = "userId", qualifiedByName = "doctorStringToUuid")
     @Mapping(target = "createdAt", ignore = true)
     @Mapping(target = "updatedAt", ignore = true)
