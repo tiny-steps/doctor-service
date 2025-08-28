@@ -65,6 +65,11 @@ public interface QualificationRepository extends JpaRepository<Qualification, UU
     Page<Qualification> findByCompletionYearGreaterThanEqual(Integer startYear, Pageable pageable);
     boolean existsByDoctorId(UUID doctorId);
     boolean existsByDoctorIdAndQualificationNameContainingIgnoreCase(UUID doctorId, String qualificationName);
+
+    // Find qualification by ID with doctor eagerly loaded
+    @Query("SELECT q FROM Qualification q JOIN FETCH q.doctor WHERE q.id = :id")
+    java.util.Optional<Qualification> findByIdWithDoctor(@Param("id") UUID id);
+
     long countByQualificationNameContainingIgnoreCase(String qualificationName);
     long countByCollegeNameContainingIgnoreCase(String collegeName);
     void deleteByDoctorId(UUID doctorId);

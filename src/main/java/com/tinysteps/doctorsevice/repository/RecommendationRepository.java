@@ -118,6 +118,11 @@ public interface RecommendationRepository extends JpaRepository<Recommendation, 
     // Missing existence and deletion methods
     boolean existsByDoctorId(UUID doctorId);
     void deleteByDoctorId(UUID doctorId);
+    boolean existsByDoctorIdAndRating(UUID doctorId, Double rating);
+
+    // Find recommendation by ID with doctor eagerly loaded
+    @Query("SELECT r FROM Recommendation r JOIN FETCH r.doctor WHERE r.id = :id")
+    java.util.Optional<Recommendation> findByIdWithDoctor(@Param("id") UUID id);
 
     // Alias for getRatingDistribution (used in service)
     @Query("SELECT r.rating, COUNT(r) FROM Recommendation r WHERE r.rating IS NOT NULL GROUP BY r.rating ORDER BY r.rating")

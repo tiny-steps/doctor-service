@@ -88,4 +88,9 @@ public interface RegistrationRepository extends JpaRepository<Registration, UUID
 
     List<Registration> findByDoctorIdAndRegistrationYearBetween(UUID doctorId, Integer startYear, Integer endYear);
 
+    boolean existsByDoctorIdAndRegistrationNumberContainingIgnoreCase(UUID doctorId, String registrationNumber);
+
+    // Find registration by ID with doctor eagerly loaded
+    @Query("SELECT r FROM Registration r JOIN FETCH r.doctor WHERE r.id = :id")
+    java.util.Optional<Registration> findByIdWithDoctor(@Param("id") UUID id);
 }

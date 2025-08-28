@@ -62,4 +62,8 @@ public interface AwardRepository extends JpaRepository<Award, UUID> {
     Page<Award> findByAwardedYear(Integer year, Pageable pageable);
     Page<Award> findByAwardedYearBetween(Integer startYear, Integer endYear, Pageable pageable);
     Page<Award> findByAwardedYearGreaterThanEqual(Integer startYear, Pageable pageable);
+
+    // Find award by ID with doctor eagerly loaded
+    @Query("SELECT a FROM Award a JOIN FETCH a.doctor WHERE a.id = :id")
+    java.util.Optional<Award> findByIdWithDoctor(@Param("id") UUID id);
 }

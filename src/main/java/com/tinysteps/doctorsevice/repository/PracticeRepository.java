@@ -112,4 +112,10 @@ public interface PracticeRepository extends JpaRepository<Practice, UUID> {
 
     @Query("SELECT DISTINCT p.addressId FROM Practice p WHERE p.addressId IS NOT NULL")
     List<UUID> findDistinctAddressIds();
+
+    boolean existsByDoctorIdAndPracticeNameContainingIgnoreCase(UUID doctorId, String practiceName);
+
+    // Find practice by ID with doctor eagerly loaded
+    @Query("SELECT p FROM Practice p JOIN FETCH p.doctor WHERE p.id = :id")
+    java.util.Optional<Practice> findByIdWithDoctor(@Param("id") UUID id);
 }

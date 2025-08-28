@@ -105,4 +105,8 @@ public interface SpecializationRepository extends JpaRepository<Specialization, 
 
     @Query("SELECT d.id FROM Doctor d WHERE d.id NOT IN (SELECT DISTINCT s.doctor.id FROM Specialization s)")
     List<UUID> findDoctorsWithoutSpecializations();
+
+    // Find specialization by ID with doctor eagerly loaded
+    @Query("SELECT s FROM Specialization s JOIN FETCH s.doctor WHERE s.id = :id")
+    java.util.Optional<Specialization> findByIdWithDoctor(@Param("id") UUID id);
 }

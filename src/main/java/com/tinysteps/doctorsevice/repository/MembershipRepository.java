@@ -55,4 +55,8 @@ public interface MembershipRepository extends JpaRepository<Membership, UUID> {
     // Find distinct council names using @Query
     @Query("SELECT DISTINCT m.membershipCouncilName FROM Membership m WHERE m.membershipCouncilName IS NOT NULL ORDER BY m.membershipCouncilName")
     List<String> findDistinctMembershipCouncilNames();
+
+    // Find membership by ID with doctor eagerly loaded
+    @Query("SELECT m FROM Membership m JOIN FETCH m.doctor WHERE m.id = :id")
+    java.util.Optional<Membership> findByIdWithDoctor(@Param("id") UUID id);
 }

@@ -88,4 +88,10 @@ public interface PhotoRepository extends JpaRepository<Photo, UUID> {
     List<UUID> findDoctorsWithoutDefaultPhoto();
 
     Optional<Photo> findFirstByDoctorId(UUID doctorId);
+
+    boolean existsByDoctorIdAndPhotoUrlContainingIgnoreCase(UUID doctorId, String photoUrl);
+
+    // Find photo by ID with doctor eagerly loaded
+    @Query("SELECT p FROM Photo p JOIN FETCH p.doctor WHERE p.id = :id")
+    java.util.Optional<Photo> findByIdWithDoctor(@Param("id") UUID id);
 }

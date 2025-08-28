@@ -8,7 +8,7 @@ import org.springframework.stereotype.Component;
 
 import java.util.UUID;
 
-@Component("doctorSecurity")
+@Component
 public class ApplicationSecurityConfig {
 
     private final DoctorRepository doctorRepository;
@@ -51,35 +51,35 @@ public class ApplicationSecurityConfig {
 
     public boolean isAwardOwner(Authentication authentication, UUID awardId) {
         String userId = authentication.getName();
-        Award award = awardRepository.findById(awardId)
+        Award award = awardRepository.findByIdWithDoctor(awardId)
                 .orElseThrow(() -> new EntityNotFoundException("Award", "id", awardId.toString()));
         return isOwner(userId, award.getDoctor());
     }
 
     public boolean isMembershipOwner(Authentication authentication, UUID membershipId) {
         String userId = authentication.getName();
-        Membership membership = membershipRepository.findById(membershipId)
+        Membership membership = membershipRepository.findByIdWithDoctor(membershipId)
                 .orElseThrow(() -> new EntityNotFoundException("Membership", "id", membershipId.toString()));
         return isOwner(userId, membership.getDoctor());
     }
 
     public boolean isOrganizationOwner(Authentication authentication, UUID organizationId) {
         String userId = authentication.getName();
-        Organization organization = organizationRepository.findById(organizationId)
+        Organization organization = organizationRepository.findByIdWithDoctor(organizationId)
                 .orElseThrow(() -> new EntityNotFoundException("Organization", "id", organizationId.toString()));
         return isOwner(userId, organization.getDoctor());
     }
 
     public boolean isPhotoOwner(Authentication authentication, UUID photoId) {
         String userId = authentication.getName();
-        Photo photo = photoRepository.findById(photoId)
+        Photo photo = photoRepository.findByIdWithDoctor(photoId)
                 .orElseThrow(() -> new EntityNotFoundException("Photo", "id", photoId.toString()));
         return isOwner(userId, photo.getDoctor());
     }
 
     public boolean isPracticeOwner(Authentication authentication, UUID practiceId) {
         String userId = authentication.getName();
-        Practice practice = practiceRepository.findById(practiceId)
+        Practice practice = practiceRepository.findByIdWithDoctor(practiceId)
                 .orElseThrow(() -> new EntityNotFoundException("Practice", "id", practiceId.toString()));
         return isOwner(userId, practice.getDoctor());
     }
@@ -91,28 +91,28 @@ public class ApplicationSecurityConfig {
 
     public boolean isQualificationOwner(Authentication authentication, UUID qualificationId) {
         String userId = authentication.getName();
-        Qualification qualification = qualificationRepository.findById(qualificationId)
+        Qualification qualification = qualificationRepository.findByIdWithDoctor(qualificationId)
                 .orElseThrow(() -> new EntityNotFoundException("Qualification", "id", qualificationId.toString()));
         return isOwner(userId, qualification.getDoctor());
     }
 
     public boolean isRecommendationOwner(Authentication authentication, UUID recommendationId) {
         String userId = authentication.getName();
-        Recommendation recommendation = recommendationRepository.findById(recommendationId)
+        Recommendation recommendation = recommendationRepository.findByIdWithDoctor(recommendationId)
                 .orElseThrow(() -> new EntityNotFoundException("Recommendation", "id", recommendationId.toString()));
         return isOwner(userId, recommendation.getDoctor());
     }
 
     public boolean isRegistrationOwner(Authentication authentication, UUID registrationId) {
         String userId = authentication.getName();
-        Registration registration = registrationRepository.findById(registrationId)
+        Registration registration = registrationRepository.findByIdWithDoctor(registrationId)
                 .orElseThrow(() -> new EntityNotFoundException("Registration", "id", registrationId.toString()));
         return isOwner(userId, registration.getDoctor());
     }
 
     public boolean isSpecializationOwner(Authentication authentication, UUID specializationId) {
         String userId = authentication.getName();
-        Specialization specialization = specializationRepository.findById(specializationId)
+        Specialization specialization = specializationRepository.findByIdWithDoctor(specializationId)
                 .orElseThrow(() -> new EntityNotFoundException("Specialization", "id", specializationId.toString()));
         return isOwner(userId, specialization.getDoctor());
     }

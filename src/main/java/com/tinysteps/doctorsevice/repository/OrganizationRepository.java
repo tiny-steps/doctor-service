@@ -101,4 +101,8 @@ public interface OrganizationRepository extends JpaRepository<Organization, UUID
     List<String> findDistinctRoles();
 
     boolean existsByDoctorIdAndOrganizationNameContainingIgnoreCase(UUID doctorId, String organizationName);
+
+    // Find organization by ID with doctor eagerly loaded
+    @Query("SELECT o FROM Organization o JOIN FETCH o.doctor WHERE o.id = :id")
+    java.util.Optional<Organization> findByIdWithDoctor(@Param("id") UUID id);
 }
