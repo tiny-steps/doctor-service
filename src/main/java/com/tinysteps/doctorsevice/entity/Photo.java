@@ -1,5 +1,6 @@
 package com.tinysteps.doctorsevice.entity;
 
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -17,12 +18,13 @@ import java.util.UUID;
 public class Photo {
 
     @Id
-       @GeneratedValue(strategy = GenerationType.UUID)
-@Column(updatable = false, nullable = false)
+    @GeneratedValue(strategy = GenerationType.UUID)
+    @Column(updatable = false, nullable = false)
     private UUID id;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "doctor_id", nullable = false)
+    @JsonManagedReference
     private Doctor doctor;
 
     @Column(name = "photo_url", nullable = false, length = 255)

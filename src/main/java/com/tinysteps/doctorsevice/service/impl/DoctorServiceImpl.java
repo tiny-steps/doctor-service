@@ -3,11 +3,9 @@ package com.tinysteps.doctorsevice.service.impl;
 import com.tinysteps.doctorsevice.entity.Doctor;
 import com.tinysteps.doctorsevice.exception.DoctorNotFoundException;
 import com.tinysteps.doctorsevice.integration.model.UserModel;
-import com.tinysteps.doctorsevice.mapper.DoctorMapper;
-import com.tinysteps.doctorsevice.model.DoctorDto;
-import com.tinysteps.doctorsevice.model.DoctorRequestDto;
-import com.tinysteps.doctorsevice.model.DoctorResponseDto;
-import com.tinysteps.doctorsevice.repository.DoctorRepository;
+import com.tinysteps.doctorsevice.mapper.*;
+import com.tinysteps.doctorsevice.model.*;
+import com.tinysteps.doctorsevice.repository.*;
 import com.tinysteps.doctorsevice.service.DoctorService;
 import com.tinysteps.doctorsevice.dto.UserRegistrationRequest;
 import com.tinysteps.doctorsevice.integration.service.AuthServiceIntegration;
@@ -28,18 +26,122 @@ public class DoctorServiceImpl implements DoctorService {
 
     private final DoctorRepository doctorRepository;
     private final DoctorMapper doctorMapper;
+    private final SpecializationMapper specializationMapper;
+    private final SpecializationRepository specializationRepository;
+    private final AwardMapper awardMapper;
+    private final AwardRepository awardRepository;
+    private final QualificationMapper qualificationMapper;
+    private final QualificationRepository qualificationRepository;
+    private final MembershipMapper membershipMapper;
+    private final MembershipRepository membershipRepository;
+    private final OrganizationMapper organizationMapper;
+    private final OrganizationRepository organizationRepository;
+    private final RegistrationMapper registrationMapper;
+    private final RegistrationRepository registrationRepository;
+    private final PricingMapper pricingMapper;
+    private final PricingRepository pricingRepository;
+    private final PhotoMapper photoMapper;
+    private final PhotoRepository photoRepository;
+    private final PracticeMapper practiceMapper;
+    private final PracticeRepository practiceRepository;
+    private final RecommendationMapper recommendationMapper;
+    private final RecommendationRepository recommendationRepository;
     private final AuthServiceIntegration authServiceIntegration;
 
-    public DoctorServiceImpl(DoctorRepository doctorRepository, DoctorMapper doctorMapper, AuthServiceIntegration authServiceIntegration) {
+    public DoctorServiceImpl(DoctorRepository doctorRepository, DoctorMapper doctorMapper,
+            SpecializationMapper specializationMapper, SpecializationRepository specializationRepository,
+            AwardMapper awardMapper, AwardRepository awardRepository,
+            QualificationMapper qualificationMapper, QualificationRepository qualificationRepository,
+            MembershipMapper membershipMapper, MembershipRepository membershipRepository,
+            OrganizationMapper organizationMapper, OrganizationRepository organizationRepository,
+            RegistrationMapper registrationMapper, RegistrationRepository registrationRepository,
+            PricingMapper pricingMapper, PricingRepository pricingRepository,
+            PhotoMapper photoMapper, PhotoRepository photoRepository,
+            PracticeMapper practiceMapper, PracticeRepository practiceRepository,
+            RecommendationMapper recommendationMapper, RecommendationRepository recommendationRepository,
+            AuthServiceIntegration authServiceIntegration) {
         this.doctorRepository = doctorRepository;
         this.doctorMapper = doctorMapper;
+        this.specializationMapper = specializationMapper;
+        this.specializationRepository = specializationRepository;
+        this.awardMapper = awardMapper;
+        this.awardRepository = awardRepository;
+        this.qualificationMapper = qualificationMapper;
+        this.qualificationRepository = qualificationRepository;
+        this.membershipMapper = membershipMapper;
+        this.membershipRepository = membershipRepository;
+        this.organizationMapper = organizationMapper;
+        this.organizationRepository = organizationRepository;
+        this.registrationMapper = registrationMapper;
+        this.registrationRepository = registrationRepository;
+        this.pricingMapper = pricingMapper;
+        this.pricingRepository = pricingRepository;
+        this.photoMapper = photoMapper;
+        this.photoRepository = photoRepository;
+        this.practiceMapper = practiceMapper;
+        this.practiceRepository = practiceRepository;
+        this.recommendationMapper = recommendationMapper;
+        this.recommendationRepository = recommendationRepository;
         this.authServiceIntegration = authServiceIntegration;
     }
 
     /**
-     * Manually creates DoctorResponseDto from Doctor entity, handling null values appropriately
+     * Manually creates DoctorResponseDto from Doctor entity, handling null values
+     * appropriately
+     * and properly populating related entities to avoid empty lists
      */
     private DoctorResponseDto createDoctorResponseDto(Doctor doctor) {
+        // Fetch all related entities for this doctor
+        List<SpecializationResponseDto> specializations = specializationRepository.findByDoctorId(doctor.getId())
+                .stream()
+                .map(specializationMapper::toResponseDto)
+                .collect(Collectors.toList());
+
+        List<AwardResponseDto> awards = awardRepository.findByDoctorId(doctor.getId())
+                .stream()
+                .map(awardMapper::toResponseDto)
+                .collect(Collectors.toList());
+
+        List<QualificationResponseDto> qualifications = qualificationRepository.findByDoctorId(doctor.getId())
+                .stream()
+                .map(qualificationMapper::toResponseDto)
+                .collect(Collectors.toList());
+
+        List<MembershipResponseDto> memberships = membershipRepository.findByDoctorId(doctor.getId())
+                .stream()
+                .map(membershipMapper::toResponseDto)
+                .collect(Collectors.toList());
+
+        List<OrganizationResponseDto> organizations = organizationRepository.findByDoctorId(doctor.getId())
+                .stream()
+                .map(organizationMapper::toResponseDto)
+                .collect(Collectors.toList());
+
+        List<RegistrationResponseDto> registrations = registrationRepository.findByDoctorId(doctor.getId())
+                .stream()
+                .map(registrationMapper::toResponseDto)
+                .collect(Collectors.toList());
+
+        List<PricingResponseDto> sessionPricings = pricingRepository.findByDoctorId(doctor.getId())
+                .stream()
+                .map(pricingMapper::toResponseDto)
+                .collect(Collectors.toList());
+
+        List<PhotoResponseDto> photos = photoRepository.findByDoctorId(doctor.getId())
+                .stream()
+                .map(photoMapper::toResponseDto)
+                .collect(Collectors.toList());
+
+        List<PracticeResponseDto> practices = practiceRepository.findByDoctorId(doctor.getId())
+                .stream()
+                .map(practiceMapper::toResponseDto)
+                .collect(Collectors.toList());
+
+        List<RecommendationResponseDto> recommendations = recommendationRepository.findByDoctorId(doctor.getId())
+                .stream()
+                .map(recommendationMapper::toResponseDto)
+                .collect(Collectors.toList());
+
         return DoctorResponseDto.builder()
                 .id(doctor.getId() != null ? doctor.getId().toString() : null)
                 .userId(doctor.getUserId() != null ? doctor.getUserId().toString() : null)
@@ -56,16 +158,16 @@ public class DoctorServiceImpl implements DoctorService {
                 .status(doctor.getStatus() != null ? doctor.getStatus() : "INACTIVE")
                 .createdAt(doctor.getCreatedAt() != null ? doctor.getCreatedAt().toString() : "")
                 .updatedAt(doctor.getUpdatedAt() != null ? doctor.getUpdatedAt().toString() : "")
-                .awards(List.of()) // Empty list to avoid lazy loading issues
-                .qualifications(List.of())
-                .memberships(List.of())
-                .organizations(List.of())
-                .registrations(List.of())
-                .sessionPricings(List.of())
-                .specializations(List.of())
-                .photos(List.of())
-                .practices(List.of())
-                .recommendations(List.of())
+                .awards(awards) // Properly populated awards
+                .qualifications(qualifications) // Properly populated qualifications
+                .memberships(memberships) // Properly populated memberships
+                .organizations(organizations) // Properly populated organizations
+                .registrations(registrations) // Properly populated registrations
+                .sessionPricings(sessionPricings) // Properly populated session pricings
+                .specializations(specializations) // Properly populated specializations
+                .photos(photos) // Properly populated photos
+                .practices(practices) // Properly populated practices
+                .recommendations(recommendations) // Properly populated recommendations
                 .build();
     }
 
@@ -154,17 +256,20 @@ public class DoctorServiceImpl implements DoctorService {
 
     @Override
     public Page<DoctorResponseDto> findByExperienceRange(Integer minYears, Integer maxYears, Pageable pageable) {
-        return doctorRepository.findByExperienceYearsBetween(minYears, maxYears, pageable).map(this::createDoctorResponseDto);
+        return doctorRepository.findByExperienceYearsBetween(minYears, maxYears, pageable)
+                .map(this::createDoctorResponseDto);
     }
 
     @Override
     public Page<DoctorResponseDto> findByMinRating(BigDecimal minRating, Pageable pageable) {
-        return doctorRepository.findByRatingAverageGreaterThanEqual(minRating, pageable).map(this::createDoctorResponseDto);
+        return doctorRepository.findByRatingAverageGreaterThanEqual(minRating, pageable)
+                .map(this::createDoctorResponseDto);
     }
 
     @Override
     public Page<DoctorResponseDto> findBySpeciality(String speciality, Pageable pageable) {
-        // This assumes a relationship between Doctor and Specialization that is not directly in the Doctor entity.
+        // This assumes a relationship between Doctor and Specialization that is not
+        // directly in the Doctor entity.
         // This would require a more complex query or a different data model.
         // For now, returning an empty page.
         return Page.empty(pageable);
@@ -172,14 +277,16 @@ public class DoctorServiceImpl implements DoctorService {
 
     @Override
     public Page<DoctorResponseDto> findByLocation(UUID addressId, Pageable pageable) {
-        // This assumes a relationship between Doctor and Address that is not directly in the Doctor entity.
+        // This assumes a relationship between Doctor and Address that is not directly
+        // in the Doctor entity.
         // This would require a more complex query or a different data model.
         // For now, returning an empty page.
         return Page.empty(pageable);
     }
 
     @Override
-    public Page<DoctorResponseDto> searchDoctors(String name, String speciality, Boolean isVerified, BigDecimal minRating, Pageable pageable) {
+    public Page<DoctorResponseDto> searchDoctors(String name, String speciality, Boolean isVerified,
+            BigDecimal minRating, Pageable pageable) {
         // This would require a specification-based search.
         // For now, returning an empty page.
         return Page.empty(pageable);
@@ -192,7 +299,8 @@ public class DoctorServiceImpl implements DoctorService {
 
     @Override
     public Page<DoctorResponseDto> findVerifiedDoctorsWithMinRating(BigDecimal minRating, Pageable pageable) {
-        return doctorRepository.findByIsVerifiedAndRatingAverageGreaterThanEqual(true, minRating, pageable).map(this::createDoctorResponseDto);
+        return doctorRepository.findByIsVerifiedAndRatingAverageGreaterThanEqual(true, minRating, pageable)
+                .map(this::createDoctorResponseDto);
     }
 
     @Override
@@ -326,10 +434,14 @@ public class DoctorServiceImpl implements DoctorService {
                 .orElseThrow(() -> new DoctorNotFoundException("Doctor not found with ID: " + id));
 
         int completeness = 0;
-        if (doctor.getName() != null && !doctor.getName().isEmpty()) completeness += 10;
-        if (doctor.getAbout() != null && !doctor.getAbout().isEmpty()) completeness += 10;
-        if (doctor.getGender() != null && !doctor.getGender().isEmpty()) completeness += 5;
-        if (doctor.getExperienceYears() != null) completeness += 10;
+        if (doctor.getName() != null && !doctor.getName().isEmpty())
+            completeness += 10;
+        if (doctor.getAbout() != null && !doctor.getAbout().isEmpty())
+            completeness += 10;
+        if (doctor.getGender() != null && !doctor.getGender().isEmpty())
+            completeness += 5;
+        if (doctor.getExperienceYears() != null)
+            completeness += 10;
         // Add checks for other fields
 
         return Math.min(100, completeness);
@@ -346,10 +458,14 @@ public class DoctorServiceImpl implements DoctorService {
                 .orElseThrow(() -> new DoctorNotFoundException("Doctor not found with ID: " + id));
         List<String> missingFields = new ArrayList<>();
 
-        if (doctor.getName() == null || doctor.getName().isEmpty()) missingFields.add("name");
-        if (doctor.getAbout() == null || doctor.getAbout().isEmpty()) missingFields.add("bio");
-        if (doctor.getGender() == null || doctor.getGender().isEmpty()) missingFields.add("gender");
-        if (doctor.getExperienceYears() == null) missingFields.add("yearsOfExperience");
+        if (doctor.getName() == null || doctor.getName().isEmpty())
+            missingFields.add("name");
+        if (doctor.getAbout() == null || doctor.getAbout().isEmpty())
+            missingFields.add("bio");
+        if (doctor.getGender() == null || doctor.getGender().isEmpty())
+            missingFields.add("gender");
+        if (doctor.getExperienceYears() == null)
+            missingFields.add("yearsOfExperience");
         // Add checks for other fields
 
         return missingFields;
@@ -394,7 +510,7 @@ public class DoctorServiceImpl implements DoctorService {
             log.info("Creating doctor with request: {}", doctorRequestDto);
             var doctor = doctorMapper.fromRequestDto(doctorRequestDto);
             log.info("Doctor from mapper :{}", doctor);
-//            doctor.setUserId(UUID.fromString(userResponse.id()));
+            // doctor.setUserId(UUID.fromString(userResponse.id()));
             var savedDoctor = doctorRepository.save(doctor);
             return createDoctorResponseDto(savedDoctor);
         } catch (Exception e) {

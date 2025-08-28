@@ -1,5 +1,6 @@
 package com.tinysteps.doctorsevice.entity;
 
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -23,6 +24,7 @@ public class Award {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "doctor_id", nullable = false)
+    @JsonManagedReference
     private Doctor doctor;
 
     @Column(nullable = false, length = 255)

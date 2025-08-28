@@ -1,11 +1,11 @@
 package com.tinysteps.doctorsevice.entity;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-
 
 import java.math.BigDecimal;
 import java.sql.Timestamp;
@@ -86,6 +86,7 @@ public class Doctor {
     private List<Pricing> sessionPricings;
 
     @OneToMany(mappedBy = "doctor", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonBackReference
     private List<Specialization> specializations;
 
     @OneToMany(mappedBy = "doctor", cascade = CascadeType.ALL, orphanRemoval = true)
@@ -95,5 +96,6 @@ public class Doctor {
     private List<Practice> practices;
 
     @OneToMany(mappedBy = "doctor", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonBackReference
     private List<Recommendation> recommendations;
 }
