@@ -23,8 +23,11 @@ public class ApplicationSecurityConfig {
     private final RegistrationRepository registrationRepository;
     private final SpecializationRepository specializationRepository;
 
-
-    public ApplicationSecurityConfig(DoctorRepository doctorRepository, AwardRepository awardRepository, MembershipRepository membershipRepository, OrganizationRepository organizationRepository, PhotoRepository photoRepository, PracticeRepository practiceRepository, PricingRepository pricingRepository, QualificationRepository qualificationRepository, RecommendationRepository recommendationRepository, RegistrationRepository registrationRepository, SpecializationRepository specializationRepository) {
+    public ApplicationSecurityConfig(DoctorRepository doctorRepository, AwardRepository awardRepository,
+            MembershipRepository membershipRepository, OrganizationRepository organizationRepository,
+            PhotoRepository photoRepository, PracticeRepository practiceRepository, PricingRepository pricingRepository,
+            QualificationRepository qualificationRepository, RecommendationRepository recommendationRepository,
+            RegistrationRepository registrationRepository, SpecializationRepository specializationRepository) {
         this.doctorRepository = doctorRepository;
         this.awardRepository = awardRepository;
         this.membershipRepository = membershipRepository;
