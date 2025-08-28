@@ -8,7 +8,7 @@ import org.springframework.stereotype.Component;
 
 import java.util.UUID;
 
-@Component
+@Component("doctorSecurity")
 public class ApplicationSecurityConfig {
 
     private final DoctorRepository doctorRepository;
