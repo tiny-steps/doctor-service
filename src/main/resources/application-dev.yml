@@ -1,0 +1,54 @@
+server:
+  port: 8084
+
+spring:
+  application:
+    name: ts-doctor-service
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: https://dev.tinystepscdc.com/auth
+  datasource:
+    url: jdbc:postgresql://postgres-service:5432/doctors?useSSL=false&allowPublicKeyRetrieval=true&createDatabaseIfNotExist=true
+    username: postgres
+    password: root
+    driver-class-name: org.postgresql.Driver
+    hikari:
+      maximum-pool-size: 5
+      minimum-idle: 2
+  jpa:
+    database-platform: org.hibernate.dialect.PostgreSQLDialect
+    show-sql: true
+    properties:
+      hibernate:
+        format_sql: true
+        use_sql_comments: true
+        jdbc:
+          lob:
+            non_contextual_creation: true
+    open-in-view: false
+    hibernate:
+      ddl-auto: update
+
+# Eureka client configuration
+eureka:
+  instance:
+    prefer-ip-address: true
+    hostname: ts-doctor-service
+  client:
+    register-with-eureka: true
+    fetch-registry: true
+    service-url:
+      defaultZone: http://ts-service-registry:8761/eureka/
+
+# Integration service URLs
+services:
+  auth-service:
+    base-url: https://dev.tinystepscdc.com/auth/api/auth/register
+  user-service:
+    base-url: http://ts-user-service
+  address-service:
+    base-url: http://ts-address-service
+  session-service:
+    base-url: http://ts-session-service
