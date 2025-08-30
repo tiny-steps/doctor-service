@@ -43,7 +43,7 @@ eureka:
 # Integration service URLs
 services:
   auth-service:
-    base-url: http://ts-auth-service/api/auth/register
+    base-url: http://ts-auth-service
   user-service:
     base-url: http://ts-user-service
 

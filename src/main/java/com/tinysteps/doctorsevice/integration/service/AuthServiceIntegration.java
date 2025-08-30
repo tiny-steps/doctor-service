@@ -42,7 +42,7 @@ public class AuthServiceIntegration {
         log.info("Registering user via auth-service with email: {}", registrationRequest.getEmail());
 
         return publicWebClient.post()
-                .uri(authServiceBaseUrl)
+                .uri(authServiceBaseUrl + "/api/auth/register")
                 .bodyValue(registrationRequest)
                 .retrieve()
                 .bodyToMono(new ParameterizedTypeReference<ResponseModel<UserModel>>() {
