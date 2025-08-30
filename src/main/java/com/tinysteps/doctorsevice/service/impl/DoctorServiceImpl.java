@@ -15,6 +15,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
@@ -178,7 +179,6 @@ public class DoctorServiceImpl implements DoctorService {
     @Override
     public DoctorResponseDto create(DoctorRequestDto requestDto) {
         var doctor = doctorMapper.fromRequestDto(requestDto);
-        doctor.setStatus("ACTIVE");
         var savedDoctor = doctorRepository.save(doctor);
         return createDoctorResponseDto(savedDoctor);
     }
@@ -682,7 +682,7 @@ public class DoctorServiceImpl implements DoctorService {
                     requestDto.ratingAverage(),
                     requestDto.reviewCount(),
 
-                    requestDto.status());
+                    StringUtils.hasText(requestDto.status())? "ACTIVE":requestDto.status());
             log.info("Creating doctor with request: {}", doctorRequestDto);
             var doctor = doctorMapper.fromRequestDto(doctorRequestDto);
             log.info("Doctor from mapper :{}", doctor);

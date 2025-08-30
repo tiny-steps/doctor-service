@@ -30,6 +30,7 @@ public class AuthServiceIntegration {
     private final io.github.resilience4j.retry.Retry authServiceRetry;
     private final io.github.resilience4j.circuitbreaker.CircuitBreaker authServiceCircuitBreaker;
     private final io.github.resilience4j.timelimiter.TimeLimiter authServiceTimeLimiter;
+    private final WebClient secureWebClient;
 
     @Value("${services.auth-service.base-url:http://ts-auth-service}")
     private String authServiceBaseUrl;
@@ -69,7 +70,7 @@ public class AuthServiceIntegration {
     public Mono<Void> updateUserEmail(String userId, String email) {
         log.info("Updating user email in auth service for user ID: {} to email: {}", userId, email);
 
-        return publicWebClient.patch()
+        return secureWebClient.patch()
                 .uri(authServiceBaseUrl + "/api/auth/users/{userId}", userId)
                 .bodyValue(new EmailUpdateRequest(email))
                 .retrieve()
@@ -94,7 +95,7 @@ public class AuthServiceIntegration {
     public Mono<Void> deleteUser(String userId) {
         log.info("Deleting user from auth service with user ID: {}", userId);
 
-        return publicWebClient.delete()
+        return secureWebClient.delete()
                 .uri(authServiceBaseUrl + "/api/auth/users/{userId}", userId)
                 .retrieve()
                 .bodyToMono(Void.class)
