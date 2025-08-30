@@ -682,7 +682,7 @@ public class DoctorServiceImpl implements DoctorService {
                     requestDto.ratingAverage(),
                     requestDto.reviewCount(),
 
-                    StringUtils.hasText(requestDto.status())? "ACTIVE":requestDto.status());
+                    StringUtils.hasText(requestDto.status()) ? requestDto.status() : "ACTIVE");
             log.info("Creating doctor with request: {}", doctorRequestDto);
             var doctor = doctorMapper.fromRequestDto(doctorRequestDto);
             log.info("Doctor from mapper :{}", doctor);
