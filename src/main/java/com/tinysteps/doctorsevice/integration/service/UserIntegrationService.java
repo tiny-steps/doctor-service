@@ -28,7 +28,7 @@ import java.util.UUID;
 @Slf4j
 public class UserIntegrationService {
 
-    private final WebClient publicWebClient;
+    private final WebClient secureWebClient;
     private final Retry userServiceRetry;
     private final CircuitBreaker userServiceCircuitBreaker;
     private final TimeLimiter userServiceTimeLimiter;
@@ -72,11 +72,10 @@ public class UserIntegrationService {
     public Mono<UserIntegrationModel> getUserById(UUID userId) {
         log.debug("Fetching user information for ID: {}", userId);
 
-        return publicWebClient.get()
+        return secureWebClient.get()
                 .uri(userServiceBaseUrl + "/{id}", userId)
                 .retrieve()
-                .bodyToMono(new ParameterizedTypeReference<IntegrationResponseModel<UserIntegrationModel>>() {
-                })
+                .bodyToMono(new ParameterizedTypeReference<IntegrationResponseModel<UserIntegrationModel>>() {})
                 .map(IntegrationResponseModel::data)
                 .transformDeferred(RetryOperator.of(userServiceRetry))
                 .transformDeferred(CircuitBreakerOperator.of(userServiceCircuitBreaker))
@@ -116,12 +115,11 @@ public class UserIntegrationService {
     public Mono<UserIntegrationModel> updateUser(UUID userId, UserUpdateRequest userUpdateRequest) {
         log.info("Updating user information for ID: {} with request: {}", userId, userUpdateRequest);
 
-        return publicWebClient.patch()
+        return secureWebClient.patch()
                 .uri(userServiceBaseUrl + "/{id}", userId)
                 .bodyValue(userUpdateRequest)
                 .retrieve()
-                .bodyToMono(new ParameterizedTypeReference<IntegrationResponseModel<UserIntegrationModel>>() {
-                })
+                .bodyToMono(new ParameterizedTypeReference<IntegrationResponseModel<UserIntegrationModel>>() {})
                 .map(IntegrationResponseModel::data)
                 .transformDeferred(RetryOperator.of(userServiceRetry))
                 .transformDeferred(CircuitBreakerOperator.of(userServiceCircuitBreaker))
