@@ -46,6 +46,11 @@ services:
     base-url: http://ts-auth-service/api/auth/register
   user-service:
     base-url: http://ts-user-service
+
+# Integration base URLs (used by integration services)
+integration:
+  user-service:
+    base-url: http://ts-user-service/api/v1/users
   address-service:
     base-url: http://ts-address-service
   session-service:
@@ -117,7 +122,7 @@ resilience4j:
         timeout-duration: 20s
         cancel-running-future: true
       ts-user-service:
-        timeoutDuration: 5s
+        timeoutDuration: 10s
       ts-address-service:
         timeoutDuration: 5s
       ts-session-service:

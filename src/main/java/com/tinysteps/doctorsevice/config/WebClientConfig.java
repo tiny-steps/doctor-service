@@ -76,7 +76,10 @@ public class WebClientConfig {
             logger.info("================ Outgoing Request from Doctor-Service ================");
             logger.info("Request: {} {}", clientRequest.method(), clientRequest.url());
             clientRequest.headers().forEach((name, values) ->
-                    values.forEach(value -> logger.info("Header: {}={}", name, value))
+                    values.forEach(value -> {
+                        String toLog = "X-Internal-Secret".equalsIgnoreCase(name) ? "[MASKED]" : value;
+                        logger.info("Header: {}={}", name, toLog);
+                    })
             );
             logger.info("======================================================================");
             return next.exchange(clientRequest);
