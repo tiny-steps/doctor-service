@@ -178,6 +178,7 @@ public class DoctorServiceImpl implements DoctorService {
     @Override
     public DoctorResponseDto create(DoctorRequestDto requestDto) {
         var doctor = doctorMapper.fromRequestDto(requestDto);
+        doctor.setStatus("ACTIVE");
         var savedDoctor = doctorRepository.save(doctor);
         return createDoctorResponseDto(savedDoctor);
     }
