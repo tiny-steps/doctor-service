@@ -3,6 +3,7 @@ package com.tinysteps.doctorsevice.integration.service;
 import com.tinysteps.doctorsevice.exception.IntegrationException;
 import com.tinysteps.doctorsevice.integration.model.IntegrationResponseModel;
 import com.tinysteps.doctorsevice.integration.model.UserIntegrationModel;
+import com.tinysteps.doctorsevice.integration.model.UserUpdateRequest;
 import io.github.resilience4j.circuitbreaker.CircuitBreaker;
 import io.github.resilience4j.reactor.circuitbreaker.operator.CircuitBreakerOperator;
 import io.github.resilience4j.reactor.retry.RetryOperator;
@@ -101,6 +102,34 @@ public class UserIntegrationService {
             log.debug("User with ID {} does not exist", userId);
             return false;
         }
+    }
+
+    /**
+     * Updates user information
+     *
+     * @param userId the user ID to update
+     * @param userUpdateRequest the user update request
+     * @return updated user information
+     * @throws IntegrationException if update fails
+     */
+    public Mono<UserIntegrationModel> updateUser(UUID userId, UserUpdateRequest userUpdateRequest) {
+        log.info("Updating user information for ID: {} with request: {}", userId, userUpdateRequest);
+
+        return publicWebClient.patch()
+                .uri(userServiceBaseUrl + "/{id}", userId)
+                .bodyValue(userUpdateRequest)
+                .retrieve()
+                .bodyToMono(new ParameterizedTypeReference<IntegrationResponseModel<UserIntegrationModel>>() {})
+                .map(IntegrationResponseModel::data)
+                .transformDeferred(RetryOperator.of(userServiceRetry))
+                .transformDeferred(CircuitBreakerOperator.of(userServiceCircuitBreaker))
+                .transformDeferred(TimeLimiterOperator.of(userServiceTimeLimiter))
+                .doOnSuccess(user -> log.info("Successfully updated user information for ID: {}", userId))
+                .onErrorMap(throwable -> {
+                    log.error("Failed to update user with ID: {}", userId, throwable);
+                    return new IntegrationException("User Service",
+                        "Failed to update user information: " + throwable.getMessage(), throwable);
+                });
     }
 
     /**

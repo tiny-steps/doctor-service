@@ -9,6 +9,8 @@ import com.tinysteps.doctorsevice.repository.*;
 import com.tinysteps.doctorsevice.service.DoctorService;
 import com.tinysteps.doctorsevice.dto.UserRegistrationRequest;
 import com.tinysteps.doctorsevice.integration.service.AuthServiceIntegration;
+import com.tinysteps.doctorsevice.integration.service.UserIntegrationService;
+import com.tinysteps.doctorsevice.integration.model.UserUpdateRequest;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -47,6 +49,7 @@ public class DoctorServiceImpl implements DoctorService {
     private final RecommendationMapper recommendationMapper;
     private final RecommendationRepository recommendationRepository;
     private final AuthServiceIntegration authServiceIntegration;
+    private final UserIntegrationService userIntegrationService;
 
     public DoctorServiceImpl(DoctorRepository doctorRepository, DoctorMapper doctorMapper,
             SpecializationMapper specializationMapper, SpecializationRepository specializationRepository,
@@ -59,7 +62,7 @@ public class DoctorServiceImpl implements DoctorService {
             PhotoMapper photoMapper, PhotoRepository photoRepository,
             PracticeMapper practiceMapper, PracticeRepository practiceRepository,
             RecommendationMapper recommendationMapper, RecommendationRepository recommendationRepository,
-            AuthServiceIntegration authServiceIntegration) {
+            AuthServiceIntegration authServiceIntegration, UserIntegrationService userIntegrationService) {
         this.doctorRepository = doctorRepository;
         this.doctorMapper = doctorMapper;
         this.specializationMapper = specializationMapper;
@@ -83,6 +86,7 @@ public class DoctorServiceImpl implements DoctorService {
         this.recommendationMapper = recommendationMapper;
         this.recommendationRepository = recommendationRepository;
         this.authServiceIntegration = authServiceIntegration;
+        this.userIntegrationService = userIntegrationService;
     }
 
     /**
@@ -196,8 +200,66 @@ public class DoctorServiceImpl implements DoctorService {
     public DoctorResponseDto update(UUID id, DoctorRequestDto requestDto) {
         var existingDoctor = doctorRepository.findById(id)
                 .orElseThrow(() -> new DoctorNotFoundException("Doctor not found with ID: " + id));
+        
+        // Store original values for comparison
+        String originalName = existingDoctor.getName();
+        String originalAvatar = existingDoctor.getImageUrl();
+        String originalStatus = existingDoctor.getStatus();
+        
+        // Get current user information for comparison
+        String originalEmail = null;
+        String originalPhone = null;
+        if (existingDoctor.getUserId() != null) {
+            try {
+                var currentUser = userIntegrationService.getUserById(existingDoctor.getUserId()).block();
+                if (currentUser != null) {
+                    originalEmail = currentUser.email();
+                    originalPhone = currentUser.phone();
+                }
+            } catch (Exception e) {
+                log.warn("Could not fetch current user information for comparison: {}", e.getMessage());
+            }
+        }
+        
+        // Update doctor entity
         doctorMapper.updateEntityFromDto(requestDto, existingDoctor);
         var updatedDoctor = doctorRepository.save(existingDoctor);
+        
+        // Update user information if doctor has a userId
+        if (existingDoctor.getUserId() != null) {
+            try {
+                // Check if any user-related fields have changed
+                boolean nameChanged = !originalName.equals(updatedDoctor.getName());
+                boolean avatarChanged = !originalAvatar.equals(updatedDoctor.getImageUrl());
+                boolean statusChanged = !originalStatus.equals(updatedDoctor.getStatus());
+                
+                // For email and phone, we need to get them from the request or user service
+                // Since Doctor entity doesn't store email/phone, we'll update user service with current values
+                boolean shouldUpdateUser = nameChanged || avatarChanged || statusChanged;
+                
+                if (shouldUpdateUser) {
+                    log.info("Updating user information for doctor ID: {} with userId: {}", id, existingDoctor.getUserId());
+                    
+                    // Update user in user service with current values
+                    UserUpdateRequest userUpdateRequest = UserUpdateRequest.builder()
+                            .name(updatedDoctor.getName())
+                            .email(originalEmail) // Keep current email
+                            .phone(originalPhone) // Keep current phone
+                            .avatar(updatedDoctor.getImageUrl())
+                            .status(updatedDoctor.getStatus())
+                            .build();
+                    
+                    userIntegrationService.updateUser(existingDoctor.getUserId(), userUpdateRequest)
+                            .doOnSuccess(user -> log.info("Successfully updated user information for doctor ID: {}", id))
+                            .doOnError(error -> log.error("Failed to update user information for doctor ID: {}", id, error))
+                            .subscribe();
+                }
+            } catch (Exception e) {
+                log.error("Error updating user information for doctor ID: {}", id, e);
+                // Don't fail the doctor update if user update fails
+            }
+        }
+        
         return createDoctorResponseDto(updatedDoctor);
     }
 
@@ -205,8 +267,66 @@ public class DoctorServiceImpl implements DoctorService {
     public DoctorResponseDto partialUpdate(UUID id, DoctorRequestDto requestDto) {
         var existingDoctor = doctorRepository.findById(id)
                 .orElseThrow(() -> new DoctorNotFoundException("Doctor not found with ID: " + id));
+        
+        // Store original values for comparison
+        String originalName = existingDoctor.getName();
+        String originalAvatar = existingDoctor.getImageUrl();
+        String originalStatus = existingDoctor.getStatus();
+        
+        // Get current user information for comparison
+        String originalEmail = null;
+        String originalPhone = null;
+        if (existingDoctor.getUserId() != null) {
+            try {
+                var currentUser = userIntegrationService.getUserById(existingDoctor.getUserId()).block();
+                if (currentUser != null) {
+                    originalEmail = currentUser.email();
+                    originalPhone = currentUser.phone();
+                }
+            } catch (Exception e) {
+                log.warn("Could not fetch current user information for comparison: {}", e.getMessage());
+            }
+        }
+        
+        // Update doctor entity
         doctorMapper.updateEntityFromDto(requestDto, existingDoctor);
         var updatedDoctor = doctorRepository.save(existingDoctor);
+        
+        // Update user information if doctor has a userId
+        if (existingDoctor.getUserId() != null) {
+            try {
+                // Check if any user-related fields have changed
+                boolean nameChanged = !originalName.equals(updatedDoctor.getName());
+                boolean avatarChanged = !originalAvatar.equals(updatedDoctor.getImageUrl());
+                boolean statusChanged = !originalStatus.equals(updatedDoctor.getStatus());
+                
+                // For email and phone, we need to get them from the request or user service
+                // Since Doctor entity doesn't store email/phone, we'll update user service with current values
+                boolean shouldUpdateUser = nameChanged || avatarChanged || statusChanged;
+                
+                if (shouldUpdateUser) {
+                    log.info("Updating user information for doctor ID: {} with userId: {}", id, existingDoctor.getUserId());
+                    
+                    // Update user in user service with current values
+                    UserUpdateRequest userUpdateRequest = UserUpdateRequest.builder()
+                            .name(updatedDoctor.getName())
+                            .email(originalEmail) // Keep current email
+                            .phone(originalPhone) // Keep current phone
+                            .avatar(updatedDoctor.getImageUrl())
+                            .status(updatedDoctor.getStatus())
+                            .build();
+                    
+                    userIntegrationService.updateUser(existingDoctor.getUserId(), userUpdateRequest)
+                            .doOnSuccess(user -> log.info("Successfully updated user information for doctor ID: {}", id))
+                            .doOnError(error -> log.error("Failed to update user information for doctor ID: {}", id, error))
+                            .subscribe();
+                }
+            } catch (Exception e) {
+                log.error("Error updating user information for doctor ID: {}", id, e);
+                // Don't fail the doctor update if user update fails
+            }
+        }
+        
         return createDoctorResponseDto(updatedDoctor);
     }
 

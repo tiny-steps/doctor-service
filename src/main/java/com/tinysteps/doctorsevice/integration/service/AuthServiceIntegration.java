@@ -57,4 +57,34 @@ public class AuthServiceIntegration {
         log.warn("Fallback for registerUser: {}", request.getEmail(), t);
         return Mono.error(new RuntimeException("User registration failed", t));
     }
+
+    /**
+     * Updates user email in auth service
+     *
+     * @param userId the user ID
+     * @param email the new email
+     * @return success response
+     */
+    public Mono<Void> updateUserEmail(String userId, String email) {
+        log.info("Updating user email in auth service for user ID: {} to email: {}", userId, email);
+
+        return publicWebClient.patch()
+                .uri(authServiceBaseUrl + "/api/auth/users/{userId}", userId)
+                .bodyValue(new EmailUpdateRequest(email))
+                .retrieve()
+                .bodyToMono(Void.class)
+                .transformDeferred(RetryOperator.of(authServiceRetry))
+                .transformDeferred(CircuitBreakerOperator.of(authServiceCircuitBreaker))
+                .transformDeferred(TimeLimiterOperator.of(authServiceTimeLimiter))
+                .doOnSuccess(result -> log.info("Successfully updated user email in auth service for user ID: {}", userId))
+                .onErrorMap(throwable -> {
+                    log.error("Failed to update user email in auth service for user ID: {}", userId, throwable);
+                    return new AuthenticationServiceException("Failed to update user email in auth service", throwable);
+                });
+    }
+
+    /**
+     * Request model for updating user email
+     */
+    private record EmailUpdateRequest(String email) {}
 }
