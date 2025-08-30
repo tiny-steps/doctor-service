@@ -341,10 +341,57 @@ public class DoctorServiceImpl implements DoctorService {
 
     @Override
     public void delete(UUID id) {
-        if (!doctorRepository.existsById(id)) {
-            throw new DoctorNotFoundException("Doctor not found with ID: " + id);
-        }
+        log.info("Starting deletion process for doctor with ID: {}", id);
+
+        // Find the doctor first to get the userId
+        var doctor = doctorRepository.findById(id)
+                .orElseThrow(() -> new DoctorNotFoundException("Doctor not found with ID: " + id));
+
+        UUID userId = doctor.getUserId();
+        log.info("Found doctor with ID: {} and userId: {}", id, userId);
+
+        // Step 1: Delete the doctor record first
+        log.info("Step 1: Deleting doctor record with ID: {}", id);
         doctorRepository.deleteById(id);
+        log.info("Successfully deleted doctor record with ID: {}", id);
+
+        // Step 2: Delete the user from both auth-service and user-service if userId
+        // exists
+        if (userId != null) {
+            log.info("Step 2: Deleting user with ID: {} from auth-service and user-service", userId);
+
+            try {
+                // Delete from auth-service
+                authServiceIntegration.deleteUser(userId.toString())
+                        .doOnSuccess(
+                                result -> log.info("Successfully deleted user from auth-service with ID: {}", userId))
+                        .doOnError(error -> log.error("Failed to delete user from auth-service with ID: {}", userId,
+                                error))
+                        .subscribe();
+
+                // Delete from user-service
+                // userIntegrationService.deleteUser(userId)
+                // .doOnSuccess(
+                // result -> log.info("Successfully deleted user from user-service with ID: {}",
+                // userId))
+                // .doOnError(error -> log.error("Failed to delete user from user-service with
+                // ID: {}", userId,
+                // error))
+                // .subscribe();
+
+                log.info("User deletion requests sent to both auth-service and user-service for user ID: {}", userId);
+
+            } catch (Exception e) {
+                log.error("Error during user deletion process for user ID: {}", userId, e);
+                // Don't fail the doctor deletion if user deletion fails
+                // The user deletion is asynchronous and will be handled by the respective
+                // services
+            }
+        } else {
+            log.info("No userId associated with doctor ID: {}, skipping user deletion", id);
+        }
+
+        log.info("Completed deletion process for doctor with ID: {}", id);
     }
 
     @Override

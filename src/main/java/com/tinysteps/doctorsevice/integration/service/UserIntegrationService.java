@@ -75,7 +75,8 @@ public class UserIntegrationService {
         return secureWebClient.get()
                 .uri(userServiceBaseUrl + "/{id}", userId)
                 .retrieve()
-                .bodyToMono(new ParameterizedTypeReference<IntegrationResponseModel<UserIntegrationModel>>() {})
+                .bodyToMono(new ParameterizedTypeReference<IntegrationResponseModel<UserIntegrationModel>>() {
+                })
                 .map(IntegrationResponseModel::data)
                 .transformDeferred(RetryOperator.of(userServiceRetry))
                 .transformDeferred(CircuitBreakerOperator.of(userServiceCircuitBreaker))
@@ -109,26 +110,50 @@ public class UserIntegrationService {
      *
      * @param userId            the user ID to update
      * @param userUpdateRequest the user update request
-     * @return updated user information
+     * @return void - the update operation completes successfully
      * @throws IntegrationException if update fails
      */
-    public Mono<UserIntegrationModel> updateUser(UUID userId, UserUpdateRequest userUpdateRequest) {
+    public Mono<Void> updateUser(UUID userId, UserUpdateRequest userUpdateRequest) {
         log.info("Updating user information for ID: {} with request: {}", userId, userUpdateRequest);
 
         return secureWebClient.patch()
                 .uri(userServiceBaseUrl + "/{id}", userId)
                 .bodyValue(userUpdateRequest)
                 .retrieve()
-                .bodyToMono(new ParameterizedTypeReference<IntegrationResponseModel<UserIntegrationModel>>() {})
-                .map(IntegrationResponseModel::data)
+                .bodyToMono(Void.class)
                 .transformDeferred(RetryOperator.of(userServiceRetry))
                 .transformDeferred(CircuitBreakerOperator.of(userServiceCircuitBreaker))
                 .transformDeferred(TimeLimiterOperator.of(userServiceTimeLimiter))
-                .doOnSuccess(user -> log.info("Successfully updated user information for ID: {}", userId))
+                .doOnSuccess(result -> log.info("Successfully updated user information for ID: {}", userId))
                 .onErrorMap(throwable -> {
                     log.error("Failed to update user with ID: {}", userId, throwable);
                     return new IntegrationException("User Service",
                             "Failed to update user information: " + throwable.getMessage(), throwable);
+                });
+    }
+
+    /**
+     * Deletes a user from the user service
+     *
+     * @param userId the user ID to delete
+     * @return void - the delete operation completes successfully
+     * @throws IntegrationException if delete fails
+     */
+    public Mono<Void> deleteUser(UUID userId) {
+        log.info("Deleting user from user service with user ID: {}", userId);
+
+        return secureWebClient.delete()
+                .uri(userServiceBaseUrl + "/{id}", userId)
+                .retrieve()
+                .bodyToMono(Void.class)
+                .transformDeferred(RetryOperator.of(userServiceRetry))
+                .transformDeferred(CircuitBreakerOperator.of(userServiceCircuitBreaker))
+                .transformDeferred(TimeLimiterOperator.of(userServiceTimeLimiter))
+                .doOnSuccess(result -> log.info("Successfully deleted user from user service with user ID: {}", userId))
+                .onErrorMap(throwable -> {
+                    log.error("Failed to delete user from user service with user ID: {}", userId, throwable);
+                    return new IntegrationException("User Service",
+                            "Failed to delete user: " + throwable.getMessage(), throwable);
                 });
     }
 

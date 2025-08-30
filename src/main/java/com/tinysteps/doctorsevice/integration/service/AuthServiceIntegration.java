@@ -86,6 +86,29 @@ public class AuthServiceIntegration {
     }
 
     /**
+     * Deletes a user from the auth service
+     *
+     * @param userId the user ID to delete
+     * @return void - the delete operation completes successfully
+     */
+    public Mono<Void> deleteUser(String userId) {
+        log.info("Deleting user from auth service with user ID: {}", userId);
+
+        return publicWebClient.delete()
+                .uri(authServiceBaseUrl + "/api/auth/users/{userId}", userId)
+                .retrieve()
+                .bodyToMono(Void.class)
+                .transformDeferred(RetryOperator.of(authServiceRetry))
+                .transformDeferred(CircuitBreakerOperator.of(authServiceCircuitBreaker))
+                .transformDeferred(TimeLimiterOperator.of(authServiceTimeLimiter))
+                .doOnSuccess(result -> log.info("Successfully deleted user from auth service with user ID: {}", userId))
+                .onErrorMap(throwable -> {
+                    log.error("Failed to delete user from auth service with user ID: {}", userId, throwable);
+                    return new AuthenticationServiceException("Failed to delete user from auth service", throwable);
+                });
+    }
+
+    /**
      * Request model for updating user email
      */
     private record EmailUpdateRequest(String email) {
