@@ -44,7 +44,8 @@ public class AuthServiceIntegration {
                 .uri(authServiceBaseUrl)
                 .bodyValue(registrationRequest)
                 .retrieve()
-                .bodyToMono(new ParameterizedTypeReference<ResponseModel<UserModel>>() {})
+                .bodyToMono(new ParameterizedTypeReference<ResponseModel<UserModel>>() {
+                })
                 .map(ResponseModel::getData)
                 .transformDeferred(RetryOperator.of(authServiceRetry))
                 .transformDeferred(CircuitBreakerOperator.of(authServiceCircuitBreaker))
@@ -62,7 +63,7 @@ public class AuthServiceIntegration {
      * Updates user email in auth service
      *
      * @param userId the user ID
-     * @param email the new email
+     * @param email  the new email
      * @return success response
      */
     public Mono<Void> updateUserEmail(String userId, String email) {
@@ -76,7 +77,8 @@ public class AuthServiceIntegration {
                 .transformDeferred(RetryOperator.of(authServiceRetry))
                 .transformDeferred(CircuitBreakerOperator.of(authServiceCircuitBreaker))
                 .transformDeferred(TimeLimiterOperator.of(authServiceTimeLimiter))
-                .doOnSuccess(result -> log.info("Successfully updated user email in auth service for user ID: {}", userId))
+                .doOnSuccess(
+                        result -> log.info("Successfully updated user email in auth service for user ID: {}", userId))
                 .onErrorMap(throwable -> {
                     log.error("Failed to update user email in auth service for user ID: {}", userId, throwable);
                     return new AuthenticationServiceException("Failed to update user email in auth service", throwable);
@@ -86,5 +88,6 @@ public class AuthServiceIntegration {
     /**
      * Request model for updating user email
      */
-    private record EmailUpdateRequest(String email) {}
+    private record EmailUpdateRequest(String email) {
+    }
 }

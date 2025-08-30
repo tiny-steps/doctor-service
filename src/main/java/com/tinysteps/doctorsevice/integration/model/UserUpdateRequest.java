@@ -11,6 +11,5 @@ public record UserUpdateRequest(
         String email,
         String phone,
         String avatar,
-        String status
-) {
+        String status) {
 }

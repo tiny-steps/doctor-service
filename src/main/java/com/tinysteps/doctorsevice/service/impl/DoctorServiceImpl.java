@@ -200,12 +200,12 @@ public class DoctorServiceImpl implements DoctorService {
     public DoctorResponseDto update(UUID id, DoctorRequestDto requestDto) {
         var existingDoctor = doctorRepository.findById(id)
                 .orElseThrow(() -> new DoctorNotFoundException("Doctor not found with ID: " + id));
-        
+
         // Store original values for comparison
         String originalName = existingDoctor.getName();
         String originalAvatar = existingDoctor.getImageUrl();
         String originalStatus = existingDoctor.getStatus();
-        
+
         // Get current user information for comparison
         String originalEmail = null;
         String originalPhone = null;
@@ -220,11 +220,11 @@ public class DoctorServiceImpl implements DoctorService {
                 log.warn("Could not fetch current user information for comparison: {}", e.getMessage());
             }
         }
-        
+
         // Update doctor entity
         doctorMapper.updateEntityFromDto(requestDto, existingDoctor);
         var updatedDoctor = doctorRepository.save(existingDoctor);
-        
+
         // Update user information if doctor has a userId
         if (existingDoctor.getUserId() != null) {
             try {
@@ -232,14 +232,16 @@ public class DoctorServiceImpl implements DoctorService {
                 boolean nameChanged = !originalName.equals(updatedDoctor.getName());
                 boolean avatarChanged = !originalAvatar.equals(updatedDoctor.getImageUrl());
                 boolean statusChanged = !originalStatus.equals(updatedDoctor.getStatus());
-                
+
                 // For email and phone, we need to get them from the request or user service
-                // Since Doctor entity doesn't store email/phone, we'll update user service with current values
+                // Since Doctor entity doesn't store email/phone, we'll update user service with
+                // current values
                 boolean shouldUpdateUser = nameChanged || avatarChanged || statusChanged;
-                
+
                 if (shouldUpdateUser) {
-                    log.info("Updating user information for doctor ID: {} with userId: {}", id, existingDoctor.getUserId());
-                    
+                    log.info("Updating user information for doctor ID: {} with userId: {}", id,
+                            existingDoctor.getUserId());
+
                     // Update user in user service with current values
                     UserUpdateRequest userUpdateRequest = UserUpdateRequest.builder()
                             .name(updatedDoctor.getName())
@@ -248,10 +250,12 @@ public class DoctorServiceImpl implements DoctorService {
                             .avatar(updatedDoctor.getImageUrl())
                             .status(updatedDoctor.getStatus())
                             .build();
-                    
+
                     userIntegrationService.updateUser(existingDoctor.getUserId(), userUpdateRequest)
-                            .doOnSuccess(user -> log.info("Successfully updated user information for doctor ID: {}", id))
-                            .doOnError(error -> log.error("Failed to update user information for doctor ID: {}", id, error))
+                            .doOnSuccess(
+                                    user -> log.info("Successfully updated user information for doctor ID: {}", id))
+                            .doOnError(error -> log.error("Failed to update user information for doctor ID: {}", id,
+                                    error))
                             .subscribe();
                 }
             } catch (Exception e) {
@@ -259,7 +263,7 @@ public class DoctorServiceImpl implements DoctorService {
                 // Don't fail the doctor update if user update fails
             }
         }
-        
+
         return createDoctorResponseDto(updatedDoctor);
     }
 
@@ -267,12 +271,12 @@ public class DoctorServiceImpl implements DoctorService {
     public DoctorResponseDto partialUpdate(UUID id, DoctorRequestDto requestDto) {
         var existingDoctor = doctorRepository.findById(id)
                 .orElseThrow(() -> new DoctorNotFoundException("Doctor not found with ID: " + id));
-        
+
         // Store original values for comparison
         String originalName = existingDoctor.getName();
         String originalAvatar = existingDoctor.getImageUrl();
         String originalStatus = existingDoctor.getStatus();
-        
+
         // Get current user information for comparison
         String originalEmail = null;
         String originalPhone = null;
@@ -287,11 +291,11 @@ public class DoctorServiceImpl implements DoctorService {
                 log.warn("Could not fetch current user information for comparison: {}", e.getMessage());
             }
         }
-        
+
         // Update doctor entity
         doctorMapper.updateEntityFromDto(requestDto, existingDoctor);
         var updatedDoctor = doctorRepository.save(existingDoctor);
-        
+
         // Update user information if doctor has a userId
         if (existingDoctor.getUserId() != null) {
             try {
@@ -299,14 +303,16 @@ public class DoctorServiceImpl implements DoctorService {
                 boolean nameChanged = !originalName.equals(updatedDoctor.getName());
                 boolean avatarChanged = !originalAvatar.equals(updatedDoctor.getImageUrl());
                 boolean statusChanged = !originalStatus.equals(updatedDoctor.getStatus());
-                
+
                 // For email and phone, we need to get them from the request or user service
-                // Since Doctor entity doesn't store email/phone, we'll update user service with current values
+                // Since Doctor entity doesn't store email/phone, we'll update user service with
+                // current values
                 boolean shouldUpdateUser = nameChanged || avatarChanged || statusChanged;
-                
+
                 if (shouldUpdateUser) {
-                    log.info("Updating user information for doctor ID: {} with userId: {}", id, existingDoctor.getUserId());
-                    
+                    log.info("Updating user information for doctor ID: {} with userId: {}", id,
+                            existingDoctor.getUserId());
+
                     // Update user in user service with current values
                     UserUpdateRequest userUpdateRequest = UserUpdateRequest.builder()
                             .name(updatedDoctor.getName())
@@ -315,10 +321,12 @@ public class DoctorServiceImpl implements DoctorService {
                             .avatar(updatedDoctor.getImageUrl())
                             .status(updatedDoctor.getStatus())
                             .build();
-                    
+
                     userIntegrationService.updateUser(existingDoctor.getUserId(), userUpdateRequest)
-                            .doOnSuccess(user -> log.info("Successfully updated user information for doctor ID: {}", id))
-                            .doOnError(error -> log.error("Failed to update user information for doctor ID: {}", id, error))
+                            .doOnSuccess(
+                                    user -> log.info("Successfully updated user information for doctor ID: {}", id))
+                            .doOnError(error -> log.error("Failed to update user information for doctor ID: {}", id,
+                                    error))
                             .subscribe();
                 }
             } catch (Exception e) {
@@ -326,7 +334,7 @@ public class DoctorServiceImpl implements DoctorService {
                 // Don't fail the doctor update if user update fails
             }
         }
-        
+
         return createDoctorResponseDto(updatedDoctor);
     }
 

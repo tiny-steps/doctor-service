@@ -51,14 +51,14 @@ public class UserIntegrationService {
             boolean isDoctor = user != null && "DOCTOR".equalsIgnoreCase(user.role());
 
             log.debug("User validation result for ID {}: exists={}, isDoctor={}",
-                     userId, user != null, isDoctor);
+                    userId, user != null, isDoctor);
 
             return isDoctor;
 
         } catch (Exception e) {
             log.error("Failed to validate doctor user with ID: {}", userId, e);
             throw new IntegrationException("User Service",
-                "Failed to validate doctor user: " + e.getMessage(), e);
+                    "Failed to validate doctor user: " + e.getMessage(), e);
         }
     }
 
@@ -75,7 +75,8 @@ public class UserIntegrationService {
         return publicWebClient.get()
                 .uri(userServiceBaseUrl + "/{id}", userId)
                 .retrieve()
-                .bodyToMono(new ParameterizedTypeReference<IntegrationResponseModel<UserIntegrationModel>>() {})
+                .bodyToMono(new ParameterizedTypeReference<IntegrationResponseModel<UserIntegrationModel>>() {
+                })
                 .map(IntegrationResponseModel::data)
                 .transformDeferred(RetryOperator.of(userServiceRetry))
                 .transformDeferred(CircuitBreakerOperator.of(userServiceCircuitBreaker))
@@ -84,7 +85,7 @@ public class UserIntegrationService {
                 .onErrorMap(throwable -> {
                     log.error("Failed to fetch user with ID: {}", userId, throwable);
                     return new IntegrationException("User Service",
-                        "Failed to fetch user information: " + throwable.getMessage(), throwable);
+                            "Failed to fetch user information: " + throwable.getMessage(), throwable);
                 });
     }
 
@@ -107,7 +108,7 @@ public class UserIntegrationService {
     /**
      * Updates user information
      *
-     * @param userId the user ID to update
+     * @param userId            the user ID to update
      * @param userUpdateRequest the user update request
      * @return updated user information
      * @throws IntegrationException if update fails
@@ -119,7 +120,8 @@ public class UserIntegrationService {
                 .uri(userServiceBaseUrl + "/{id}", userId)
                 .bodyValue(userUpdateRequest)
                 .retrieve()
-                .bodyToMono(new ParameterizedTypeReference<IntegrationResponseModel<UserIntegrationModel>>() {})
+                .bodyToMono(new ParameterizedTypeReference<IntegrationResponseModel<UserIntegrationModel>>() {
+                })
                 .map(IntegrationResponseModel::data)
                 .transformDeferred(RetryOperator.of(userServiceRetry))
                 .transformDeferred(CircuitBreakerOperator.of(userServiceCircuitBreaker))
@@ -128,7 +130,7 @@ public class UserIntegrationService {
                 .onErrorMap(throwable -> {
                     log.error("Failed to update user with ID: {}", userId, throwable);
                     return new IntegrationException("User Service",
-                        "Failed to update user information: " + throwable.getMessage(), throwable);
+                            "Failed to update user information: " + throwable.getMessage(), throwable);
                 });
     }
 
