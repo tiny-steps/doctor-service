@@ -10,6 +10,8 @@ public record DoctorResponseDto(
         String id,
         String userId,
         String name,
+        String email,
+        String phone,
         String slug,
         String gender,
         String summary,

@@ -96,6 +96,27 @@ public class DoctorServiceImpl implements DoctorService {
      * and properly populating related entities to avoid empty lists
      */
     private DoctorResponseDto createDoctorResponseDto(Doctor doctor) {
+        // Fetch user data for email and phone
+        String email = "";
+        String phone = "";
+        if (doctor.getUserId() != null) {
+            try {
+                log.info("Fetching user data for doctor {} with userId: {}", doctor.getId(), doctor.getUserId());
+                var user = userIntegrationService.getUserById(doctor.getUserId()).block();
+                if (user != null) {
+                    email = user.email() != null ? user.email() : "";
+                    phone = user.phone() != null ? user.phone() : "";
+                    log.info("Successfully fetched user data for doctor {}: email={}, phone={}", doctor.getId(), email, phone);
+                } else {
+                    log.warn("User service returned null for userId: {} (doctor: {})", doctor.getUserId(), doctor.getId());
+                }
+            } catch (Exception e) {
+                log.error("Failed to fetch user information for doctor {} with userId {}: {}", doctor.getId(), doctor.getUserId(), e.getMessage(), e);
+            }
+        } else {
+            log.warn("Doctor {} has no userId associated", doctor.getId());
+        }
+
         // Fetch all related entities for this doctor
         List<SpecializationResponseDto> specializations = specializationRepository.findByDoctorId(doctor.getId())
                 .stream()
@@ -151,6 +172,8 @@ public class DoctorServiceImpl implements DoctorService {
                 .id(doctor.getId() != null ? doctor.getId().toString() : null)
                 .userId(doctor.getUserId() != null ? doctor.getUserId().toString() : null)
                 .name(doctor.getName() != null ? doctor.getName() : "")
+                .email(email)
+                .phone(phone)
                 .slug(doctor.getSlug() != null ? doctor.getSlug() : "")
                 .gender(doctor.getGender() != null ? doctor.getGender() : "")
                 .summary(doctor.getSummary() != null ? doctor.getSummary() : "")
@@ -185,6 +208,7 @@ public class DoctorServiceImpl implements DoctorService {
 
     @Override
     public DoctorResponseDto findById(UUID id) {
+
         return doctorRepository.findById(id)
                 .map(this::createDoctorResponseDto)
                 .orElseThrow(() -> new DoctorNotFoundException("Doctor not found with ID: " + id));
