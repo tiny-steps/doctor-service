@@ -26,7 +26,7 @@ import java.util.UUID;
             PricingMapper.class,
             SpecializationMapper.class,
             PhotoMapper.class,
-            PracticeMapper.class,
+
             RecommendationMapper.class
         })
 public interface DoctorMapper {
@@ -50,7 +50,7 @@ public interface DoctorMapper {
     @Mapping(target = "sessionPricings", ignore = true)
     @Mapping(target = "specializations", ignore = true)
     @Mapping(target = "photos", ignore = true)
-    @Mapping(target = "practices", ignore = true)
+    @Mapping(target = "addressIds", ignore = true)
     @Mapping(target = "recommendations", ignore = true)
     Doctor fromRequestDto(DoctorRequestDto requestDto);
 
@@ -71,7 +71,7 @@ public interface DoctorMapper {
     @Mapping(target = "sessionPricings", ignore = true)
     @Mapping(target = "specializations", ignore = true)
     @Mapping(target = "photos", ignore = true)
-    @Mapping(target = "practices", ignore = true)
+    @Mapping(target = "addressIds", ignore = true)
     @Mapping(target = "recommendations", ignore = true)
     void updateEntityFromDto(DoctorRequestDto requestDto, @MappingTarget Doctor doctor);
 

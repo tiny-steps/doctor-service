@@ -13,6 +13,7 @@ import com.tinysteps.doctorsevice.integration.service.UserIntegrationService;
 import com.tinysteps.doctorsevice.integration.model.UserUpdateRequest;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
@@ -45,8 +46,7 @@ public class DoctorServiceImpl implements DoctorService {
     private final PricingRepository pricingRepository;
     private final PhotoMapper photoMapper;
     private final PhotoRepository photoRepository;
-    private final PracticeMapper practiceMapper;
-    private final PracticeRepository practiceRepository;
+
     private final RecommendationMapper recommendationMapper;
     private final RecommendationRepository recommendationRepository;
     private final AuthServiceIntegration authServiceIntegration;
@@ -61,7 +61,7 @@ public class DoctorServiceImpl implements DoctorService {
             RegistrationMapper registrationMapper, RegistrationRepository registrationRepository,
             PricingMapper pricingMapper, PricingRepository pricingRepository,
             PhotoMapper photoMapper, PhotoRepository photoRepository,
-            PracticeMapper practiceMapper, PracticeRepository practiceRepository,
+
             RecommendationMapper recommendationMapper, RecommendationRepository recommendationRepository,
             AuthServiceIntegration authServiceIntegration, UserIntegrationService userIntegrationService) {
         this.doctorRepository = doctorRepository;
@@ -82,8 +82,7 @@ public class DoctorServiceImpl implements DoctorService {
         this.pricingRepository = pricingRepository;
         this.photoMapper = photoMapper;
         this.photoRepository = photoRepository;
-        this.practiceMapper = practiceMapper;
-        this.practiceRepository = practiceRepository;
+
         this.recommendationMapper = recommendationMapper;
         this.recommendationRepository = recommendationRepository;
         this.authServiceIntegration = authServiceIntegration;
@@ -137,10 +136,8 @@ public class DoctorServiceImpl implements DoctorService {
                 .map(photoMapper::toResponseDto)
                 .collect(Collectors.toList());
 
-        List<PracticeResponseDto> practices = practiceRepository.findByDoctorId(doctor.getId())
-                .stream()
-                .map(practiceMapper::toResponseDto)
-                .collect(Collectors.toList());
+        // Get address IDs from doctor_addresses junction table
+        List<String> addressIds = doctor.getAddressIds() != null ? doctor.getAddressIds() : new ArrayList<>();
 
         List<RecommendationResponseDto> recommendations = recommendationRepository.findByDoctorId(doctor.getId())
                 .stream()
@@ -171,7 +168,7 @@ public class DoctorServiceImpl implements DoctorService {
                 .sessionPricings(sessionPricings) // Properly populated session pricings
                 .specializations(specializations) // Properly populated specializations
                 .photos(photos) // Properly populated photos
-                .practices(practices) // Properly populated practices
+                .addressIds(addressIds) // Properly populated address IDs
                 .recommendations(recommendations) // Properly populated recommendations
                 .build();
     }
@@ -453,11 +450,17 @@ public class DoctorServiceImpl implements DoctorService {
 
     @Override
     public Page<DoctorResponseDto> findByLocation(UUID addressId, Pageable pageable) {
-        // This assumes a relationship between Doctor and Address that is not directly
-        // in the Doctor entity.
-        // This would require a more complex query or a different data model.
-        // For now, returning an empty page.
-        return Page.empty(pageable);
+        List<Doctor> doctors = doctorRepository.findByAddressLocation(addressId);
+        List<DoctorResponseDto> doctorDtos = doctors.stream()
+                .map(this::createDoctorResponseDto)
+                .collect(Collectors.toList());
+        
+        // Convert list to page manually since repository method returns List
+        int start = (int) pageable.getOffset();
+        int end = Math.min((start + pageable.getPageSize()), doctorDtos.size());
+        List<DoctorResponseDto> pageContent = doctorDtos.subList(start, end);
+        
+        return new PageImpl<>(pageContent, pageable, doctorDtos.size());
     }
 
     @Override

@@ -87,16 +87,6 @@ public class EntityNotFoundExceptions {
         }
     }
 
-    public static class PracticeNotFoundException extends EntityNotFoundException {
-        public PracticeNotFoundException(UUID id) {
-            super("Practice", "id", id.toString());
-        }
-
-        public PracticeNotFoundException(String field, String value) {
-            super("Practice", field, value);
-        }
-    }
-
     public static class RecommendationNotFoundException extends EntityNotFoundException {
         public RecommendationNotFoundException(UUID id) {
             super("Recommendation", "id", id.toString());

@@ -16,7 +16,7 @@ public class ApplicationSecurityConfig {
     private final MembershipRepository membershipRepository;
     private final OrganizationRepository organizationRepository;
     private final PhotoRepository photoRepository;
-    private final PracticeRepository practiceRepository;
+
     private final PricingRepository pricingRepository;
     private final QualificationRepository qualificationRepository;
     private final RecommendationRepository recommendationRepository;
@@ -25,7 +25,7 @@ public class ApplicationSecurityConfig {
 
     public ApplicationSecurityConfig(DoctorRepository doctorRepository, AwardRepository awardRepository,
             MembershipRepository membershipRepository, OrganizationRepository organizationRepository,
-            PhotoRepository photoRepository, PracticeRepository practiceRepository, PricingRepository pricingRepository,
+            PhotoRepository photoRepository, PricingRepository pricingRepository,
             QualificationRepository qualificationRepository, RecommendationRepository recommendationRepository,
             RegistrationRepository registrationRepository, SpecializationRepository specializationRepository) {
         this.doctorRepository = doctorRepository;
@@ -33,7 +33,7 @@ public class ApplicationSecurityConfig {
         this.membershipRepository = membershipRepository;
         this.organizationRepository = organizationRepository;
         this.photoRepository = photoRepository;
-        this.practiceRepository = practiceRepository;
+
         this.pricingRepository = pricingRepository;
         this.qualificationRepository = qualificationRepository;
         this.recommendationRepository = recommendationRepository;
@@ -80,12 +80,7 @@ public class ApplicationSecurityConfig {
         return isOwner(userId, photo.getDoctor());
     }
 
-    public boolean isPracticeOwner(Authentication authentication, UUID practiceId) {
-        String userId = authentication.getName();
-        Practice practice = practiceRepository.findByIdWithDoctor(practiceId)
-                .orElseThrow(() -> new EntityNotFoundException("Practice", "id", practiceId.toString()));
-        return isOwner(userId, practice.getDoctor());
-    }
+
 
     public boolean isPricingOwner(Authentication authentication, UUID doctorId) {
         // Pricing is directly linked to doctor, so we can reuse isDoctorOwner

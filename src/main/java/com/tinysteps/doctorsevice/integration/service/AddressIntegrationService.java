@@ -85,35 +85,7 @@ public class AddressIntegrationService {
                 });
     }
 
-    /**
-     * Validates if an address is suitable for medical practice
-     *
-     * @param addressId the address ID to validate
-     * @return true if address is suitable for practice
-     */
-    public boolean validatePracticeAddress(UUID addressId) {
-        try {
-            AddressIntegrationModel address = getAddressById(addressId).block();
 
-            if (address == null) {
-                return false;
-            }
-
-            // Check if address type is suitable for medical practice
-            String addressType = address.type();
-            boolean isSuitable = "CLINIC".equalsIgnoreCase(addressType) ||
-                               "HOSPITAL".equalsIgnoreCase(addressType);
-
-            log.debug("Practice address validation for ID {}: type={}, suitable={}",
-                     addressId, addressType, isSuitable);
-
-            return isSuitable;
-
-        } catch (Exception e) {
-            log.error("Failed to validate practice address with ID: {}", addressId, e);
-            return false;
-        }
-    }
 
     /**
      * Checks if an address exists

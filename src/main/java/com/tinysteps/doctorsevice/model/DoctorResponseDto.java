@@ -30,7 +30,7 @@ public record DoctorResponseDto(
         List<PricingResponseDto> sessionPricings,
         List<SpecializationResponseDto> specializations,
         List<PhotoResponseDto> photos,
-        List<PracticeResponseDto> practices,
+        List<String> addressIds,
         List<RecommendationResponseDto> recommendations
 ) {
 }

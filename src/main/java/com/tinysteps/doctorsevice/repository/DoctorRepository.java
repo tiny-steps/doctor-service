@@ -52,9 +52,9 @@ public interface DoctorRepository extends JpaRepository<Doctor, UUID> {
     @Query("SELECT DISTINCT d FROM Doctor d JOIN d.specializations s WHERE s.speciality = :speciality")
     List<Doctor> findBySpeciality(@Param("speciality") String speciality);
 
-    // Find doctors by location (through practices)
-    @Query("SELECT DISTINCT d FROM Doctor d JOIN d.practices p WHERE p.addressId = :addressId")
-    List<Doctor> findByPracticeLocation(@Param("addressId") UUID addressId);
+    // Find by address location using doctor_addresses junction table
+    @Query("SELECT DISTINCT d FROM Doctor d WHERE :addressId MEMBER OF d.addressIds")
+    List<Doctor> findByAddressLocation(@Param("addressId") UUID addressId);
 
     // Search doctors by multiple criteria
     @Query("SELECT DISTINCT d FROM Doctor d " +
