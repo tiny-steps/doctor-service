@@ -158,7 +158,9 @@ public class DoctorServiceImpl implements DoctorService {
                 .collect(Collectors.toList());
 
         // Get address IDs from doctor_addresses junction table
-        List<String> addressIds = doctor.getAddressIds() != null ? doctor.getAddressIds() : new ArrayList<>();
+        List<String> addressIds = doctor.getAddressIds() != null ? 
+                doctor.getAddressIds().stream().map(UUID::toString).collect(Collectors.toList()) : 
+                new ArrayList<>();
 
         List<RecommendationResponseDto> recommendations = recommendationRepository.findByDoctorId(doctor.getId())
                 .stream()
