@@ -33,6 +33,7 @@ public interface DoctorMapper {
 
     @Mapping(target = "id", source = "id", qualifiedByName = "doctorUuidToString")
     @Mapping(target = "userId", source = "userId", qualifiedByName = "doctorUuidToString")
+    @Mapping(target = "primaryBranchId", source = "primaryBranchId", qualifiedByName = "doctorUuidToString")
     @Mapping(target = "createdAt", source = "createdAt", qualifiedByName = "doctorTimestampToString")
     @Mapping(target = "updatedAt", source = "updatedAt", qualifiedByName = "doctorTimestampToString")
     DoctorResponseDto toResponseDto(Doctor doctor);
@@ -40,6 +41,7 @@ public interface DoctorMapper {
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "name", source = "name")
     @Mapping(target = "userId", source = "userId", qualifiedByName = "doctorStringToUuid")
+    @Mapping(target = "primaryBranchId", source = "primaryBranchId", qualifiedByName = "doctorStringToUuid")
     @Mapping(target = "createdAt", ignore = true)
     @Mapping(target = "updatedAt", ignore = true)
     @Mapping(target = "awards", ignore = true)

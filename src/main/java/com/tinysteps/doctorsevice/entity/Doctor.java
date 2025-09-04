@@ -62,6 +62,12 @@ public class Doctor {
     @Column(length = 20)
     private String status = "ACTIVE";
 
+    @Column(name = "primary_branch_id")
+    private UUID primaryBranchId;
+
+    @Column(name = "is_multi_branch")
+    private Boolean isMultiBranch = false;
+
     @Column(name = "created_at")
     private Timestamp createdAt;
 
@@ -93,10 +99,8 @@ public class Doctor {
     @OneToMany(mappedBy = "doctor", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Photo> photos;
 
-    @ElementCollection
-    @CollectionTable(name = "doctor_addresses", joinColumns = @JoinColumn(name = "doctor_id"))
-    @Column(name = "address_id")
-    private List<UUID> addressIds = new ArrayList<>();
+    @OneToMany(mappedBy = "doctor", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<DoctorAddress> doctorAddresses = new ArrayList<>();
 
     @OneToMany(mappedBy = "doctor", cascade = CascadeType.ALL, orphanRemoval = true)
     @JsonBackReference

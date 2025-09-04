@@ -349,6 +349,20 @@ public class DoctorController {
                 .build());
     }
 
+    @Operation(summary = "Get doctors by location and practice role", description = "Retrieves doctors by location and practice role")
+    @GetMapping("/location/{addressId}/role/{practiceRole}")
+    public ResponseEntity<ResponseModel<Page<DoctorResponseDto>>> getDoctorsByLocationAndPracticeRole(
+            @Parameter(description = "Address ID", required = true) @PathVariable UUID addressId,
+            @Parameter(description = "Practice role", required = true) @PathVariable String practiceRole,
+            @Parameter(description = "Pagination information") Pageable pageable) {
+        Page<DoctorResponseDto> doctors = doctorService.findByLocationAndPracticeRole(addressId, practiceRole, pageable);
+        return ResponseEntity.ok(ResponseModel.<Page<DoctorResponseDto>>builder()
+                .status(HttpStatus.OK)
+                .message("Doctors retrieved successfully")
+                .data(doctors)
+                .build());
+    }
+
     @Operation(summary = "Get verified doctors with minimum rating", description = "Retrieves verified doctors with minimum rating")
     @GetMapping("/verified/min-rating/{minRating}")
     public ResponseEntity<ResponseModel<Page<DoctorResponseDto>>> getVerifiedDoctorsWithMinRating(
@@ -578,6 +592,103 @@ public class DoctorController {
                 .status(HttpStatus.OK)
                 .message("Profile completeness checked")
                 .data(isComplete)
+                .build());
+    }
+
+    // Branch-based endpoints
+    @Operation(summary = "Get doctors by branch", description = "Retrieves doctors by branch ID")
+    @GetMapping("/branch/{branchId}")
+    @PreAuthorize("@securityService.hasBranchAccess(#branchId) or hasRole('ADMIN')")
+    public ResponseEntity<ResponseModel<Page<DoctorResponseDto>>> getDoctorsByBranch(
+            @Parameter(description = "Branch ID", required = true) @PathVariable UUID branchId,
+            @Parameter(description = "Pagination information") Pageable pageable) {
+        Page<DoctorResponseDto> doctors = doctorService.findByBranch(branchId, pageable);
+        return ResponseEntity.ok(ResponseModel.<Page<DoctorResponseDto>>builder()
+                .status(HttpStatus.OK)
+                .message("Doctors retrieved successfully")
+                .data(doctors)
+                .build());
+    }
+
+    @Operation(summary = "Get doctors by branch and status", description = "Retrieves doctors by branch ID and status")
+    @GetMapping("/branch/{branchId}/status/{status}")
+    @PreAuthorize("@securityService.hasBranchAccess(#branchId) or hasRole('ADMIN')")
+    public ResponseEntity<ResponseModel<Page<DoctorResponseDto>>> getDoctorsByBranchAndStatus(
+            @Parameter(description = "Branch ID", required = true) @PathVariable UUID branchId,
+            @Parameter(description = "Doctor status", required = true) @PathVariable String status,
+            @Parameter(description = "Pagination information") Pageable pageable) {
+        Page<DoctorResponseDto> doctors = doctorService.findByBranchAndStatus(branchId, status, pageable);
+        return ResponseEntity.ok(ResponseModel.<Page<DoctorResponseDto>>builder()
+                .status(HttpStatus.OK)
+                .message("Doctors retrieved successfully")
+                .data(doctors)
+                .build());
+    }
+
+    @Operation(summary = "Get doctors by branch and verification status", description = "Retrieves doctors by branch ID and verification status")
+    @GetMapping("/branch/{branchId}/verification/{isVerified}")
+    @PreAuthorize("@securityService.hasBranchAccess(#branchId) or hasRole('ADMIN')")
+    public ResponseEntity<ResponseModel<List<DoctorResponseDto>>> getDoctorsByBranchAndVerificationStatus(
+            @Parameter(description = "Branch ID", required = true) @PathVariable UUID branchId,
+            @Parameter(description = "Verification status", required = true) @PathVariable Boolean isVerified) {
+        List<DoctorResponseDto> doctors = doctorService.findByBranchAndVerificationStatus(branchId, isVerified);
+        return ResponseEntity.ok(ResponseModel.<List<DoctorResponseDto>>builder()
+                .status(HttpStatus.OK)
+                .message("Doctors retrieved successfully")
+                .data(doctors)
+                .build());
+    }
+
+    @Operation(summary = "Get multi-branch doctors", description = "Retrieves doctors who work across multiple branches")
+    @GetMapping("/multi-branch")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<ResponseModel<Page<DoctorResponseDto>>> getMultiBranchDoctors(
+            @Parameter(description = "Pagination information") Pageable pageable) {
+        Page<DoctorResponseDto> doctors = doctorService.findMultiBranchDoctors(pageable);
+        return ResponseEntity.ok(ResponseModel.<Page<DoctorResponseDto>>builder()
+                .status(HttpStatus.OK)
+                .message("Multi-branch doctors retrieved successfully")
+                .data(doctors)
+                .build());
+    }
+
+    @Operation(summary = "Get doctors by current user's branch", description = "Retrieves doctors from the current user's primary branch")
+    @GetMapping("/my-branch")
+    @PreAuthorize("hasAnyRole('DOCTOR','ADMIN','STAFF')")
+    public ResponseEntity<ResponseModel<Page<DoctorResponseDto>>> getDoctorsByCurrentUserBranch(
+            @Parameter(description = "Pagination information") Pageable pageable) {
+        Page<DoctorResponseDto> doctors = doctorService.findDoctorsByCurrentUserBranch(pageable);
+        return ResponseEntity.ok(ResponseModel.<Page<DoctorResponseDto>>builder()
+                .status(HttpStatus.OK)
+                .message("Doctors from your branch retrieved successfully")
+                .data(doctors)
+                .build());
+    }
+
+    @Operation(summary = "Count doctors by branch", description = "Gets the count of doctors by branch ID")
+    @GetMapping("/statistics/count/branch/{branchId}")
+    @PreAuthorize("@securityService.hasBranchAccess(#branchId) or hasRole('ADMIN')")
+    public ResponseEntity<ResponseModel<Long>> countDoctorsByBranch(
+            @Parameter(description = "Branch ID", required = true) @PathVariable UUID branchId) {
+        long count = doctorService.countByBranch(branchId);
+        return ResponseEntity.ok(ResponseModel.<Long>builder()
+                .status(HttpStatus.OK)
+                .message("Doctor count by branch retrieved successfully")
+                .data(count)
+                .build());
+    }
+
+    @Operation(summary = "Count doctors by branch and status", description = "Gets the count of doctors by branch ID and status")
+    @GetMapping("/statistics/count/branch/{branchId}/status/{status}")
+    @PreAuthorize("@securityService.hasBranchAccess(#branchId) or hasRole('ADMIN')")
+    public ResponseEntity<ResponseModel<Long>> countDoctorsByBranchAndStatus(
+            @Parameter(description = "Branch ID", required = true) @PathVariable UUID branchId,
+            @Parameter(description = "Doctor status", required = true) @PathVariable String status) {
+        long count = doctorService.countByBranchAndStatus(branchId, status);
+        return ResponseEntity.ok(ResponseModel.<Long>builder()
+                .status(HttpStatus.OK)
+                .message("Doctor count by branch and status retrieved successfully")
+                .data(count)
                 .build());
     }
 }

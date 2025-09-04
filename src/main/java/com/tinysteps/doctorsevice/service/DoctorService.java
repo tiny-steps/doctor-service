@@ -37,6 +37,15 @@ public interface DoctorService {
     Page<DoctorResponseDto> findByMinRating(BigDecimal minRating, Pageable pageable);
     Page<DoctorResponseDto> findBySpeciality(String speciality, Pageable pageable);
     Page<DoctorResponseDto> findByLocation(UUID addressId, Pageable pageable);
+    Page<DoctorResponseDto> findByLocationAndPracticeRole(UUID addressId, String practiceRole, Pageable pageable);
+    
+    // Branch-based Operations
+    Page<DoctorResponseDto> findByBranch(UUID primaryBranchId, Pageable pageable);
+    Page<DoctorResponseDto> findByBranchAndStatus(UUID primaryBranchId, String status, Pageable pageable);
+    Page<DoctorResponseDto> findByBranchAndVerificationStatus(UUID primaryBranchId, Boolean isVerified, Pageable pageable);
+    Page<DoctorResponseDto> findMultiBranchDoctors(Pageable pageable);
+    List<DoctorResponseDto> findDoctorsByCurrentUserBranch();
+    Page<DoctorResponseDto> findDoctorsByCurrentUserBranch(Pageable pageable);
 
     // Advanced Search
     Page<DoctorResponseDto> searchDoctors(String name, String speciality, Boolean isVerified,
@@ -65,6 +74,8 @@ public interface DoctorService {
     long countByStatus(String status);
     long countByVerificationStatus(Boolean isVerified);
     long countBySpeciality(String speciality);
+    long countByBranch(UUID primaryBranchId);
+    long countByBranchAndStatus(UUID primaryBranchId, String status);
 
     // Bulk Operations
     List<DoctorResponseDto> createBatch(List<DoctorRequestDto> requestDtos);

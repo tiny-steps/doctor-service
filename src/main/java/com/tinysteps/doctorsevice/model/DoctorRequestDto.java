@@ -40,6 +40,10 @@ public record DoctorRequestDto(
         Integer reviewCount,
 
         @Pattern(regexp = "^(ACTIVE|INACTIVE|SUSPENDED)$", message = "Status must be ACTIVE, INACTIVE, or SUSPENDED")
-        String status
+        String status,
+
+        String primaryBranchId,
+
+        Boolean isMultiBranch
 ) {
 }

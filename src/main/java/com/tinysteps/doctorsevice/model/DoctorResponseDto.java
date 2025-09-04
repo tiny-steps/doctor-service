@@ -22,6 +22,8 @@ public record DoctorResponseDto(
         BigDecimal ratingAverage,
         Integer reviewCount,
         String status,
+        String primaryBranchId,
+        Boolean isMultiBranch,
         String createdAt,
         String updatedAt,
         List<AwardResponseDto> awards,

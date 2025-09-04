@@ -52,9 +52,21 @@ public interface DoctorRepository extends JpaRepository<Doctor, UUID> {
     @Query("SELECT DISTINCT d FROM Doctor d JOIN d.specializations s WHERE s.speciality = :speciality")
     List<Doctor> findBySpeciality(@Param("speciality") String speciality);
 
-    // Find by address location using doctor_addresses junction table
-    @Query("SELECT DISTINCT d FROM Doctor d WHERE :addressId MEMBER OF d.addressIds")
+    // Find doctors by address location using DoctorAddress relationship
+    @Query("SELECT DISTINCT d FROM Doctor d JOIN d.doctorAddresses da WHERE da.addressId = :addressId")
     List<Doctor> findByAddressLocation(@Param("addressId") UUID addressId);
+
+    // Find doctors by address location with pagination
+    @Query("SELECT DISTINCT d FROM Doctor d JOIN d.doctorAddresses da WHERE da.addressId = :addressId")
+    Page<Doctor> findByAddressLocation(@Param("addressId") UUID addressId, Pageable pageable);
+
+    // Find doctors by address location and practice role
+    @Query("SELECT DISTINCT d FROM Doctor d JOIN d.doctorAddresses da WHERE da.addressId = :addressId AND da.practiceRole = :practiceRole")
+    List<Doctor> findByAddressLocationAndPracticeRole(@Param("addressId") UUID addressId, @Param("practiceRole") String practiceRole);
+
+    // Find doctors by address location and practice role with pagination
+    @Query("SELECT DISTINCT d FROM Doctor d JOIN d.doctorAddresses da WHERE da.addressId = :addressId AND da.practiceRole = :practiceRole")
+    Page<Doctor> findByAddressLocationAndPracticeRole(@Param("addressId") UUID addressId, @Param("practiceRole") String practiceRole, Pageable pageable);
 
     // Search doctors by multiple criteria
     @Query("SELECT DISTINCT d FROM Doctor d " +
@@ -89,4 +101,23 @@ public interface DoctorRepository extends JpaRepository<Doctor, UUID> {
     Page<Doctor> findByRatingAverageGreaterThanEqual(BigDecimal minRating, Pageable pageable);
     Page<Doctor> findAllByOrderByRatingAverageDesc(Pageable pageable);
     Page<Doctor> findByIsVerifiedAndRatingAverageGreaterThanEqual(Boolean isVerified, BigDecimal minRating, Pageable pageable);
+
+    // Branch-based queries
+    List<Doctor> findByPrimaryBranchId(UUID primaryBranchId);
+    Page<Doctor> findByPrimaryBranchId(UUID primaryBranchId, Pageable pageable);
+    
+    // Find doctors by primary branch and status
+    List<Doctor> findByPrimaryBranchIdAndStatus(UUID primaryBranchId, String status);
+    Page<Doctor> findByPrimaryBranchIdAndStatus(UUID primaryBranchId, String status, Pageable pageable);
+    
+    // Find multi-branch doctors
+    List<Doctor> findByIsMultiBranch(Boolean isMultiBranch);
+    Page<Doctor> findByIsMultiBranch(Boolean isMultiBranch, Pageable pageable);
+    
+    // Combined branch and verification queries
+    Page<Doctor> findByPrimaryBranchIdAndIsVerified(UUID primaryBranchId, Boolean isVerified, Pageable pageable);
+    
+    // Count by branch
+    long countByPrimaryBranchId(UUID primaryBranchId);
+    long countByPrimaryBranchIdAndStatus(UUID primaryBranchId, String status);
 }

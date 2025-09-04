@@ -7,6 +7,8 @@ import com.tinysteps.doctorsevice.mapper.*;
 import com.tinysteps.doctorsevice.model.*;
 import com.tinysteps.doctorsevice.repository.*;
 import com.tinysteps.doctorsevice.service.DoctorService;
+import com.tinysteps.doctorsevice.service.DoctorAddressService;
+import com.tinysteps.doctorservice.service.SecurityService;
 import com.tinysteps.doctorsevice.dto.UserRegistrationRequest;
 import com.tinysteps.doctorsevice.integration.service.AuthServiceIntegration;
 import com.tinysteps.doctorsevice.integration.service.UserIntegrationService;
@@ -51,6 +53,8 @@ public class DoctorServiceImpl implements DoctorService {
     private final RecommendationRepository recommendationRepository;
     private final AuthServiceIntegration authServiceIntegration;
     private final UserIntegrationService userIntegrationService;
+    private final DoctorAddressService doctorAddressService;
+    private final SecurityService securityService;
 
     public DoctorServiceImpl(DoctorRepository doctorRepository, DoctorMapper doctorMapper,
             SpecializationMapper specializationMapper, SpecializationRepository specializationRepository,
@@ -63,7 +67,8 @@ public class DoctorServiceImpl implements DoctorService {
             PhotoMapper photoMapper, PhotoRepository photoRepository,
 
             RecommendationMapper recommendationMapper, RecommendationRepository recommendationRepository,
-            AuthServiceIntegration authServiceIntegration, UserIntegrationService userIntegrationService) {
+            AuthServiceIntegration authServiceIntegration, UserIntegrationService userIntegrationService,
+            DoctorAddressService doctorAddressService, SecurityService securityService) {
         this.doctorRepository = doctorRepository;
         this.doctorMapper = doctorMapper;
         this.specializationMapper = specializationMapper;
@@ -87,6 +92,8 @@ public class DoctorServiceImpl implements DoctorService {
         this.recommendationRepository = recommendationRepository;
         this.authServiceIntegration = authServiceIntegration;
         this.userIntegrationService = userIntegrationService;
+        this.doctorAddressService = doctorAddressService;
+        this.securityService = securityService;
     }
 
     /**
@@ -476,17 +483,14 @@ public class DoctorServiceImpl implements DoctorService {
 
     @Override
     public Page<DoctorResponseDto> findByLocation(UUID addressId, Pageable pageable) {
-        List<Doctor> doctors = doctorRepository.findByAddressLocation(addressId);
-        List<DoctorResponseDto> doctorDtos = doctors.stream()
-                .map(this::createDoctorResponseDto)
-                .collect(Collectors.toList());
-        
-        // Convert list to page manually since repository method returns List
-        int start = (int) pageable.getOffset();
-        int end = Math.min((start + pageable.getPageSize()), doctorDtos.size());
-        List<DoctorResponseDto> pageContent = doctorDtos.subList(start, end);
-        
-        return new PageImpl<>(pageContent, pageable, doctorDtos.size());
+        return doctorRepository.findByAddressLocation(addressId, pageable)
+                .map(this::createDoctorResponseDto);
+    }
+
+    @Override
+    public Page<DoctorResponseDto> findByLocationAndPracticeRole(UUID addressId, String practiceRole, Pageable pageable) {
+        return doctorRepository.findByAddressLocationAndPracticeRole(addressId, practiceRole, pageable)
+                .map(this::createDoctorResponseDto);
     }
 
     @Override
@@ -722,5 +726,78 @@ public class DoctorServiceImpl implements DoctorService {
 
             throw new RuntimeException("Failed to register doctor", e);
         }
+    }
+
+    // Branch-based methods
+    @Override
+    public long countByBranch(UUID branchId) {
+        return doctorRepository.countByPrimaryBranchId(branchId);
+    }
+
+    @Override
+    public long countByBranchAndStatus(UUID branchId, String status) {
+        return doctorRepository.countByPrimaryBranchIdAndStatus(branchId, status);
+    }
+
+    @Override
+    public Page<DoctorResponseDto> findByBranch(UUID branchId, Pageable pageable) {
+        Page<Doctor> doctors = doctorRepository.findByPrimaryBranchId(branchId, pageable);
+        return doctors.map(this::createDoctorResponseDto);
+    }
+
+    @Override
+    public List<DoctorResponseDto> findByBranch(UUID branchId) {
+        List<Doctor> doctors = doctorRepository.findByPrimaryBranchId(branchId);
+        return doctors.stream()
+                .map(this::createDoctorResponseDto)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public Page<DoctorResponseDto> findByBranchAndStatus(UUID branchId, String status, Pageable pageable) {
+        Page<Doctor> doctors = doctorRepository.findByPrimaryBranchIdAndStatus(branchId, status, pageable);
+        return doctors.map(this::createDoctorResponseDto);
+    }
+
+    @Override
+    public List<DoctorResponseDto> findByBranchAndStatus(UUID branchId, String status) {
+        List<Doctor> doctors = doctorRepository.findByPrimaryBranchIdAndStatus(branchId, status);
+        return doctors.stream()
+                .map(this::createDoctorResponseDto)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public List<DoctorResponseDto> findByBranchAndVerificationStatus(UUID branchId, Boolean isVerified) {
+        List<Doctor> doctors = doctorRepository.findByPrimaryBranchIdAndIsVerified(branchId, isVerified);
+        return doctors.stream()
+                .map(this::createDoctorResponseDto)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public Page<DoctorResponseDto> findMultiBranchDoctors(Pageable pageable) {
+        Page<Doctor> doctors = doctorRepository.findByIsMultiBranch(true, pageable);
+        return doctors.map(this::createDoctorResponseDto);
+    }
+
+    @Override
+    public List<DoctorResponseDto> findMultiBranchDoctors() {
+        List<Doctor> doctors = doctorRepository.findByIsMultiBranch(true);
+        return doctors.stream()
+                .map(this::createDoctorResponseDto)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public Page<DoctorResponseDto> findDoctorsByCurrentUserBranch(Pageable pageable) {
+        UUID primaryBranchId = securityService.getPrimaryBranchId();
+        return findByBranch(primaryBranchId, pageable);
+    }
+
+    @Override
+    public List<DoctorResponseDto> findDoctorsByCurrentUserBranch() {
+        UUID primaryBranchId = securityService.getPrimaryBranchId();
+        return findByBranch(primaryBranchId);
     }
 }
