@@ -67,8 +67,8 @@ public class BranchContextIntegrationTest {
 
         // Then
         assertThat(response).isNotNull();
-        assertThat(response.getPrimaryBranchId()).isEqualTo(branchId1.toString());
-        assertThat(response.getIsMultiBranch()).isFalse();
+        assertThat(response.primaryBranchId()).isEqualTo(branchId1.toString());
+        assertThat(response.isMultiBranch()).isFalse();
     }
 
     @Test
@@ -81,8 +81,8 @@ public class BranchContextIntegrationTest {
 
         // Then
         assertThat(response).isNotNull();
-        assertThat(response.getPrimaryBranchId()).isEqualTo(branchId1.toString());
-        assertThat(response.getIsMultiBranch()).isTrue();
+        assertThat(response.primaryBranchId()).isEqualTo(branchId1.toString());
+        assertThat(response.isMultiBranch()).isTrue();
     }
 
     @Test
@@ -98,7 +98,7 @@ public class BranchContextIntegrationTest {
         assertThat(result).isNotNull();
         assertThat(result.getContent()).hasSize(2); // Two doctors in branch1
         assertThat(result.getContent())
-                .allMatch(doctor -> doctor.getPrimaryBranchId().equals(branchId1.toString()));
+                .allMatch(doctor -> doctor.primaryBranchId().equals(branchId1.toString()));
     }
 
     @Test
@@ -114,8 +114,8 @@ public class BranchContextIntegrationTest {
         assertThat(result).isNotNull();
         assertThat(result.getContent()).hasSize(2);
         assertThat(result.getContent())
-                .allMatch(doctor -> doctor.getPrimaryBranchId().equals(branchId1.toString()))
-                .allMatch(doctor -> doctor.getStatus().equals("ACTIVE"));
+                .allMatch(doctor -> doctor.primaryBranchId().equals(branchId1.toString()))
+                .allMatch(doctor -> doctor.status().equals("ACTIVE"));
     }
 
     @Test
@@ -129,8 +129,8 @@ public class BranchContextIntegrationTest {
         // Then
         assertThat(result).isNotNull();
         assertThat(result).hasSize(1); // Only one verified doctor in branch1
-        assertThat(result.get(0).getPrimaryBranchId()).isEqualTo(branchId1.toString());
-        assertThat(result.get(0).getIsVerified()).isTrue();
+        assertThat(result.get(0).primaryBranchId()).isEqualTo(branchId1.toString());
+        assertThat(result.get(0).isVerified()).isTrue();
     }
 
     @Test
@@ -145,7 +145,7 @@ public class BranchContextIntegrationTest {
         // Then
         assertThat(result).isNotNull();
         assertThat(result.getContent()).hasSize(1); // Only one multi-branch doctor
-        assertThat(result.getContent().get(0).getIsMultiBranch()).isTrue();
+        assertThat(result.getContent().get(0).isMultiBranch()).isTrue();
     }
 
     @Test
@@ -161,7 +161,7 @@ public class BranchContextIntegrationTest {
         assertThat(result).isNotNull();
         assertThat(result.getContent()).hasSize(2); // Two doctors in user's primary branch
         assertThat(result.getContent())
-                .allMatch(doctor -> doctor.getPrimaryBranchId().equals(branchId1.toString()));
+                .allMatch(doctor -> doctor.primaryBranchId().equals(branchId1.toString()));
     }
 
     @Test
@@ -227,15 +227,15 @@ public class BranchContextIntegrationTest {
     }
 
     private DoctorRequestDto createDoctorRequestDto(UUID userId, UUID branchId, boolean isMultiBranch) {
-        DoctorRequestDto dto = new DoctorRequestDto();
-        dto.setUserId(userId.toString());
-        dto.setName("Test Doctor");
-        dto.setSlug("test-doctor-" + UUID.randomUUID().toString().substring(0, 8));
-        dto.setGender("MALE");
-        dto.setStatus("ACTIVE");
-        dto.setIsVerified(false);
-        dto.setPrimaryBranchId(branchId.toString());
-        dto.setIsMultiBranch(isMultiBranch);
-        return dto;
+        return DoctorRequestDto.builder()
+                .userId(userId.toString())
+                .name("Test Doctor")
+                .slug("test-doctor-" + UUID.randomUUID().toString().substring(0, 8))
+                .gender("MALE")
+                .status("ACTIVE")
+                .isVerified(false)
+                .primaryBranchId(branchId.toString())
+                .isMultiBranch(isMultiBranch)
+                .build();
     }
 }

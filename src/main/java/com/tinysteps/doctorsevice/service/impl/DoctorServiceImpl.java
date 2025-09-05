@@ -194,6 +194,8 @@ public class DoctorServiceImpl implements DoctorService {
                 .ratingAverage(doctor.getRatingAverage() != null ? doctor.getRatingAverage() : BigDecimal.ZERO)
                 .reviewCount(doctor.getReviewCount() != null ? doctor.getReviewCount() : 0)
                 .status(doctor.getStatus() != null ? doctor.getStatus() : "INACTIVE")
+                .primaryBranchId(doctor.getPrimaryBranchId() != null ? doctor.getPrimaryBranchId().toString() : null)
+                .isMultiBranch(doctor.getIsMultiBranch() != null ? doctor.getIsMultiBranch() : false)
                 .createdAt(doctor.getCreatedAt() != null ? doctor.getCreatedAt().toString() : "")
                 .updatedAt(doctor.getUpdatedAt() != null ? doctor.getUpdatedAt().toString() : "")
                 .awards(awards) // Properly populated awards
