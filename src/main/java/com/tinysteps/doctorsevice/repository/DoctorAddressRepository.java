@@ -2,6 +2,8 @@ package com.tinysteps.doctorsevice.repository;
 
 import com.tinysteps.doctorsevice.entity.DoctorAddress;
 import com.tinysteps.doctorsevice.entity.DoctorAddressId;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -19,9 +21,19 @@ public interface DoctorAddressRepository extends JpaRepository<DoctorAddress, Do
     List<DoctorAddress> findByDoctorId(UUID doctorId);
 
     /**
+     * Find all addresses for a specific doctor with pagination
+     */
+    Page<DoctorAddress> findByDoctorId(UUID doctorId, Pageable pageable);
+
+    /**
      * Find all doctors at a specific address
      */
     List<DoctorAddress> findByAddressId(UUID addressId);
+
+    /**
+     * Find all doctors at a specific address with pagination
+     */
+    Page<DoctorAddress> findByAddressId(UUID addressId, Pageable pageable);
 
     /**
      * Find doctors by address and practice role
@@ -32,6 +44,16 @@ public interface DoctorAddressRepository extends JpaRepository<DoctorAddress, Do
      * Find doctor addresses by practice role
      */
     List<DoctorAddress> findByDoctorIdAndPracticeRole(UUID doctorId, DoctorAddress.PracticeRole practiceRole);
+
+    /**
+     * Find relationships by practice role
+     */
+    List<DoctorAddress> findByPracticeRole(DoctorAddress.PracticeRole practiceRole);
+
+    /**
+     * Find relationships by practice role with pagination
+     */
+    Page<DoctorAddress> findByPracticeRole(DoctorAddress.PracticeRole practiceRole, Pageable pageable);
 
     /**
      * Check if doctor is associated with a specific address

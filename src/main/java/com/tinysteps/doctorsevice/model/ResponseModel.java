@@ -22,4 +22,43 @@ public class ResponseModel<T> {
     public static <T> ResponseModelBuilder<T> builder() {
         return (ResponseModelBuilder<T>) new ResponseModelBuilder<Object>();
     }
+
+    // Success response with data
+    public static <T> ResponseModel<T> success(String message, T data) {
+        return ResponseModel.<T>builder()
+                .status(HttpStatus.OK)
+                .code(HttpStatus.OK.value())
+                .message(message)
+                .data(data)
+                .build();
+    }
+
+    // Success response without data
+    public static <T> ResponseModel<T> success(String message) {
+        return ResponseModel.<T>builder()
+                .status(HttpStatus.OK)
+                .code(HttpStatus.OK.value())
+                .message(message)
+                .build();
+    }
+
+    // Created response
+    public static <T> ResponseModel<T> created(String message, T data) {
+        return ResponseModel.<T>builder()
+                .status(HttpStatus.CREATED)
+                .code(HttpStatus.CREATED.value())
+                .message(message)
+                .data(data)
+                .build();
+    }
+
+    // Error response
+    public static <T> ResponseModel<T> error(HttpStatus status, String message, List<ErrorModel> errors) {
+        return ResponseModel.<T>builder()
+                .status(status)
+                .code(status.value())
+                .message(message)
+                .errors(errors)
+                .build();
+    }
 }

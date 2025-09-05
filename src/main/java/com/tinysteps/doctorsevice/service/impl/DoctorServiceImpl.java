@@ -1,6 +1,7 @@
 package com.tinysteps.doctorsevice.service.impl;
 
 import com.tinysteps.doctorsevice.entity.Doctor;
+import com.tinysteps.doctorsevice.entity.DoctorAddress;
 import com.tinysteps.doctorsevice.exception.DoctorNotFoundException;
 import com.tinysteps.doctorsevice.integration.model.UserModel;
 import com.tinysteps.doctorsevice.mapper.*;
@@ -8,11 +9,11 @@ import com.tinysteps.doctorsevice.model.*;
 import com.tinysteps.doctorsevice.repository.*;
 import com.tinysteps.doctorsevice.service.DoctorService;
 import com.tinysteps.doctorsevice.service.DoctorAddressService;
-import com.tinysteps.doctorservice.service.SecurityService;
 import com.tinysteps.doctorsevice.dto.UserRegistrationRequest;
 import com.tinysteps.doctorsevice.integration.service.AuthServiceIntegration;
 import com.tinysteps.doctorsevice.integration.service.UserIntegrationService;
 import com.tinysteps.doctorsevice.integration.model.UserUpdateRequest;
+import com.tinysteps.doctorsevice.service.SecurityService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -165,8 +166,11 @@ public class DoctorServiceImpl implements DoctorService {
                 .collect(Collectors.toList());
 
         // Get address IDs from doctor_addresses junction table
-        List<String> addressIds = doctor.getAddressIds() != null ? 
-                doctor.getAddressIds().stream().map(UUID::toString).collect(Collectors.toList()) : 
+        List<String> addressIds = doctor.getDoctorAddresses() != null ?
+                doctor.getDoctorAddresses().stream()
+                        .map(DoctorAddress::getAddressId)
+                        .map(UUID::toString)
+                        .collect(Collectors.toList()) :
                 new ArrayList<>();
 
         List<RecommendationResponseDto> recommendations = recommendationRepository.findByDoctorId(doctor.getId())
@@ -714,8 +718,10 @@ public class DoctorServiceImpl implements DoctorService {
                     requestDto.isVerified(),
                     requestDto.ratingAverage(),
                     requestDto.reviewCount(),
-
-                    StringUtils.hasText(requestDto.status()) ? requestDto.status() : "ACTIVE");
+                    StringUtils.hasText(requestDto.status()) ? requestDto.status() : "ACTIVE",
+                    null, // primaryBranchId - will be set later if needed
+                    false // isMultiBranch - default to false
+            );
             log.info("Creating doctor with request: {}", doctorRequestDto);
             var doctor = doctorMapper.fromRequestDto(doctorRequestDto);
             log.info("Doctor from mapper :{}", doctor);
@@ -769,10 +775,16 @@ public class DoctorServiceImpl implements DoctorService {
 
     @Override
     public List<DoctorResponseDto> findByBranchAndVerificationStatus(UUID branchId, Boolean isVerified) {
-        List<Doctor> doctors = doctorRepository.findByPrimaryBranchIdAndIsVerified(branchId, isVerified);
+        Page<Doctor> doctors = doctorRepository.findByPrimaryBranchIdAndIsVerified(branchId, isVerified, Pageable.unpaged());
         return doctors.stream()
                 .map(this::createDoctorResponseDto)
                 .collect(Collectors.toList());
+    }
+
+    @Override
+    public Page<DoctorResponseDto> findByBranchAndVerificationStatus(UUID branchId, Boolean isVerified, Pageable pageable) {
+        Page<Doctor> doctors = doctorRepository.findByPrimaryBranchIdAndIsVerified(branchId, isVerified, pageable);
+        return doctors.map(this::createDoctorResponseDto);
     }
 
     @Override

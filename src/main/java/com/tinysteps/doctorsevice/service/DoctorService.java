@@ -41,9 +41,13 @@ public interface DoctorService {
     
     // Branch-based Operations
     Page<DoctorResponseDto> findByBranch(UUID primaryBranchId, Pageable pageable);
+    List<DoctorResponseDto> findByBranch(UUID primaryBranchId);
     Page<DoctorResponseDto> findByBranchAndStatus(UUID primaryBranchId, String status, Pageable pageable);
+    List<DoctorResponseDto> findByBranchAndStatus(UUID primaryBranchId, String status);
     Page<DoctorResponseDto> findByBranchAndVerificationStatus(UUID primaryBranchId, Boolean isVerified, Pageable pageable);
+    List<DoctorResponseDto> findByBranchAndVerificationStatus(UUID primaryBranchId, Boolean isVerified);
     Page<DoctorResponseDto> findMultiBranchDoctors(Pageable pageable);
+    List<DoctorResponseDto> findMultiBranchDoctors();
     List<DoctorResponseDto> findDoctorsByCurrentUserBranch();
     Page<DoctorResponseDto> findDoctorsByCurrentUserBranch(Pageable pageable);
 
