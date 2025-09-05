@@ -1,4 +1,4 @@
-package com.tinysteps.doctorservice.service;
+package com.tinysteps.doctorsevice.service;
 
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -19,7 +19,7 @@ public class SecurityService {
      */
     public String getCurrentUserId() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        
+
         if (authentication == null || !authentication.isAuthenticated()) {
             throw new RuntimeException("User is not authenticated");
         }
@@ -31,7 +31,7 @@ public class SecurityService {
             }
             return userId;
         }
-        
+
         throw new RuntimeException("Invalid authentication token");
     }
 
@@ -41,7 +41,7 @@ public class SecurityService {
      */
     public List<String> getCurrentUserRoles() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        
+
         if (authentication == null || !authentication.isAuthenticated()) {
             throw new RuntimeException("User is not authenticated");
         }
@@ -49,7 +49,7 @@ public class SecurityService {
         if (authentication.getPrincipal() instanceof Jwt jwt) {
             return jwt.getClaimAsStringList("role");
         }
-        
+
         throw new RuntimeException("Invalid authentication token");
     }
 
@@ -84,15 +84,15 @@ public class SecurityService {
     public boolean canAccessUserResources(String targetUserId) {
         try {
             String currentUserId = getCurrentUserId();
-            
+
             // Users can access their own resources
             if (currentUserId.equals(targetUserId)) {
                 return true;
             }
-            
+
             // Admins can access any resources
             return isAdmin();
-            
+
         } catch (Exception e) {
             return false;
         }
@@ -116,7 +116,7 @@ public class SecurityService {
      */
     public List<UUID> getBranchIds() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        
+
         if (authentication == null || !authentication.isAuthenticated()) {
             throw new RuntimeException("User is not authenticated");
         }
@@ -126,12 +126,12 @@ public class SecurityService {
             if (branchIdStrings == null || branchIdStrings.isEmpty()) {
                 return List.of(); // Return empty list if no branch IDs
             }
-            
+
             return branchIdStrings.stream()
                     .map(UUID::fromString)
                     .collect(Collectors.toList());
         }
-        
+
         throw new RuntimeException("Invalid authentication token");
     }
 
@@ -141,7 +141,7 @@ public class SecurityService {
      */
     public UUID getPrimaryBranchId() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        
+
         if (authentication == null || !authentication.isAuthenticated()) {
             throw new RuntimeException("User is not authenticated");
         }
@@ -151,10 +151,10 @@ public class SecurityService {
             if (primaryBranchIdString == null || primaryBranchIdString.isEmpty()) {
                 return null; // Return null if no primary branch ID
             }
-            
+
             return UUID.fromString(primaryBranchIdString);
         }
-        
+
         throw new RuntimeException("Invalid authentication token");
     }
 
