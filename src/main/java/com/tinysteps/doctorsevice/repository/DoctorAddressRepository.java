@@ -91,4 +91,20 @@ public interface DoctorAddressRepository extends JpaRepository<DoctorAddress, Do
      * Count total doctors at an address
      */
     long countByAddressId(UUID addressId);
+
+    /**
+     * Find doctor-address relationships by doctor and address
+     */
+    List<DoctorAddress> findByDoctorIdAndAddressId(UUID doctorId, UUID addressId);
+
+    /**
+     * Check if doctor-address relationship exists with specific role
+     */
+    boolean existsByDoctorIdAndAddressIdAndPracticeRole(UUID doctorId, UUID addressId,
+            DoctorAddress.PracticeRole practiceRole);
+
+    /**
+     * Delete doctor-address relationships by doctor and address
+     */
+    void deleteByDoctorIdAndAddressId(UUID doctorId, UUID addressId);
 }
