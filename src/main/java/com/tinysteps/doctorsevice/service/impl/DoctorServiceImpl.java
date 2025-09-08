@@ -2,6 +2,7 @@ package com.tinysteps.doctorsevice.service.impl;
 
 import com.tinysteps.doctorsevice.entity.Doctor;
 import com.tinysteps.doctorsevice.entity.DoctorAddress;
+import com.tinysteps.doctorsevice.repository.DoctorAddressRepository;
 import com.tinysteps.doctorsevice.exception.DoctorNotFoundException;
 import com.tinysteps.doctorsevice.integration.model.UserModel;
 import com.tinysteps.doctorsevice.mapper.*;
@@ -19,6 +20,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
 import java.math.BigDecimal;
@@ -56,6 +58,7 @@ public class DoctorServiceImpl implements DoctorService {
     private final UserIntegrationService userIntegrationService;
     private final DoctorAddressService doctorAddressService;
     private final SecurityService securityService;
+    private final DoctorAddressRepository doctorAddressRepository;
 
     public DoctorServiceImpl(DoctorRepository doctorRepository, DoctorMapper doctorMapper,
             SpecializationMapper specializationMapper, SpecializationRepository specializationRepository,
@@ -69,7 +72,8 @@ public class DoctorServiceImpl implements DoctorService {
 
             RecommendationMapper recommendationMapper, RecommendationRepository recommendationRepository,
             AuthServiceIntegration authServiceIntegration, UserIntegrationService userIntegrationService,
-            DoctorAddressService doctorAddressService, SecurityService securityService) {
+            DoctorAddressService doctorAddressService, SecurityService securityService,
+            DoctorAddressRepository doctorAddressRepository) {
         this.doctorRepository = doctorRepository;
         this.doctorMapper = doctorMapper;
         this.specializationMapper = specializationMapper;
@@ -95,6 +99,7 @@ public class DoctorServiceImpl implements DoctorService {
         this.userIntegrationService = userIntegrationService;
         this.doctorAddressService = doctorAddressService;
         this.securityService = securityService;
+        this.doctorAddressRepository = doctorAddressRepository;
     }
 
     /**
@@ -165,13 +170,11 @@ public class DoctorServiceImpl implements DoctorService {
                 .map(photoMapper::toResponseDto)
                 .collect(Collectors.toList());
 
-        // Get address IDs from doctor_addresses junction table
-        List<String> addressIds = doctor.getDoctorAddresses() != null ?
-                doctor.getDoctorAddresses().stream()
-                        .map(DoctorAddress::getAddressId)
-                        .map(UUID::toString)
-                        .collect(Collectors.toList()) :
-                new ArrayList<>();
+        // Get address IDs from doctor_addresses junction table using repository
+        List<String> addressIds = doctorAddressRepository.findAddressIdsByDoctorId(doctor.getId())
+                .stream()
+                .map(UUID::toString)
+                .collect(Collectors.toList());
 
         List<RecommendationResponseDto> recommendations = recommendationRepository.findByDoctorId(doctor.getId())
                 .stream()
@@ -212,6 +215,7 @@ public class DoctorServiceImpl implements DoctorService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public DoctorResponseDto create(DoctorRequestDto requestDto) {
         var doctor = doctorMapper.fromRequestDto(requestDto);
         var savedDoctor = doctorRepository.save(doctor);
@@ -219,6 +223,7 @@ public class DoctorServiceImpl implements DoctorService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public DoctorResponseDto findById(UUID id) {
 
         return doctorRepository.findById(id)
