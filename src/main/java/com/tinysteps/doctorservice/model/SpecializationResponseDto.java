@@ -1,0 +1,12 @@
+package com.tinysteps.doctorservice.model;
+
+import lombok.Builder;
+
+@Builder
+public record SpecializationResponseDto(
+        String id,
+        String doctorId,
+        String speciality,
+        String subspecialization
+) {
+}
