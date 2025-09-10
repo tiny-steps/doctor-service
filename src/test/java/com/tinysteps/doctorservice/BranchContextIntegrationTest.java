@@ -1,11 +1,11 @@
-package com.tinysteps.doctorsevice;
+package com.tinysteps.doctorservice;
 
-import com.tinysteps.doctorsevice.entity.Doctor;
-import com.tinysteps.doctorsevice.model.DoctorRequestDto;
-import com.tinysteps.doctorsevice.model.DoctorResponseDto;
-import com.tinysteps.doctorsevice.repository.DoctorRepository;
-import com.tinysteps.doctorsevice.service.DoctorService;
-import com.tinysteps.doctorsevice.service.SecurityService;
+import com.tinysteps.doctorservice.entity.Doctor;
+import com.tinysteps.doctorservice.model.DoctorRequestDto;
+import com.tinysteps.doctorservice.model.DoctorResponseDto;
+import com.tinysteps.doctorservice.repository.DoctorRepository;
+import com.tinysteps.doctorservice.service.DoctorService;
+import com.tinysteps.doctorservice.service.SecurityService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;

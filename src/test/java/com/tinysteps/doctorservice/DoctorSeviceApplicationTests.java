@@ -1,4 +1,4 @@
-package com.tinysteps.doctorsevice;
+package com.tinysteps.doctorservice;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
