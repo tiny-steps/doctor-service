@@ -23,9 +23,14 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
+import jakarta.persistence.TypedQuery;
 import java.math.BigDecimal;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -59,6 +64,9 @@ public class DoctorServiceImpl implements DoctorService {
     private final DoctorAddressService doctorAddressService;
     private final SecurityService securityService;
     private final DoctorAddressRepository doctorAddressRepository;
+
+    @PersistenceContext
+    private EntityManager entityManager;
 
     public DoctorServiceImpl(DoctorRepository doctorRepository, DoctorMapper doctorMapper,
             SpecializationMapper specializationMapper, SpecializationRepository specializationRepository,
@@ -118,12 +126,15 @@ public class DoctorServiceImpl implements DoctorService {
                 if (user != null) {
                     email = user.email() != null ? user.email() : "";
                     phone = user.phone() != null ? user.phone() : "";
-                    log.info("Successfully fetched user data for doctor {}: email={}, phone={}", doctor.getId(), email, phone);
+                    log.info("Successfully fetched user data for doctor {}: email={}, phone={}", doctor.getId(), email,
+                            phone);
                 } else {
-                    log.warn("User service returned null for userId: {} (doctor: {})", doctor.getUserId(), doctor.getId());
+                    log.warn("User service returned null for userId: {} (doctor: {})", doctor.getUserId(),
+                            doctor.getId());
                 }
             } catch (Exception e) {
-                log.error("Failed to fetch user information for doctor {} with userId {}: {}", doctor.getId(), doctor.getUserId(), e.getMessage(), e);
+                log.error("Failed to fetch user information for doctor {} with userId {}: {}", doctor.getId(),
+                        doctor.getUserId(), e.getMessage(), e);
             }
         } else {
             log.warn("Doctor {} has no userId associated", doctor.getId());
@@ -499,7 +510,8 @@ public class DoctorServiceImpl implements DoctorService {
     }
 
     @Override
-    public Page<DoctorResponseDto> findByLocationAndPracticeRole(UUID addressId, String practiceRole, Pageable pageable) {
+    public Page<DoctorResponseDto> findByLocationAndPracticeRole(UUID addressId, String practiceRole,
+            Pageable pageable) {
         return doctorRepository.findByAddressLocationAndPracticeRole(addressId, practiceRole, pageable)
                 .map(this::createDoctorResponseDto);
     }
@@ -782,14 +794,16 @@ public class DoctorServiceImpl implements DoctorService {
 
     @Override
     public List<DoctorResponseDto> findByBranchAndVerificationStatus(UUID branchId, Boolean isVerified) {
-        Page<Doctor> doctors = doctorRepository.findByPrimaryBranchIdAndIsVerified(branchId, isVerified, Pageable.unpaged());
+        Page<Doctor> doctors = doctorRepository.findByPrimaryBranchIdAndIsVerified(branchId, isVerified,
+                Pageable.unpaged());
         return doctors.stream()
                 .map(this::createDoctorResponseDto)
                 .collect(Collectors.toList());
     }
 
     @Override
-    public Page<DoctorResponseDto> findByBranchAndVerificationStatus(UUID branchId, Boolean isVerified, Pageable pageable) {
+    public Page<DoctorResponseDto> findByBranchAndVerificationStatus(UUID branchId, Boolean isVerified,
+            Pageable pageable) {
         Page<Doctor> doctors = doctorRepository.findByPrimaryBranchIdAndIsVerified(branchId, isVerified, pageable);
         return doctors.map(this::createDoctorResponseDto);
     }
@@ -818,5 +832,135 @@ public class DoctorServiceImpl implements DoctorService {
     public List<DoctorResponseDto> findDoctorsByCurrentUserBranch() {
         UUID primaryBranchId = securityService.getPrimaryBranchId();
         return findByBranch(primaryBranchId);
+    }
+
+    @Override
+    public Page<DoctorResponseDto> searchDoctorsInBranch(UUID branchId, String name, String speciality,
+            Boolean isVerified,
+            BigDecimal minRating, Pageable pageable) {
+        // Build specification based on provided parameters
+        StringBuilder queryBuilder = new StringBuilder("SELECT d FROM Doctor d WHERE d.primaryBranchId = :branchId");
+        Map<String, Object> params = new HashMap<>();
+        params.put("branchId", branchId);
+
+        if (name != null && !name.isEmpty()) {
+            queryBuilder.append(" AND (d.name ILIKE :name OR d.firstName ILIKE :name OR d.lastName ILIKE :name)");
+            params.put("name", "%" + name + "%");
+        }
+
+        if (speciality != null && !speciality.isEmpty()) {
+            queryBuilder.append(" AND d.speciality ILIKE :speciality");
+            params.put("speciality", "%" + speciality + "%");
+        }
+
+        if (isVerified != null) {
+            queryBuilder.append(" AND d.isVerified = :isVerified");
+            params.put("isVerified", isVerified);
+        }
+
+        if (minRating != null) {
+            queryBuilder.append(" AND d.ratingAverage >= :minRating");
+            params.put("minRating", minRating);
+        }
+
+        // Execute query with pagination
+        TypedQuery<Doctor> query = entityManager.createQuery(queryBuilder.toString(), Doctor.class);
+        params.forEach(query::setParameter);
+
+        // Apply pagination
+        query.setFirstResult((int) pageable.getOffset());
+        query.setMaxResults(pageable.getPageSize());
+
+        List<Doctor> doctors = query.getResultList();
+
+        // Get total count for pagination
+        String countQueryStr = queryBuilder.toString().replace("SELECT d FROM Doctor d",
+                "SELECT COUNT(d) FROM Doctor d");
+        TypedQuery<Long> countQuery = entityManager.createQuery(countQueryStr, Long.class);
+        params.forEach(countQuery::setParameter);
+        long total = countQuery.getSingleResult();
+
+        // Convert to DTOs
+        List<DoctorResponseDto> doctorDtos = doctors.stream()
+                .map(this::createDoctorResponseDto)
+                .collect(Collectors.toList());
+
+        return new PageImpl<>(doctorDtos, pageable, total);
+    }
+
+    @Override
+    public Map<String, Object> getBranchStatistics(UUID branchId) {
+        Map<String, Object> statistics = new HashMap<>();
+
+        // Total doctors in branch
+        long totalDoctors = doctorRepository.countByPrimaryBranchId(branchId);
+        statistics.put("totalDoctors", totalDoctors);
+
+        // Verified doctors
+        long verifiedDoctors = doctorRepository.countByPrimaryBranchIdAndIsVerified(branchId, true);
+        statistics.put("verifiedDoctors", verifiedDoctors);
+
+        // Active doctors
+        long activeDoctors = doctorRepository.countByPrimaryBranchIdAndStatus(branchId, "ACTIVE");
+        statistics.put("activeDoctors", activeDoctors);
+
+        // Doctors by gender
+        long maleDoctors = doctorRepository.countByPrimaryBranchIdAndGender(branchId, "MALE");
+        long femaleDoctors = doctorRepository.countByPrimaryBranchIdAndGender(branchId, "FEMALE");
+        statistics.put("maleDoctors", maleDoctors);
+        statistics.put("femaleDoctors", femaleDoctors);
+
+        // Average rating
+        Double avgRating = doctorRepository.findAverageRatingByPrimaryBranchId(branchId);
+        statistics.put("averageRating", avgRating != null ? avgRating : 0.0);
+
+        // Doctors by experience range
+        long experiencedDoctors = doctorRepository.countByPrimaryBranchIdAndExperienceYearsGreaterThanEqual(branchId,
+                10);
+        long midCareerDoctors = doctorRepository.countByPrimaryBranchIdAndExperienceYearsBetween(branchId, 5, 9);
+        long newDoctors = doctorRepository.countByPrimaryBranchIdAndExperienceYearsLessThan(branchId, 5);
+        statistics.put("experiencedDoctors", experiencedDoctors);
+        statistics.put("midCareerDoctors", midCareerDoctors);
+        statistics.put("newDoctors", newDoctors);
+
+        return statistics;
+    }
+
+    @Override
+    public Map<String, Object> getCurrentUserBranchStatistics() {
+        UUID primaryBranchId = securityService.getPrimaryBranchId();
+        return getBranchStatistics(primaryBranchId);
+    }
+
+    @Override
+    public Map<String, Object> getAllBranchesStatistics() {
+        Map<String, Object> statistics = new HashMap<>();
+
+        // Get all branches for current user
+        List<UUID> branchIds = securityService.getBranchIds();
+
+        // Total doctors across all accessible branches
+        long totalDoctors = doctorRepository.countByPrimaryBranchIdIn(branchIds);
+        statistics.put("totalDoctors", totalDoctors);
+
+        // Verified doctors across all branches
+        long verifiedDoctors = doctorRepository.countByPrimaryBranchIdInAndIsVerified(branchIds, true);
+        statistics.put("verifiedDoctors", verifiedDoctors);
+
+        // Active doctors across all branches
+        long activeDoctors = doctorRepository.countByPrimaryBranchIdInAndStatus(branchIds, "ACTIVE");
+        statistics.put("activeDoctors", activeDoctors);
+
+        // Doctors by gender across all branches
+        long maleDoctors = doctorRepository.countByPrimaryBranchIdInAndGender(branchIds, "MALE");
+        long femaleDoctors = doctorRepository.countByPrimaryBranchIdInAndGender(branchIds, "FEMALE");
+        statistics.put("maleDoctors", maleDoctors);
+        statistics.put("femaleDoctors", femaleDoctors);
+
+        // Average rating across all branches
+        Double avgRating = doctorRepository.findAverageRatingByPrimaryBranchIdIn(branchIds);
+        statistics.put("averageRating", avgRating != null ? avgRating : 0.0);
+
+        return statistics;
     }
 }
