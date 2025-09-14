@@ -2,6 +2,7 @@ package com.tinysteps.doctorservice.repository;
 
 import com.tinysteps.doctorservice.entity.DoctorAddress;
 import com.tinysteps.doctorservice.entity.DoctorAddressId;
+import com.tinysteps.doctorservice.entity.PracticeRole;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -38,22 +39,22 @@ public interface DoctorAddressRepository extends JpaRepository<DoctorAddress, Do
     /**
      * Find doctors by address and practice role
      */
-    List<DoctorAddress> findByAddressIdAndPracticeRole(UUID addressId, DoctorAddress.PracticeRole practiceRole);
+    List<DoctorAddress> findByAddressIdAndPracticeRole(UUID addressId, PracticeRole practiceRole);
 
     /**
      * Find doctor addresses by practice role
      */
-    List<DoctorAddress> findByDoctorIdAndPracticeRole(UUID doctorId, DoctorAddress.PracticeRole practiceRole);
+    List<DoctorAddress> findByDoctorIdAndPracticeRole(UUID doctorId, PracticeRole practiceRole);
 
     /**
      * Find relationships by practice role
      */
-    List<DoctorAddress> findByPracticeRole(DoctorAddress.PracticeRole practiceRole);
+    List<DoctorAddress> findByPracticeRole(PracticeRole practiceRole);
 
     /**
      * Find relationships by practice role with pagination
      */
-    Page<DoctorAddress> findByPracticeRole(DoctorAddress.PracticeRole practiceRole, Pageable pageable);
+    Page<DoctorAddress> findByPracticeRole(PracticeRole practiceRole, Pageable pageable);
 
     /**
      * Check if doctor is associated with a specific address
@@ -100,8 +101,7 @@ public interface DoctorAddressRepository extends JpaRepository<DoctorAddress, Do
     /**
      * Check if doctor-address relationship exists with specific role
      */
-    boolean existsByDoctorIdAndAddressIdAndPracticeRole(UUID doctorId, UUID addressId,
-            DoctorAddress.PracticeRole practiceRole);
+    boolean existsByDoctorIdAndAddressIdAndPracticeRole(UUID doctorId, UUID addressId, PracticeRole practiceRole);
 
     /**
      * Delete doctor-address relationships by doctor and address

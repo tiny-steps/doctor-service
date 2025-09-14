@@ -19,7 +19,7 @@ import java.util.stream.Collectors;
 @Service
 @Slf4j
 public class SecurityService {
-    
+
     private static final Set<String> VALID_DOMAIN_TYPES = Set.of(
         "healthcare", "ecommerce", "cab-booking", "payment", "financial"
     );
@@ -31,39 +31,32 @@ public class SecurityService {
      */
     public String getCurrentUserId() {
         log.debug("Retrieving current user ID from JWT token");
-        
+
         try {
             Authentication auth = SecurityContextHolder.getContext().getAuthentication();
             if (auth == null) {
                 log.warn("No authentication context found");
                 throw new SecurityException("Authentication context not found");
             }
-            
             if (!auth.isAuthenticated()) {
                 log.warn("User is not authenticated");
                 throw new SecurityException("User is not authenticated");
             }
-            
             if (!(auth.getPrincipal() instanceof Jwt jwt)) {
                 log.warn("Authentication principal is not a JWT token");
                 throw new SecurityException("Invalid authentication token type");
             }
-            
             String userId = jwt.getClaimAsString("id");
             if (!StringUtils.hasText(userId)) {
                 log.warn("User ID claim is missing or empty in JWT token");
                 throw new SecurityException("User ID not found in token claims");
             }
-            
-            // Validate user ID format (basic validation)
             if (userId.trim().length() < 1) {
                 log.warn("User ID claim contains only whitespace");
                 throw new SecurityException("Invalid user ID format");
             }
-            
             log.debug("Successfully retrieved user ID: {}", userId);
             return userId.trim();
-            
         } catch (IllegalArgumentException e) {
             log.error("Invalid user ID format: {}", e.getMessage());
             throw new SecurityException("Invalid user ID format", e);
@@ -83,39 +76,32 @@ public class SecurityService {
      */
     public List<String> getCurrentUserRoles() {
         log.debug("Retrieving current user roles from JWT token");
-        
+
         try {
             Authentication auth = SecurityContextHolder.getContext().getAuthentication();
             if (auth == null) {
                 log.debug("No authentication context found, returning empty roles list");
                 return List.of();
             }
-            
             if (!auth.isAuthenticated()) {
                 log.debug("User is not authenticated, returning empty roles list");
                 return List.of();
             }
-            
             if (!(auth.getPrincipal() instanceof Jwt jwt)) {
                 log.debug("Authentication principal is not a JWT token, returning empty roles list");
                 return List.of();
             }
-            
             List<String> roles = jwt.getClaimAsStringList("role");
             if (roles == null || roles.isEmpty()) {
                 log.debug("No roles found in JWT token");
                 return List.of();
             }
-            
-            // Filter out null, empty, or whitespace-only roles
             List<String> validRoles = roles.stream()
                     .filter(StringUtils::hasText)
                     .map(String::trim)
                     .collect(Collectors.toList());
-            
             log.debug("Successfully retrieved {} valid roles", validRoles.size());
             return validRoles;
-            
         } catch (Exception e) {
             log.error("Unexpected error retrieving user roles: {}", e.getMessage());
             return List.of(); // Fail-safe: return empty list instead of throwing
@@ -140,9 +126,7 @@ public class SecurityService {
      * Check if the current user is an admin
      * @return true if user has ADMIN role, false otherwise
      */
-    public boolean isAdmin() {
-        return hasRole("ADMIN");
-    }
+    public boolean isAdmin() { return hasRole("ADMIN"); }
 
     /**
      * Check if the current user can access resources for the given user ID
@@ -192,69 +176,57 @@ public class SecurityService {
      */
     public List<UUID> getContextIds(String domainType) {
         log.debug("Retrieving context IDs for domain type: {}", domainType);
-        
+
         // Input validation
         if (!StringUtils.hasText(domainType)) {
             log.warn("Domain type is null or empty");
             throw new SecurityException("Domain type cannot be null or empty");
         }
-        
+
         if (!VALID_DOMAIN_TYPES.contains(domainType.trim())) {
             log.warn("Invalid domain type provided: {}", domainType);
             throw new SecurityException("Invalid domain type: " + domainType);
         }
-        
+
         try {
             Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-            if (auth == null) {
-                log.debug("No authentication context found");
+            if (auth == null || !auth.isAuthenticated()) {
                 throw new SecurityException("User is not authenticated");
             }
-            
-            if (!auth.isAuthenticated()) {
-                log.debug("User is not authenticated");
-                throw new SecurityException("User is not authenticated");
-            }
-            
+
             if (!(auth.getPrincipal() instanceof Jwt jwt)) {
-                log.debug("Authentication principal is not a JWT token");
                 throw new SecurityException("Invalid authentication token");
             }
-            
+
+            // Try snake_case then camelCase
             List<String> contextIdStrings = jwt.getClaimAsStringList("context_ids");
+            if (contextIdStrings == null || contextIdStrings.isEmpty()) {
+                contextIdStrings = jwt.getClaimAsStringList("contextIds");
+            }
             String tokenDomainType = jwt.getClaimAsString("domain_type");
-            
+            if (!StringUtils.hasText(tokenDomainType)) {
+                tokenDomainType = jwt.getClaimAsString("domainType");
+            }
             if (contextIdStrings == null || contextIdStrings.isEmpty()) {
                 log.debug("No context IDs found in JWT token for domain: {}", domainType);
                 return List.of();
             }
-            
             if (!domainType.equals(tokenDomainType)) {
                 log.debug("Domain type mismatch - requested: {}, token: {}", domainType, tokenDomainType);
                 return List.of();
             }
-            
-            // Validate and convert context ID strings to UUIDs
             List<UUID> contextIds = contextIdStrings.stream()
                     .filter(StringUtils::hasText)
                     .map(String::trim)
-                    .map(contextIdStr -> {
-                        try {
-                            return UUID.fromString(contextIdStr);
-                        } catch (IllegalArgumentException e) {
-                            log.warn("Invalid UUID format for context ID: {}", contextIdStr);
-                            return null;
-                        }
+                    .map(s -> {
+                        try { return UUID.fromString(s); } catch (Exception e) { log.warn("Invalid UUID in contextIds claim: {}", s); return null; }
                     })
-                    .filter(uuid -> uuid != null)
+                    .filter(u -> u != null)
                     .collect(Collectors.toList());
-            
-            log.debug("Successfully retrieved {} valid context IDs for domain: {}", contextIds.size(), domainType);
+            log.debug("Retrieved {} context IDs for domain {}", contextIds.size(), domainType);
             return contextIds;
-            
-        } catch (SecurityException e) {
-            throw e; // Re-throw security exceptions
-        } catch (Exception e) {
+        } catch (SecurityException e) { throw e; }
+        catch (Exception e) {
             log.error("Unexpected error retrieving context IDs for domain {}: {}", domainType, e.getMessage());
             throw new SecurityException("Failed to retrieve context IDs: " + e.getMessage());
         }
@@ -268,65 +240,57 @@ public class SecurityService {
      */
     public UUID getPrimaryContextId(String domainType) {
         log.debug("Retrieving primary context ID for domain type: {}", domainType);
-        
+
         // Input validation
         if (!StringUtils.hasText(domainType)) {
-            log.warn("Domain type is null or empty");
             throw new SecurityException("Domain type cannot be null or empty");
         }
-        
+
         if (!VALID_DOMAIN_TYPES.contains(domainType.trim())) {
-            log.warn("Invalid domain type provided: {}", domainType);
             throw new SecurityException("Invalid domain type: " + domainType);
         }
-        
+
         try {
             Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-            if (auth == null) {
-                log.debug("No authentication context found");
+            if (auth == null || !auth.isAuthenticated()) {
                 throw new SecurityException("User is not authenticated");
             }
-            
-            if (!auth.isAuthenticated()) {
-                log.debug("User is not authenticated");
-                throw new SecurityException("User is not authenticated");
-            }
-            
+
             if (!(auth.getPrincipal() instanceof Jwt jwt)) {
-                log.debug("Authentication principal is not a JWT token");
                 throw new SecurityException("Invalid authentication token");
             }
-            
+
+            // Try snake_case then camelCase then legacy fallbacks
             String primaryContextIdString = jwt.getClaimAsString("primary_context_id");
-            String tokenDomainType = jwt.getClaimAsString("domain_type");
-            
             if (!StringUtils.hasText(primaryContextIdString)) {
-                // Fallback to legacy primary_branch_id for backward compatibility
-                primaryContextIdString = jwt.getClaimAsString("primary_branch_id");
-                if (!StringUtils.hasText(primaryContextIdString)) {
-                    log.debug("No primary context ID found in JWT token for domain: {}", domainType);
-                    return null;
-                }
+                primaryContextIdString = jwt.getClaimAsString("primaryContextId");
             }
-            
+            if (!StringUtils.hasText(primaryContextIdString)) {
+                primaryContextIdString = jwt.getClaimAsString("primary_branch_id");
+            }
+            if (!StringUtils.hasText(primaryContextIdString)) {
+                primaryContextIdString = jwt.getClaimAsString("primaryBranchId");
+            }
+            String tokenDomainType = jwt.getClaimAsString("domain_type");
+            if (!StringUtils.hasText(tokenDomainType)) {
+                tokenDomainType = jwt.getClaimAsString("domainType");
+            }
+            if (!StringUtils.hasText(primaryContextIdString)) {
+                log.debug("No primary context ID found");
+                return null;
+            }
             if (!domainType.equals(tokenDomainType)) {
                 log.debug("Domain type mismatch - requested: {}, token: {}", domainType, tokenDomainType);
                 return null;
             }
-            
-            // Validate UUID format
             try {
-                UUID primaryContextId = UUID.fromString(primaryContextIdString.trim());
-                log.debug("Successfully retrieved primary context ID for domain: {}", domainType);
-                return primaryContextId;
+                return UUID.fromString(primaryContextIdString.trim());
             } catch (IllegalArgumentException e) {
                 log.warn("Invalid UUID format for primary context ID: {}", primaryContextIdString);
                 return null;
             }
-            
-        } catch (SecurityException e) {
-            throw e; // Re-throw security exceptions
-        } catch (Exception e) {
+        } catch (SecurityException e) { throw e; }
+        catch (Exception e) {
             log.error("Unexpected error retrieving primary context ID for domain {}: {}", domainType, e.getMessage());
             throw new SecurityException("Failed to retrieve primary context ID: " + e.getMessage());
         }
@@ -355,7 +319,7 @@ public class SecurityService {
             } catch (Exception e) {
                 // Fall back to legacy claims
             }
-            
+
             // Fall back to legacy branch claims
             List<String> branchIdStrings = jwt.getClaimAsStringList("branchIds");
             if (branchIdStrings == null || branchIdStrings.isEmpty()) {
@@ -393,7 +357,7 @@ public class SecurityService {
             } catch (Exception e) {
                 // Fall back to legacy claims
             }
-            
+
             // Fall back to legacy branch claims
             String primaryBranchIdString = jwt.getClaimAsString("primaryBranchId");
             if (primaryBranchIdString == null || primaryBranchIdString.isEmpty()) {
@@ -420,23 +384,23 @@ public class SecurityService {
      */
     public boolean hasAccessToContext(String contextId, String domainType) {
         log.debug("Checking context access for contextId: {}, domainType: {}", contextId, domainType);
-        
+
         // Input validation
         if (!StringUtils.hasText(contextId)) {
             log.debug("Context ID is null or empty, denying access");
             return false;
         }
-        
+
         if (!StringUtils.hasText(domainType)) {
             log.debug("Domain type is null or empty, denying access");
             return false;
         }
-        
+
         if (!VALID_DOMAIN_TYPES.contains(domainType.trim())) {
             log.debug("Invalid domain type: {}, denying access", domainType);
             return false;
         }
-        
+
         try {
             UUID contextUuid = UUID.fromString(contextId.trim());
             boolean hasAccess = hasAccessToContext(contextUuid, domainType);
@@ -459,23 +423,23 @@ public class SecurityService {
      */
     public boolean hasAccessToContext(UUID contextId, String domainType) {
         log.debug("Checking context access for contextId: {}, domainType: {}", contextId, domainType);
-        
+
         // Input validation
         if (contextId == null) {
             log.debug("Context ID is null, denying access");
             return false;
         }
-        
+
         if (!StringUtils.hasText(domainType)) {
             log.debug("Domain type is null or empty, denying access");
             return false;
         }
-        
+
         if (!VALID_DOMAIN_TYPES.contains(domainType.trim())) {
             log.debug("Invalid domain type: {}, denying access", domainType);
             return false;
         }
-        
+
         try {
             List<UUID> userContextIds = getContextIds(domainType);
             boolean hasAccess = userContextIds.contains(contextId);
@@ -521,13 +485,9 @@ public class SecurityService {
      */
     @Deprecated
     public boolean hasBranchAccess(String branchId) {
-        if (branchId == null || branchId.isEmpty()) {
-            return false;
-        }
-        
+        if (!StringUtils.hasText(branchId)) { return false; }
         try {
-            UUID branchUuid = UUID.fromString(branchId);
-            return hasBranchAccess(branchUuid);
+            return hasBranchAccess(UUID.fromString(branchId.trim()));
         } catch (IllegalArgumentException e) {
             return false;
         }
@@ -541,21 +501,24 @@ public class SecurityService {
      */
     @Deprecated
     public boolean hasBranchAccess(UUID branchId) {
-        if (branchId == null) {
-            return false;
-        }
-        
-        // Try new context-based access first
+        if (branchId == null) { return false; }
+        boolean contextAccess = false;
         try {
-            return hasAccessToContext(branchId, "healthcare");
+            contextAccess = hasAccessToContext(branchId, "healthcare");
         } catch (Exception e) {
-            // Fall back to legacy branch access
+            log.debug("Context-based access check threw exception, attempting legacy fallback: {}", e.getMessage());
         }
-        
+        if (contextAccess) {
+            return true; // Short-circuit if context-based access granted
+        }
+        // Fallback to legacy branch claims even if context-based returned false
         try {
             List<UUID> userBranchIds = getBranchIds();
-            return userBranchIds.contains(branchId);
+            boolean legacyAccess = userBranchIds.contains(branchId);
+            log.debug("Legacy branch access check for {} => {}", branchId, legacyAccess);
+            return legacyAccess;
         } catch (Exception e) {
+            log.debug("Legacy branch access check failed: {}", e.getMessage());
             return false;
         }
     }

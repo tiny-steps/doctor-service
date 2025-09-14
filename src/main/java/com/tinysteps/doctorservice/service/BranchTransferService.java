@@ -2,6 +2,7 @@ package com.tinysteps.doctorservice.service;
 
 import com.tinysteps.doctorservice.entity.Doctor;
 import com.tinysteps.doctorservice.entity.DoctorAddress;
+import com.tinysteps.doctorservice.entity.PracticeRole; // added
 import com.tinysteps.doctorservice.repository.DoctorRepository;
 import com.tinysteps.doctorservice.repository.DoctorAddressRepository;
 import com.tinysteps.doctorservice.service.SecurityService;
@@ -93,7 +94,7 @@ public class BranchTransferService {
      * Add doctor to additional branch without removing from current branches
      */
     @Transactional
-    public boolean addDoctorToBranch(UUID doctorId, UUID branchId, DoctorAddress.PracticeRole role) {
+    public boolean addDoctorToBranch(UUID doctorId, UUID branchId, PracticeRole role) { // updated type
         log.info("Adding doctor {} to branch {} with role {}", doctorId, branchId, role);
 
         try {

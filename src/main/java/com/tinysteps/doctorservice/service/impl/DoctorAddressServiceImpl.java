@@ -2,6 +2,7 @@ package com.tinysteps.doctorservice.service.impl;
 
 import com.tinysteps.doctorservice.entity.DoctorAddress;
 import com.tinysteps.doctorservice.entity.DoctorAddressId;
+import com.tinysteps.doctorservice.entity.PracticeRole;
 import com.tinysteps.doctorservice.mapper.DoctorAddressMapper;
 import com.tinysteps.doctorservice.model.DoctorAddressRequestDto;
 import com.tinysteps.doctorservice.model.DoctorAddressResponseDto;
@@ -31,18 +32,18 @@ public class DoctorAddressServiceImpl implements DoctorAddressService {
     @Transactional
     public DoctorAddressResponseDto addDoctorAddress(UUID doctorId, DoctorAddressRequestDto requestDto) {
         log.debug("Adding address {} to doctor {} with role {}", requestDto.addressId(), doctorId, requestDto.practiceRole());
-        
-        DoctorAddressId id = new DoctorAddressId(doctorId, requestDto.addressId(), DoctorAddress.PracticeRole.valueOf(requestDto.practiceRole()));
-        
+
+        DoctorAddressId id = new DoctorAddressId(doctorId, requestDto.addressId(), PracticeRole.valueOf(requestDto.practiceRole()));
+
         if (doctorAddressRepository.existsById(id)) {
             throw new IllegalArgumentException("Doctor address relationship already exists");
         }
-        
+
         DoctorAddress doctorAddress = new DoctorAddress();
         doctorAddress.setDoctorId(doctorId);
         doctorAddress.setAddressId(requestDto.addressId());
-        doctorAddress.setPracticeRole(DoctorAddress.PracticeRole.valueOf(requestDto.practiceRole()));
-        
+        doctorAddress.setPracticeRole(PracticeRole.valueOf(requestDto.practiceRole()));
+
         DoctorAddress saved = doctorAddressRepository.save(doctorAddress);
         return doctorAddressMapper.toResponseDto(saved);
     }
@@ -51,13 +52,13 @@ public class DoctorAddressServiceImpl implements DoctorAddressService {
     @Transactional
     public void removeDoctorAddress(UUID doctorId, UUID addressId, String practiceRole) {
         log.debug("Removing address {} from doctor {} with role {}", addressId, doctorId, practiceRole);
-        
-        DoctorAddressId id = new DoctorAddressId(doctorId, addressId, DoctorAddress.PracticeRole.valueOf(practiceRole));
-        
+
+        DoctorAddressId id = new DoctorAddressId(doctorId, addressId, PracticeRole.valueOf(practiceRole));
+
         if (!doctorAddressRepository.existsById(id)) {
             throw new IllegalArgumentException("Doctor address relationship does not exist");
         }
-        
+
         doctorAddressRepository.deleteById(id);
     }
 
@@ -92,28 +93,28 @@ public class DoctorAddressServiceImpl implements DoctorAddressService {
     @Override
     public List<DoctorAddressResponseDto> findByPracticeRole(String practiceRole) {
         log.debug("Finding doctor-address relationships by practice role {}", practiceRole);
-        List<DoctorAddress> relationships = doctorAddressRepository.findByPracticeRole(DoctorAddress.PracticeRole.valueOf(practiceRole));
+        List<DoctorAddress> relationships = doctorAddressRepository.findByPracticeRole(PracticeRole.valueOf(practiceRole));
         return doctorAddressMapper.toResponseDtos(relationships);
     }
 
     @Override
     public Page<DoctorAddressResponseDto> findByPracticeRole(String practiceRole, Pageable pageable) {
         log.debug("Finding doctor-address relationships by practice role {} with pagination", practiceRole);
-        Page<DoctorAddress> relationships = doctorAddressRepository.findByPracticeRole(DoctorAddress.PracticeRole.valueOf(practiceRole), pageable);
+        Page<DoctorAddress> relationships = doctorAddressRepository.findByPracticeRole(PracticeRole.valueOf(practiceRole), pageable);
         return relationships.map(doctorAddressMapper::toResponseDto);
     }
 
     @Override
     public List<DoctorAddressResponseDto> findByDoctorIdAndPracticeRole(UUID doctorId, String practiceRole) {
         log.debug("Finding addresses for doctor {} with practice role {}", doctorId, practiceRole);
-        List<DoctorAddress> addresses = doctorAddressRepository.findByDoctorIdAndPracticeRole(doctorId, DoctorAddress.PracticeRole.valueOf(practiceRole));
+        List<DoctorAddress> addresses = doctorAddressRepository.findByDoctorIdAndPracticeRole(doctorId, PracticeRole.valueOf(practiceRole));
         return doctorAddressMapper.toResponseDtos(addresses);
     }
 
     @Override
     public boolean existsDoctorAddress(UUID doctorId, UUID addressId, String practiceRole) {
         log.debug("Checking if doctor {} has address {} with role {}", doctorId, addressId, practiceRole);
-        DoctorAddressId id = new DoctorAddressId(doctorId, addressId, DoctorAddress.PracticeRole.valueOf(practiceRole));
+        DoctorAddressId id = new DoctorAddressId(doctorId, addressId, PracticeRole.valueOf(practiceRole));
         return doctorAddressRepository.existsById(id);
     }
 
@@ -147,23 +148,23 @@ public class DoctorAddressServiceImpl implements DoctorAddressService {
     @Transactional
     public List<DoctorAddressResponseDto> addMultipleDoctorAddresses(UUID doctorId, List<DoctorAddressRequestDto> requestDtos) {
         log.debug("Adding {} addresses to doctor {}", requestDtos.size(), doctorId);
-        
+
         List<DoctorAddress> doctorAddresses = requestDtos.stream()
                 .map(dto -> {
-                    DoctorAddressId id = new DoctorAddressId(doctorId, dto.addressId(), DoctorAddress.PracticeRole.valueOf(dto.practiceRole()));
-                    
+                    DoctorAddressId id = new DoctorAddressId(doctorId, dto.addressId(), PracticeRole.valueOf(dto.practiceRole()));
+
                     if (doctorAddressRepository.existsById(id)) {
                         throw new IllegalArgumentException("Doctor address relationship already exists for address " + dto.addressId() + " with role " + dto.practiceRole());
                     }
-                    
+
                     DoctorAddress doctorAddress = new DoctorAddress();
                     doctorAddress.setDoctorId(doctorId);
                     doctorAddress.setAddressId(dto.addressId());
-                    doctorAddress.setPracticeRole(DoctorAddress.PracticeRole.valueOf(dto.practiceRole()));
+                    doctorAddress.setPracticeRole(PracticeRole.valueOf(dto.practiceRole()));
                     return doctorAddress;
                 })
                 .toList();
-        
+
         List<DoctorAddress> saved = doctorAddressRepository.saveAll(doctorAddresses);
         return doctorAddressMapper.toResponseDtos(saved);
     }

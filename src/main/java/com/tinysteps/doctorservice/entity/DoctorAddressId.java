@@ -18,5 +18,5 @@ public class DoctorAddressId implements Serializable {
 
     private UUID doctorId;
     private UUID addressId;
-    private DoctorAddress.PracticeRole practiceRole;
+    private PracticeRole practiceRole; // changed from DoctorAddress.PracticeRole
 }

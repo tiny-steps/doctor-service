@@ -1,7 +1,7 @@
 package com.tinysteps.doctorservice.mapper;
 
 import com.tinysteps.doctorservice.entity.DoctorAddress;
-import com.tinysteps.doctorservice.entity.DoctorAddress.PracticeRole;
+import com.tinysteps.doctorservice.entity.PracticeRole; // changed import
 import com.tinysteps.doctorservice.model.DoctorAddressRequestDto;
 import com.tinysteps.doctorservice.model.DoctorAddressResponseDto;
 import org.mapstruct.*;

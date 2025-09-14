@@ -1,6 +1,7 @@
 package com.tinysteps.doctorservice.controller;
 
 import com.tinysteps.doctorservice.entity.DoctorAddress;
+import com.tinysteps.doctorservice.entity.PracticeRole;
 import com.tinysteps.doctorservice.service.BranchTransferService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -89,7 +90,7 @@ public class DoctorBranchTransferController {
                 doctorId, branchId, role);
 
         try {
-            DoctorAddress.PracticeRole practiceRole = DoctorAddress.PracticeRole.valueOf(role.toUpperCase());
+            PracticeRole practiceRole = PracticeRole.valueOf(role.toUpperCase());
             boolean success = branchTransferService.addDoctorToBranch(doctorId, branchId, practiceRole);
 
             if (success) {

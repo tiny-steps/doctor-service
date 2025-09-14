@@ -738,7 +738,7 @@ public class DoctorServiceImpl implements DoctorService {
                     requestDto.ratingAverage(),
                     requestDto.reviewCount(),
                     StringUtils.hasText(requestDto.status()) ? requestDto.status() : "ACTIVE",
-                    null, // primaryBranchId - will be set later if needed
+                    requestDto.branchId(), // Use branchId from request
                     false // isMultiBranch - default to false
             );
             log.info("Creating doctor with request: {}", doctorRequestDto);
@@ -766,13 +766,19 @@ public class DoctorServiceImpl implements DoctorService {
 
     @Override
     public Page<DoctorResponseDto> findByBranch(UUID branchId, Pageable pageable) {
-        Page<Doctor> doctors = doctorRepository.findByPrimaryBranchId(branchId, pageable);
+        // For specific branch queries, only include doctors associated with that branch
+        // Do not include doctors with NULL primaryBranchId (legacy doctors) in specific
+        // branch queries
+        Page<Doctor> doctors = doctorRepository.findByPrimaryOrAssociatedBranch(branchId, pageable);
         return doctors.map(this::createDoctorResponseDto);
     }
 
     @Override
     public List<DoctorResponseDto> findByBranch(UUID branchId) {
-        List<Doctor> doctors = doctorRepository.findByPrimaryBranchId(branchId);
+        // For specific branch queries, only include doctors associated with that branch
+        // Do not include doctors with NULL primaryBranchId (legacy doctors) in specific
+        // branch queries
+        List<Doctor> doctors = doctorRepository.findByPrimaryOrAssociatedBranch(branchId);
         return doctors.stream()
                 .map(this::createDoctorResponseDto)
                 .collect(Collectors.toList());

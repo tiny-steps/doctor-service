@@ -33,13 +33,4 @@ public class DoctorAddress {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "doctor_id", insertable = false, updatable = false)
     private Doctor doctor;
-
-    public enum PracticeRole {
-        CONSULTANT,
-        VISITING_DOCTOR,
-        HEAD_OF_DEPARTMENT,
-        RESIDENT,
-        SPECIALIST,
-        EMERGENCY_DOCTOR
-    }
 }
