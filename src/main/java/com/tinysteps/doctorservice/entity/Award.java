@@ -23,7 +23,7 @@ public class Award {
     private UUID id;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "doctor_id", nullable = false)
+    @JoinColumn(name = "doctor_id", referencedColumnName = "id", nullable = false)
     @JsonManagedReference
     private Doctor doctor;
 

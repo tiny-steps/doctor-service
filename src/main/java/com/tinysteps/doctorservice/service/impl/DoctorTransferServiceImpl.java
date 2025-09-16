@@ -76,7 +76,8 @@ public class DoctorTransferServiceImpl implements DoctorTransferService {
 
                     DoctorAddressRequestDto addRequest = new DoctorAddressRequestDto(
                             requestDto.getTargetBranchId(),
-                            sourceRole.practiceRole()
+                            sourceRole.practiceRole(),
+                            "ACTIVE"
                     );
                     doctorAddressService.addDoctorAddress(doctorId, addRequest);
                 }
@@ -151,12 +152,23 @@ public class DoctorTransferServiceImpl implements DoctorTransferService {
         try {
             List<DoctorAddressResponseDto> addresses = doctorAddressService.findByDoctorId(doctorId);
 
+            // Convert DoctorAddressResponseDto to BranchAssignment
+            List<DoctorTransferResponseDto.BranchAssignment> currentAssignments = addresses.stream()
+                    .map(address -> DoctorTransferResponseDto.BranchAssignment.builder()
+                            .branchId(UUID.fromString(address.addressId()))
+                            .branchName("Branch " + address.addressId()) // TODO: Get actual branch name from address service
+                            .role(address.practiceRole())
+                            .isPrimary(false) // TODO: Determine primary branch logic
+                            .assignedAt(address.createdAt())
+                            .build())
+                    .collect(Collectors.toList());
+
             return DoctorTransferResponseDto.builder()
                     .transferId(UUID.randomUUID())
                     .status(DoctorTransferResponseDto.TransferStatus.SUCCESS)
                     .message("Current branches retrieved successfully")
                     .doctorId(doctorId)
-                    .currentAssignments(null) // TODO: Convert DoctorAddressResponseDto to BranchAssignment
+                    .currentAssignments(currentAssignments)
                     .transferredAt(LocalDateTime.now())
                     .build();
         } catch (Exception e) {

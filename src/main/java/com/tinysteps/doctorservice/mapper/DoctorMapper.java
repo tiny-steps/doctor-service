@@ -3,6 +3,7 @@ package com.tinysteps.doctorservice.mapper;
 import com.tinysteps.doctorservice.model.DoctorRequestDto;
 import com.tinysteps.doctorservice.model.DoctorResponseDto;
 import com.tinysteps.doctorservice.entity.Doctor;
+import com.tinysteps.common.entity.EntityStatus;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.MappingTarget;
@@ -11,31 +12,30 @@ import org.mapstruct.NullValuePropertyMappingStrategy;
 import org.mapstruct.ReportingPolicy;
 
 import java.sql.Timestamp;
+import java.time.Instant;
 import java.util.List;
 import java.util.UUID;
 
-@Mapper(componentModel = "spring",
-        unmappedTargetPolicy = ReportingPolicy.IGNORE,
-        nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE,
-        uses = {
-            AwardMapper.class,
-            QualificationMapper.class,
-            MembershipMapper.class,
-            OrganizationMapper.class,
-            RegistrationMapper.class,
-            PricingMapper.class,
-            SpecializationMapper.class,
-            PhotoMapper.class,
-
-            RecommendationMapper.class
-        })
+@Mapper(componentModel = "spring", unmappedTargetPolicy = ReportingPolicy.IGNORE, nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE, uses = {
+        AwardMapper.class,
+        QualificationMapper.class,
+        MembershipMapper.class,
+        OrganizationMapper.class,
+        RegistrationMapper.class,
+        PricingMapper.class,
+        SpecializationMapper.class,
+        PhotoMapper.class,
+        DoctorAddressMapper.class,
+        RecommendationMapper.class
+})
 public interface DoctorMapper {
 
     @Mapping(target = "id", source = "id", qualifiedByName = "doctorUuidToString")
     @Mapping(target = "userId", source = "userId", qualifiedByName = "doctorUuidToString")
     @Mapping(target = "primaryBranchId", source = "primaryBranchId", qualifiedByName = "doctorUuidToString")
-    @Mapping(target = "createdAt", source = "createdAt", qualifiedByName = "doctorTimestampToString")
-    @Mapping(target = "updatedAt", source = "updatedAt", qualifiedByName = "doctorTimestampToString")
+    @Mapping(target = "status", source = "status", qualifiedByName = "doctorEntityStatusToString")
+    @Mapping(target = "createdAt", source = "createdAt", qualifiedByName = "doctorInstantToString")
+    @Mapping(target = "updatedAt", source = "updatedAt", qualifiedByName = "doctorInstantToString")
     DoctorResponseDto toResponseDto(Doctor doctor);
 
     @Mapping(target = "id", ignore = true)
@@ -93,8 +93,18 @@ public interface DoctorMapper {
         return timestamp != null ? timestamp.toString() : null;
     }
 
+    @Named("doctorInstantToString")
+    default String doctorInstantToString(Instant instant) {
+        return instant != null ? instant.toString() : null;
+    }
+
     @Named("doctorStringToTimestamp")
     default Timestamp doctorStringToTimestamp(String timestamp) {
-        return timestamp != null && !timestamp.isEmpty() ? Timestamp.valueOf(timestamp) : null;
+        return timestamp != null ? Timestamp.valueOf(timestamp) : null;
+    }
+
+    @Named("doctorEntityStatusToString")
+    default String doctorEntityStatusToString(EntityStatus status) {
+        return status != null ? status.name() : null;
     }
 }

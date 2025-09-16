@@ -11,6 +11,8 @@ public record DoctorAddressRequestDto(
         
         @NotNull(message = "Practice role is required")
         @Size(min = 1, max = 100, message = "Practice role must be between 1 and 100 characters")
-        String practiceRole
+        String practiceRole,
+        
+        String status // Optional, defaults to ACTIVE if not provided
 ) {
 }

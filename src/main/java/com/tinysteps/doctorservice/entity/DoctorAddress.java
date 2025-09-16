@@ -31,6 +31,8 @@ public class DoctorAddress {
     private PracticeRole practiceRole = PracticeRole.CONSULTANT;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "doctor_id", insertable = false, updatable = false)
+    @JoinColumn(name = "doctor_id", referencedColumnName = "id", insertable = false, updatable = false)
     private Doctor doctor;
+
+    private Status status;
 }

@@ -1,11 +1,13 @@
 package com.tinysteps.doctorservice.entity;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.tinysteps.common.entity.BaseEntity;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import lombok.EqualsAndHashCode;
 
 import java.math.BigDecimal;
 import java.sql.Timestamp;
@@ -19,12 +21,8 @@ import java.util.UUID;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class Doctor {
-
-    @Id
-    @GeneratedValue(strategy = GenerationType.UUID)
-    @Column(updatable = false, nullable = false)
-    private UUID id;
+@EqualsAndHashCode(callSuper = true)
+public class Doctor extends BaseEntity {
 
     @Column(name = "user_id", nullable = false)
     private UUID userId;
@@ -59,20 +57,11 @@ public class Doctor {
     @Column(name = "review_count")
     private Integer reviewCount = 0;
 
-    @Column(length = 20)
-    private String status = "ACTIVE";
-
     @Column(name = "primary_branch_id")
     private UUID primaryBranchId;
 
     @Column(name = "is_multi_branch")
     private Boolean isMultiBranch = false;
-
-    @Column(name = "created_at")
-    private Timestamp createdAt;
-
-    @Column(name = "updated_at")
-    private Timestamp updatedAt;
 
     @OneToMany(mappedBy = "doctor", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Award> awards;

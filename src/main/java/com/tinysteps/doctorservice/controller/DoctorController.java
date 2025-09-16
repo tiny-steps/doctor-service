@@ -3,6 +3,8 @@ package com.tinysteps.doctorservice.controller;
 import com.tinysteps.doctorservice.model.DoctorDto;
 import com.tinysteps.doctorservice.model.DoctorRequestDto;
 import com.tinysteps.doctorservice.model.DoctorResponseDto;
+import com.tinysteps.doctorservice.model.DoctorBranchDeactivationRequestDto;
+import com.tinysteps.doctorservice.model.DoctorSoftDeleteResponseDto;
 import com.tinysteps.doctorservice.model.ResponseModel;
 import com.tinysteps.doctorservice.service.DoctorService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -16,6 +18,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -424,6 +427,143 @@ public class DoctorController {
                                 .status(HttpStatus.OK)
                                 .message("Doctor deactivated successfully")
                                 .data(doctor)
+                                .build());
+        }
+
+        // Enhanced Soft Delete Endpoints
+        @Operation(summary = "Deactivate doctor from specific branches", description = "Deactivates a doctor from specified branches while maintaining their association with other branches")
+        @ApiResponses(value = {
+                        @ApiResponse(responseCode = "200", description = "Doctor successfully deactivated from branches"),
+                        @ApiResponse(responseCode = "400", description = "Invalid branch IDs or doctor not associated with specified branches"),
+                        @ApiResponse(responseCode = "401", description = "Unauthorized"),
+                        @ApiResponse(responseCode = "403", description = "Access denied"),
+                        @ApiResponse(responseCode = "404", description = "Doctor not found")
+        })
+        @PutMapping("/{doctorId}/deactivate-branches")
+        @PreAuthorize("hasRole('ADMIN') or hasRole('BRANCH_MANAGER')")
+        public ResponseEntity<ResponseModel<DoctorSoftDeleteResponseDto>> deactivateDoctorFromBranches(
+                        @Parameter(description = "Doctor ID", required = true) @PathVariable UUID doctorId,
+                        @Valid @RequestBody DoctorBranchDeactivationRequestDto request) {
+                DoctorSoftDeleteResponseDto response = doctorService.deactivateDoctorFromBranches(doctorId, request);
+                return ResponseEntity.ok(ResponseModel.<DoctorSoftDeleteResponseDto>builder()
+                                .status(HttpStatus.OK)
+                                .message("Doctor deactivation operation completed")
+                                .data(response)
+                                .build());
+        }
+
+        @Operation(summary = "Deactivate doctor globally", description = "Deactivates a doctor from all branches and sets global status to INACTIVE")
+        @ApiResponses(value = {
+                        @ApiResponse(responseCode = "200", description = "Doctor successfully deactivated globally"),
+                        @ApiResponse(responseCode = "401", description = "Unauthorized"),
+                        @ApiResponse(responseCode = "403", description = "Access denied"),
+                        @ApiResponse(responseCode = "404", description = "Doctor not found")
+        })
+        @PutMapping("/{doctorId}/deactivate-global")
+        @PreAuthorize("hasRole('ADMIN')")
+        public ResponseEntity<ResponseModel<DoctorSoftDeleteResponseDto>> deactivateDoctorGlobally(
+                        @Parameter(description = "Doctor ID", required = true) @PathVariable UUID doctorId) {
+                DoctorSoftDeleteResponseDto response = doctorService.deactivateDoctorGlobally(doctorId);
+                return ResponseEntity.ok(ResponseModel.<DoctorSoftDeleteResponseDto>builder()
+                                .status(HttpStatus.OK)
+                                .message("Doctor global deactivation completed")
+                                .data(response)
+                                .build());
+        }
+
+        @Operation(summary = "Activate doctor in branch", description = "Activates a doctor in a specific branch and updates global status if needed")
+        @ApiResponses(value = {
+                        @ApiResponse(responseCode = "200", description = "Doctor successfully activated in branch"),
+                        @ApiResponse(responseCode = "400", description = "Doctor not associated with specified branch"),
+                        @ApiResponse(responseCode = "401", description = "Unauthorized"),
+                        @ApiResponse(responseCode = "403", description = "Access denied"),
+                        @ApiResponse(responseCode = "404", description = "Doctor not found")
+        })
+        @PutMapping("/{doctorId}/activate-branch/{branchId}")
+        @PreAuthorize("hasRole('ADMIN') or hasRole('BRANCH_MANAGER')")
+        public ResponseEntity<ResponseModel<DoctorSoftDeleteResponseDto>> activateDoctorInBranch(
+                        @Parameter(description = "Doctor ID", required = true) @PathVariable UUID doctorId,
+                        @Parameter(description = "Branch ID", required = true) @PathVariable UUID branchId) {
+                DoctorSoftDeleteResponseDto response = doctorService.activateDoctorInBranch(doctorId, branchId);
+                return ResponseEntity.ok(ResponseModel.<DoctorSoftDeleteResponseDto>builder()
+                                .status(HttpStatus.OK)
+                                .message("Doctor activation operation completed")
+                                .data(response)
+                                .build());
+        }
+
+        @Operation(summary = "Get doctor branch status", description = "Retrieves the activation status of a doctor across all branches")
+        @ApiResponses(value = {
+                        @ApiResponse(responseCode = "200", description = "Doctor branch status retrieved successfully"),
+                        @ApiResponse(responseCode = "401", description = "Unauthorized"),
+                        @ApiResponse(responseCode = "403", description = "Access denied"),
+                        @ApiResponse(responseCode = "404", description = "Doctor not found")
+        })
+        @GetMapping("/{doctorId}/branch-status")
+        @PreAuthorize("@doctorSecurity.isDoctorOwner(authentication, #doctorId) or hasRole('ADMIN') or hasRole('BRANCH_MANAGER')")
+        public ResponseEntity<ResponseModel<Map<UUID, Boolean>>> getDoctorBranchStatus(
+                        @Parameter(description = "Doctor ID", required = true) @PathVariable UUID doctorId) {
+                Map<UUID, Boolean> branchStatus = doctorService.getDoctorBranchStatus(doctorId);
+                return ResponseEntity.ok(ResponseModel.<Map<UUID, Boolean>>builder()
+                                .status(HttpStatus.OK)
+                                .message("Doctor branch status retrieved successfully")
+                                .data(branchStatus)
+                                .build());
+        }
+
+        @Operation(summary = "Check if doctor is active in any branch", description = "Checks if a doctor is active in at least one branch")
+        @GetMapping("/{doctorId}/active-in-any-branch")
+        @PreAuthorize("@doctorSecurity.isDoctorOwner(authentication, #doctorId) or hasRole('ADMIN') or hasRole('BRANCH_MANAGER')")
+        public ResponseEntity<ResponseModel<Boolean>> isDoctorActiveInAnyBranch(
+                        @Parameter(description = "Doctor ID", required = true) @PathVariable UUID doctorId) {
+                boolean isActive = doctorService.isDoctorActiveInAnyBranch(doctorId);
+                return ResponseEntity.ok(ResponseModel.<Boolean>builder()
+                                .status(HttpStatus.OK)
+                                .message("Doctor branch activity status checked")
+                                .data(isActive)
+                                .build());
+        }
+
+        @Operation(summary = "Get active branch count", description = "Gets the number of branches where the doctor is currently active")
+        @GetMapping("/{doctorId}/active-branch-count")
+        @PreAuthorize("@doctorSecurity.isDoctorOwner(authentication, #doctorId) or hasRole('ADMIN') or hasRole('BRANCH_MANAGER')")
+        public ResponseEntity<ResponseModel<Long>> getActiveBranchCount(
+                        @Parameter(description = "Doctor ID", required = true) @PathVariable UUID doctorId) {
+                long count = doctorService.getActiveBranchCount(doctorId);
+                return ResponseEntity.ok(ResponseModel.<Long>builder()
+                                .status(HttpStatus.OK)
+                                .message("Active branch count retrieved successfully")
+                                .data(count)
+                                .build());
+        }
+
+        @Operation(summary = "Get active branches", description = "Gets the list of branch IDs where the doctor is currently active")
+        @GetMapping("/{doctorId}/active-branches")
+        @PreAuthorize("@doctorSecurity.isDoctorOwner(authentication, #doctorId) or hasRole('ADMIN') or hasRole('BRANCH_MANAGER')")
+        public ResponseEntity<ResponseModel<List<UUID>>> getActiveBranches(
+                        @Parameter(description = "Doctor ID", required = true) @PathVariable UUID doctorId) {
+                List<UUID> branches = doctorService.getActiveBranches(doctorId);
+                return ResponseEntity.ok(ResponseModel.<List<UUID>>builder()
+                                .status(HttpStatus.OK)
+                                .message("Active branches retrieved successfully")
+                                .data(branches)
+                                .build());
+        }
+
+        @Operation(summary = "Get doctors by branch with status", description = "Gets all doctors for a specific branch including inactive ones")
+        @GetMapping("/branch/{branchId}/with-status")
+        @PreAuthorize("hasRole('ADMIN') or hasRole('BRANCH_MANAGER')")
+        public ResponseEntity<ResponseModel<Page<DoctorResponseDto>>> getDoctorsByBranchWithStatus(
+                        @Parameter(description = "Branch ID", required = true) @PathVariable UUID branchId,
+                        @Parameter(description = "Include inactive doctors") @RequestParam(defaultValue = "false") boolean includeInactive,
+                        @Parameter(description = "Pagination information") Pageable pageable) {
+                Page<DoctorResponseDto> doctors = doctorService.findByBranchWithStatusFilter(branchId, includeInactive,
+                                pageable);
+
+                return ResponseEntity.ok(ResponseModel.<Page<DoctorResponseDto>>builder()
+                                .status(HttpStatus.OK)
+                                .message("Doctors retrieved successfully")
+                                .data(doctors)
                                 .build());
         }
 

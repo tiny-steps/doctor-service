@@ -17,14 +17,24 @@ public interface DoctorAddressService {
     DoctorAddressResponseDto addDoctorAddress(UUID doctorId, DoctorAddressRequestDto requestDto);
 
     /**
-     * Remove a doctor from an address with a specific practice role
+     * Remove a doctor from an address with a specific practice role (sets status to INACTIVE)
      */
     void removeDoctorAddress(UUID doctorId, UUID addressId, String practiceRole);
+
+    /**
+     * Activate a doctor address relationship (sets status to ACTIVE)
+     */
+    void activateDoctorAddress(UUID doctorId, UUID addressId, String practiceRole);
 
     /**
      * Get all addresses for a doctor
      */
     List<DoctorAddressResponseDto> findByDoctorId(UUID doctorId);
+
+    /**
+     * Get only active addresses for a doctor
+     */
+    List<DoctorAddressResponseDto> findActiveDoctorAddresses(UUID doctorId);
 
     /**
      * Get all addresses for a doctor with pagination
@@ -62,12 +72,12 @@ public interface DoctorAddressService {
     boolean existsDoctorAddress(UUID doctorId, UUID addressId, String practiceRole);
 
     /**
-     * Remove all doctor-address relationships for a doctor
+     * Remove all doctor-address relationships for a doctor (sets status to INACTIVE)
      */
     void removeAllDoctorAddresses(UUID doctorId);
 
     /**
-     * Remove all doctor-address relationships for an address
+     * Remove all doctor-address relationships for an address (sets status to INACTIVE)
      */
     void removeAllAddressDoctors(UUID addressId);
 
@@ -75,6 +85,11 @@ public interface DoctorAddressService {
      * Count total addresses for a doctor
      */
     long countByDoctorId(UUID doctorId);
+
+    /**
+     * Count active addresses for a doctor
+     */
+    long countActiveDoctorAddresses(UUID doctorId);
 
     /**
      * Count total doctors at an address

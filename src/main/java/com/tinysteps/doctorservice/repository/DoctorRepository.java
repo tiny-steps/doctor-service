@@ -1,6 +1,7 @@
 package com.tinysteps.doctorservice.repository;
 
 import com.tinysteps.doctorservice.entity.Doctor;
+import com.tinysteps.common.entity.EntityStatus;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -26,7 +27,7 @@ public interface DoctorRepository extends JpaRepository<Doctor, UUID> {
         List<Doctor> findByNameContainingIgnoreCase(String name);
 
         // Find by status
-        List<Doctor> findByStatus(String status);
+        List<Doctor> findByStatus(EntityStatus status);
 
         // Find by verification status
         List<Doctor> findByIsVerified(Boolean isVerified);
@@ -52,21 +53,23 @@ public interface DoctorRepository extends JpaRepository<Doctor, UUID> {
         @Query("SELECT DISTINCT d FROM Doctor d JOIN d.specializations s WHERE s.speciality = :speciality")
         List<Doctor> findBySpeciality(@Param("speciality") String speciality);
 
-        // Find doctors by address location using DoctorAddress relationship
-        @Query("SELECT DISTINCT d FROM Doctor d JOIN d.doctorAddresses da WHERE da.addressId = :addressId")
+        // Find doctors by address location using DoctorAddress relationship with ACTIVE
+        // status filter
+        @Query("SELECT DISTINCT d FROM Doctor d JOIN d.doctorAddresses da WHERE da.addressId = :addressId AND da.status = com.tinysteps.doctorservice.entity.Status.ACTIVE")
         List<Doctor> findByAddressLocation(@Param("addressId") UUID addressId);
 
-        // Find doctors by address location with pagination
-        @Query("SELECT DISTINCT d FROM Doctor d JOIN d.doctorAddresses da WHERE da.addressId = :addressId")
+        // Find doctors by address location with pagination with ACTIVE status filter
+        @Query("SELECT DISTINCT d FROM Doctor d JOIN d.doctorAddresses da WHERE da.addressId = :addressId AND da.status = com.tinysteps.doctorservice.entity.Status.ACTIVE")
         Page<Doctor> findByAddressLocation(@Param("addressId") UUID addressId, Pageable pageable);
 
-        // Find doctors by address location and practice role
-        @Query("SELECT DISTINCT d FROM Doctor d JOIN d.doctorAddresses da WHERE da.addressId = :addressId AND da.practiceRole = :practiceRole")
+        // Find doctors by address location and practice role with ACTIVE status filter
+        @Query("SELECT DISTINCT d FROM Doctor d JOIN d.doctorAddresses da WHERE da.addressId = :addressId AND da.practiceRole = :practiceRole AND da.status = com.tinysteps.doctorservice.entity.Status.ACTIVE")
         List<Doctor> findByAddressLocationAndPracticeRole(@Param("addressId") UUID addressId,
                         @Param("practiceRole") String practiceRole);
 
-        // Find doctors by address location and practice role with pagination
-        @Query("SELECT DISTINCT d FROM Doctor d JOIN d.doctorAddresses da WHERE da.addressId = :addressId AND da.practiceRole = :practiceRole")
+        // Find doctors by address location and practice role with pagination with
+        // ACTIVE status filter
+        @Query("SELECT DISTINCT d FROM Doctor d JOIN d.doctorAddresses da WHERE da.addressId = :addressId AND da.practiceRole = :practiceRole AND da.status = com.tinysteps.doctorservice.entity.Status.ACTIVE")
         Page<Doctor> findByAddressLocationAndPracticeRole(@Param("addressId") UUID addressId,
                         @Param("practiceRole") String practiceRole, Pageable pageable);
 
@@ -77,14 +80,14 @@ public interface DoctorRepository extends JpaRepository<Doctor, UUID> {
                         "AND (:speciality IS NULL OR s.speciality = :speciality) " +
                         "AND (:isVerified IS NULL OR d.isVerified = :isVerified) " +
                         "AND (:minRating IS NULL OR d.ratingAverage >= :minRating) " +
-                        "AND d.status = 'ACTIVE'")
+                        "AND d.status = :status")
         List<Doctor> searchDoctors(@Param("name") String name,
                         @Param("speciality") String speciality,
                         @Param("isVerified") Boolean isVerified,
                         @Param("minRating") BigDecimal minRating);
 
-        // Count doctors by status
-        long countByStatus(String status);
+        // Count by status
+        long countByStatus(EntityStatus status);
 
         // Count verified doctors
         long countByIsVerified(Boolean isVerified);
@@ -96,7 +99,7 @@ public interface DoctorRepository extends JpaRepository<Doctor, UUID> {
         boolean existsByUserId(UUID userId);
 
         // Pageable versions
-        Page<Doctor> findByStatus(String status, Pageable pageable);
+        Page<Doctor> findByStatus(EntityStatus status, Pageable pageable);
 
         Page<Doctor> findByIsVerified(Boolean isVerified, Pageable pageable);
 
@@ -116,10 +119,10 @@ public interface DoctorRepository extends JpaRepository<Doctor, UUID> {
 
         Page<Doctor> findByPrimaryBranchId(UUID primaryBranchId, Pageable pageable);
 
-        // Find doctors by primary branch and status
-        List<Doctor> findByPrimaryBranchIdAndStatus(UUID primaryBranchId, String status);
+        // Find by branch and status
+        List<Doctor> findByPrimaryBranchIdAndStatus(UUID primaryBranchId, EntityStatus status);
 
-        Page<Doctor> findByPrimaryBranchIdAndStatus(UUID primaryBranchId, String status, Pageable pageable);
+        Page<Doctor> findByPrimaryBranchIdAndStatus(UUID primaryBranchId, EntityStatus status, Pageable pageable);
 
         // Find multi-branch doctors
         List<Doctor> findByIsMultiBranch(Boolean isMultiBranch);
@@ -132,7 +135,7 @@ public interface DoctorRepository extends JpaRepository<Doctor, UUID> {
         // Count by branch
         long countByPrimaryBranchId(UUID primaryBranchId);
 
-        long countByPrimaryBranchIdAndStatus(UUID primaryBranchId, String status);
+        long countByPrimaryBranchIdAndStatus(UUID primaryBranchId, EntityStatus status);
 
         // Additional branch-based count methods
         long countByPrimaryBranchIdAndIsVerified(UUID primaryBranchId, Boolean isVerified);
@@ -150,7 +153,7 @@ public interface DoctorRepository extends JpaRepository<Doctor, UUID> {
 
         long countByPrimaryBranchIdInAndIsVerified(List<UUID> branchIds, Boolean isVerified);
 
-        long countByPrimaryBranchIdInAndStatus(List<UUID> branchIds, String status);
+        long countByPrimaryBranchIdInAndStatus(List<UUID> branchIds, EntityStatus status);
 
         long countByPrimaryBranchIdInAndGender(List<UUID> branchIds, String gender);
 
@@ -161,17 +164,27 @@ public interface DoctorRepository extends JpaRepository<Doctor, UUID> {
         @Query("SELECT AVG(d.ratingAverage) FROM Doctor d WHERE d.primaryBranchId IN :branchIds")
         Double findAverageRatingByPrimaryBranchIdIn(@Param("branchIds") List<UUID> branchIds);
 
-        @Query("SELECT DISTINCT d FROM Doctor d LEFT JOIN d.doctorAddresses da WHERE d.primaryBranchId = :branchId OR da.addressId = :branchId")
+        // Updated queries to include ACTIVE status filter for DoctorAddress
+        // relationships
+        @Query("SELECT DISTINCT d FROM Doctor d LEFT JOIN d.doctorAddresses da WHERE d.primaryBranchId = :branchId OR (da.addressId = :branchId AND da.status = com.tinysteps.doctorservice.entity.Status.ACTIVE)")
         Page<Doctor> findByPrimaryOrAssociatedBranch(@Param("branchId") UUID branchId, Pageable pageable);
 
-        @Query("SELECT DISTINCT d FROM Doctor d LEFT JOIN d.doctorAddresses da WHERE d.primaryBranchId = :branchId OR da.addressId = :branchId")
+        @Query("SELECT DISTINCT d FROM Doctor d LEFT JOIN d.doctorAddresses da WHERE d.primaryBranchId = :branchId OR (da.addressId = :branchId AND da.status = com.tinysteps.doctorservice.entity.Status.ACTIVE)")
         List<Doctor> findByPrimaryOrAssociatedBranch(@Param("branchId") UUID branchId);
 
+        // Branch queries with status filtering (includes both active and inactive)
+        @Query("SELECT DISTINCT d FROM Doctor d LEFT JOIN d.doctorAddresses da WHERE d.primaryBranchId = :branchId OR da.addressId = :branchId")
+        Page<Doctor> findByPrimaryOrAssociatedBranchAllStatuses(@Param("branchId") UUID branchId, Pageable pageable);
+
+        @Query("SELECT DISTINCT d FROM Doctor d LEFT JOIN d.doctorAddresses da WHERE d.primaryBranchId = :branchId OR da.addressId = :branchId")
+        List<Doctor> findByPrimaryOrAssociatedBranchAllStatuses(@Param("branchId") UUID branchId);
+
         // Include doctors with NULL primaryBranchId (legacy doctors) in branch-specific
-        // queries - but only when querying for a specific branch
-        @Query("SELECT DISTINCT d FROM Doctor d LEFT JOIN d.doctorAddresses da WHERE d.primaryBranchId = :branchId OR da.addressId = :branchId OR d.primaryBranchId IS NULL")
+        // queries - but only when querying for a specific branch with ACTIVE status
+        // filter
+        @Query("SELECT DISTINCT d FROM Doctor d LEFT JOIN d.doctorAddresses da WHERE d.primaryBranchId = :branchId OR (da.addressId = :branchId AND da.status = com.tinysteps.doctorservice.entity.Status.ACTIVE) OR d.primaryBranchId IS NULL")
         Page<Doctor> findByPrimaryOrAssociatedBranchOrNull(@Param("branchId") UUID branchId, Pageable pageable);
 
-        @Query("SELECT DISTINCT d FROM Doctor d LEFT JOIN d.doctorAddresses da WHERE d.primaryBranchId = :branchId OR da.addressId = :branchId OR d.primaryBranchId IS NULL")
+        @Query("SELECT DISTINCT d FROM Doctor d LEFT JOIN d.doctorAddresses da WHERE d.primaryBranchId = :branchId OR (da.addressId = :branchId AND da.status = com.tinysteps.doctorservice.entity.Status.ACTIVE) OR d.primaryBranchId IS NULL")
         List<Doctor> findByPrimaryOrAssociatedBranchOrNull(@Param("branchId") UUID branchId);
 }

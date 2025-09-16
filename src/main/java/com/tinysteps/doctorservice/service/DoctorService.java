@@ -3,6 +3,8 @@ package com.tinysteps.doctorservice.service;
 import com.tinysteps.doctorservice.model.DoctorDto;
 import com.tinysteps.doctorservice.model.DoctorRequestDto;
 import com.tinysteps.doctorservice.model.DoctorResponseDto;
+import com.tinysteps.doctorservice.model.DoctorBranchDeactivationRequestDto;
+import com.tinysteps.doctorservice.model.DoctorSoftDeleteResponseDto;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
@@ -16,134 +18,205 @@ import java.util.UUID;
  */
 public interface DoctorService {
 
-    // CRUD Operations
-    DoctorResponseDto create(DoctorRequestDto requestDto);
+        // CRUD Operations
+        DoctorResponseDto create(DoctorRequestDto requestDto);
 
-    // Add registration method
-    DoctorResponseDto registerDoctor(DoctorDto requestDto);
+        // Add registration method
+        DoctorResponseDto registerDoctor(DoctorDto requestDto);
 
-    DoctorResponseDto findById(UUID id);
+        DoctorResponseDto findById(UUID id);
 
-    Page<DoctorResponseDto> findAll(Pageable pageable);
+        Page<DoctorResponseDto> findAll(Pageable pageable);
 
-    DoctorResponseDto update(UUID id, DoctorRequestDto requestDto);
+        DoctorResponseDto update(UUID id, DoctorRequestDto requestDto);
 
-    DoctorResponseDto partialUpdate(UUID id, DoctorRequestDto requestDto);
+        DoctorResponseDto partialUpdate(UUID id, DoctorRequestDto requestDto);
 
-    void delete(UUID id);
+        void delete(UUID id);
 
-    // Search Operations
-    DoctorResponseDto findBySlug(String slug);
+        // Search Operations
+        DoctorResponseDto findBySlug(String slug);
 
-    DoctorResponseDto findByUserId(UUID userId);
+        DoctorResponseDto findByUserId(UUID userId);
 
-    List<DoctorResponseDto> findByName(String name);
+        List<DoctorResponseDto> findByName(String name);
 
-    Page<DoctorResponseDto> findByStatus(String status, Pageable pageable);
+        Page<DoctorResponseDto> findByStatus(String status, Pageable pageable);
 
-    Page<DoctorResponseDto> findByVerificationStatus(Boolean isVerified, Pageable pageable);
+        Page<DoctorResponseDto> findByVerificationStatus(Boolean isVerified, Pageable pageable);
 
-    Page<DoctorResponseDto> findByGender(String gender, Pageable pageable);
+        Page<DoctorResponseDto> findByGender(String gender, Pageable pageable);
 
-    Page<DoctorResponseDto> findByExperienceRange(Integer minYears, Integer maxYears, Pageable pageable);
+        Page<DoctorResponseDto> findByExperienceRange(Integer minYears, Integer maxYears, Pageable pageable);
 
-    Page<DoctorResponseDto> findByMinRating(BigDecimal minRating, Pageable pageable);
+        Page<DoctorResponseDto> findByMinRating(BigDecimal minRating, Pageable pageable);
 
-    Page<DoctorResponseDto> findBySpeciality(String speciality, Pageable pageable);
+        Page<DoctorResponseDto> findBySpeciality(String speciality, Pageable pageable);
 
-    Page<DoctorResponseDto> findByLocation(UUID addressId, Pageable pageable);
+        Page<DoctorResponseDto> findByLocation(UUID addressId, Pageable pageable);
 
-    Page<DoctorResponseDto> findByLocationAndPracticeRole(UUID addressId, String practiceRole, Pageable pageable);
+        Page<DoctorResponseDto> findByLocationAndPracticeRole(UUID addressId, String practiceRole, Pageable pageable);
 
-    // Branch-based Operations
-    Page<DoctorResponseDto> findByBranch(UUID primaryBranchId, Pageable pageable);
+        // Branch-based Operations
+        Page<DoctorResponseDto> findByBranch(UUID primaryBranchId, Pageable pageable);
 
-    List<DoctorResponseDto> findByBranch(UUID primaryBranchId);
+        List<DoctorResponseDto> findByBranch(UUID primaryBranchId);
 
-    Page<DoctorResponseDto> findByBranchAndStatus(UUID primaryBranchId, String status, Pageable pageable);
+        Page<DoctorResponseDto> findByBranchAndStatus(UUID primaryBranchId, String status, Pageable pageable);
 
-    List<DoctorResponseDto> findByBranchAndStatus(UUID primaryBranchId, String status);
+        List<DoctorResponseDto> findByBranchAndStatus(UUID primaryBranchId, String status);
 
-    Page<DoctorResponseDto> findByBranchAndVerificationStatus(UUID primaryBranchId, Boolean isVerified,
-            Pageable pageable);
+        Page<DoctorResponseDto> findByBranchAndVerificationStatus(UUID primaryBranchId, Boolean isVerified,
+                        Pageable pageable);
 
-    List<DoctorResponseDto> findByBranchAndVerificationStatus(UUID primaryBranchId, Boolean isVerified);
+        List<DoctorResponseDto> findByBranchAndVerificationStatus(UUID primaryBranchId, Boolean isVerified);
 
-    Page<DoctorResponseDto> findMultiBranchDoctors(Pageable pageable);
+        Page<DoctorResponseDto> findMultiBranchDoctors(Pageable pageable);
 
-    List<DoctorResponseDto> findMultiBranchDoctors();
+        List<DoctorResponseDto> findMultiBranchDoctors();
 
-    List<DoctorResponseDto> findDoctorsByCurrentUserBranch();
+        List<DoctorResponseDto> findDoctorsByCurrentUserBranch();
 
-    Page<DoctorResponseDto> findDoctorsByCurrentUserBranch(Pageable pageable);
+        Page<DoctorResponseDto> findDoctorsByCurrentUserBranch(Pageable pageable);
 
-    // Advanced Search
-    Page<DoctorResponseDto> searchDoctors(String name, String speciality, Boolean isVerified,
-            BigDecimal minRating, Pageable pageable);
+        // Advanced Search
+        Page<DoctorResponseDto> searchDoctors(String name, String speciality, Boolean isVerified,
+                        BigDecimal minRating, Pageable pageable);
 
-    // Branch-based Search
-    Page<DoctorResponseDto> searchDoctorsInBranch(UUID branchId, String name, String speciality, Boolean isVerified,
-            BigDecimal minRating, Pageable pageable);
+        // Branch-based Search
+        Page<DoctorResponseDto> searchDoctorsInBranch(UUID branchId, String name, String speciality, Boolean isVerified,
+                        BigDecimal minRating, Pageable pageable);
 
-    Page<DoctorResponseDto> findTopRatedDoctors(Pageable pageable);
+        /**
+         * Find doctors by branch with status filtering
+         * 
+         * @param branchId        The branch ID
+         * @param includeInactive Whether to include inactive doctors
+         * @param pageable        Pagination information
+         * @return Page of doctors
+         */
+        Page<DoctorResponseDto> findByBranchWithStatusFilter(UUID branchId, boolean includeInactive, Pageable pageable);
 
-    Page<DoctorResponseDto> findVerifiedDoctorsWithMinRating(BigDecimal minRating, Pageable pageable);
+        Page<DoctorResponseDto> findTopRatedDoctors(Pageable pageable);
 
-    // Business Operations
-    DoctorResponseDto verifyDoctor(UUID id);
+        Page<DoctorResponseDto> findVerifiedDoctorsWithMinRating(BigDecimal minRating, Pageable pageable);
 
-    DoctorResponseDto unverifyDoctor(UUID id);
+        // Business Operations
+        DoctorResponseDto verifyDoctor(UUID id);
 
-    DoctorResponseDto activateDoctor(UUID id);
+        DoctorResponseDto unverifyDoctor(UUID id);
 
-    DoctorResponseDto deactivateDoctor(UUID id);
+        DoctorResponseDto activateDoctor(UUID id);
 
-    DoctorResponseDto suspendDoctor(UUID id);
+        DoctorResponseDto deactivateDoctor(UUID id);
 
-    void updateRatingAndReviewCount(UUID id, BigDecimal newRating, Integer reviewCount);
+        DoctorResponseDto suspendDoctor(UUID id);
 
-    // Validation Operations
-    boolean existsById(UUID id);
+        // Enhanced Soft Delete Operations
+        /**
+         * Deactivate a doctor from specific branches
+         * 
+         * @param doctorId The doctor's ID
+         * @param request  Contains list of branch IDs and options
+         * @return Details about the deactivation operation
+         */
+        DoctorSoftDeleteResponseDto deactivateDoctorFromBranches(UUID doctorId,
+                        DoctorBranchDeactivationRequestDto request);
 
-    boolean existsBySlug(String slug);
+        /**
+         * Deactivate a doctor globally (from all branches)
+         * 
+         * @param doctorId The doctor's ID
+         * @return Details about the deactivation operation
+         */
+        DoctorSoftDeleteResponseDto deactivateDoctorGlobally(UUID doctorId);
 
-    boolean existsByUserId(UUID userId);
+        /**
+         * Activate a doctor in a specific branch
+         * 
+         * @param doctorId The doctor's ID
+         * @param branchId The branch ID to activate the doctor in
+         * @return Details about the activation operation
+         */
+        DoctorSoftDeleteResponseDto activateDoctorInBranch(UUID doctorId, UUID branchId);
 
-    boolean isSlugAvailable(String slug);
+        /**
+         * Get the current activation status of a doctor across all branches
+         * 
+         * @param doctorId The doctor's ID
+         * @return Map of branch ID to activation status
+         */
+        Map<UUID, Boolean> getDoctorBranchStatus(UUID doctorId);
 
-    boolean isDoctorVerified(UUID id);
+        void updateRatingAndReviewCount(UUID id, BigDecimal newRating, Integer reviewCount);
 
-    boolean isDoctorActive(UUID id);
+        // Validation Operations
+        boolean existsById(UUID id);
 
-    // Statistics Operations
-    long countAll();
+        boolean existsBySlug(String slug);
 
-    long countByStatus(String status);
+        boolean existsByUserId(UUID userId);
 
-    long countByVerificationStatus(Boolean isVerified);
+        boolean isSlugAvailable(String slug);
 
-    long countBySpeciality(String speciality);
+        boolean isDoctorVerified(UUID id);
 
-    long countByBranch(UUID primaryBranchId);
+        boolean isDoctorActive(UUID id);
 
-    long countByBranchAndStatus(UUID primaryBranchId, String status);
+        // Statistics Operations
+        long countAll();
 
-    // Branch Statistics
-    Map<String, Object> getBranchStatistics(UUID branchId);
+        long countByStatus(String status);
 
-    Map<String, Object> getCurrentUserBranchStatistics();
+        long countByVerificationStatus(Boolean isVerified);
 
-    Map<String, Object> getAllBranchesStatistics();
+        long countBySpeciality(String speciality);
 
-    // Bulk Operations
-    List<DoctorResponseDto> createBatch(List<DoctorRequestDto> requestDtos);
+        long countByBranch(UUID primaryBranchId);
 
-    void deleteBatch(List<UUID> ids);
+        long countByBranchAndStatus(UUID primaryBranchId, String status);
 
-    // Profile Completeness
-    int calculateProfileCompleteness(UUID id);
+        // Branch Statistics
+        Map<String, Object> getBranchStatistics(UUID branchId);
 
-    boolean isProfileComplete(UUID id);
+        Map<String, Object> getCurrentUserBranchStatistics();
 
-    List<String> getMissingProfileFields(UUID id);
+        Map<String, Object> getAllBranchesStatistics();
+
+        // Bulk Operations
+        List<DoctorResponseDto> createBatch(List<DoctorRequestDto> requestDtos);
+
+        void deleteBatch(List<UUID> ids);
+
+        // Profile Completeness
+        int calculateProfileCompleteness(UUID id);
+
+        boolean isProfileComplete(UUID id);
+
+        List<String> getMissingProfileFields(UUID id);
+
+        // Soft Delete Utility Methods
+        /**
+         * Check if a doctor is active in any branch
+         * 
+         * @param doctorId The doctor's ID
+         * @return true if doctor is active in at least one branch
+         */
+        boolean isDoctorActiveInAnyBranch(UUID doctorId);
+
+        /**
+         * Get count of branches where doctor is active
+         * 
+         * @param doctorId The doctor's ID
+         * @return number of active branches
+         */
+        long getActiveBranchCount(UUID doctorId);
+
+        /**
+         * Get list of branches where doctor is active
+         * 
+         * @param doctorId The doctor's ID
+         * @return list of active branch IDs
+         */
+        List<UUID> getActiveBranches(UUID doctorId);
 }

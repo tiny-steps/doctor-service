@@ -3,6 +3,7 @@ package com.tinysteps.doctorservice.service.impl;
 import com.tinysteps.doctorservice.entity.DoctorAddress;
 import com.tinysteps.doctorservice.entity.DoctorAddressId;
 import com.tinysteps.doctorservice.entity.PracticeRole;
+import com.tinysteps.doctorservice.entity.Status;
 import com.tinysteps.doctorservice.mapper.DoctorAddressMapper;
 import com.tinysteps.doctorservice.model.DoctorAddressRequestDto;
 import com.tinysteps.doctorservice.model.DoctorAddressResponseDto;
@@ -18,6 +19,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -43,6 +45,9 @@ public class DoctorAddressServiceImpl implements DoctorAddressService {
         doctorAddress.setDoctorId(doctorId);
         doctorAddress.setAddressId(requestDto.addressId());
         doctorAddress.setPracticeRole(PracticeRole.valueOf(requestDto.practiceRole()));
+        // Set status from DTO or default to ACTIVE
+        doctorAddress.setStatus(requestDto.status() != null ? 
+            Status.valueOf(requestDto.status().toUpperCase()) : Status.ACTIVE);
 
         DoctorAddress saved = doctorAddressRepository.save(doctorAddress);
         return doctorAddressMapper.toResponseDto(saved);
@@ -51,15 +56,23 @@ public class DoctorAddressServiceImpl implements DoctorAddressService {
     @Override
     @Transactional
     public void removeDoctorAddress(UUID doctorId, UUID addressId, String practiceRole) {
-        log.debug("Removing address {} from doctor {} with role {}", addressId, doctorId, practiceRole);
+        log.info("Setting doctor address status to INACTIVE for doctorId: {}, addressId: {}, practiceRole: {}", 
+                doctorId, addressId, practiceRole);
+        
+        PracticeRole role = PracticeRole.valueOf(practiceRole.toUpperCase());
+        doctorAddressRepository.updateStatusByDoctorIdAndAddressIdAndPracticeRole(
+                doctorId, addressId, role, Status.INACTIVE);
+    }
 
-        DoctorAddressId id = new DoctorAddressId(doctorId, addressId, PracticeRole.valueOf(practiceRole));
-
-        if (!doctorAddressRepository.existsById(id)) {
-            throw new IllegalArgumentException("Doctor address relationship does not exist");
-        }
-
-        doctorAddressRepository.deleteById(id);
+    @Override
+    @Transactional
+    public void activateDoctorAddress(UUID doctorId, UUID addressId, String practiceRole) {
+        log.info("Setting doctor address status to ACTIVE for doctorId: {}, addressId: {}, practiceRole: {}", 
+                doctorId, addressId, practiceRole);
+        
+        PracticeRole role = PracticeRole.valueOf(practiceRole.toUpperCase());
+        doctorAddressRepository.updateStatusByDoctorIdAndAddressIdAndPracticeRole(
+                doctorId, addressId, role, Status.ACTIVE);
     }
 
     @Override
@@ -67,6 +80,16 @@ public class DoctorAddressServiceImpl implements DoctorAddressService {
         log.debug("Finding addresses for doctor {}", doctorId);
         List<DoctorAddress> addresses = doctorAddressRepository.findByDoctorId(doctorId);
         return doctorAddressMapper.toResponseDtos(addresses);
+    }
+
+    @Override
+    public List<DoctorAddressResponseDto> findActiveDoctorAddresses(UUID doctorId) {
+        log.info("Finding active doctor addresses for doctorId: {}", doctorId);
+        
+        List<DoctorAddress> doctorAddresses = doctorAddressRepository.findByDoctorIdAndStatus(doctorId, Status.ACTIVE);
+        return doctorAddresses.stream()
+                .map(doctorAddressMapper::toResponseDto)
+                .collect(Collectors.toList());
     }
 
     @Override
@@ -121,21 +144,27 @@ public class DoctorAddressServiceImpl implements DoctorAddressService {
     @Override
     @Transactional
     public void removeAllDoctorAddresses(UUID doctorId) {
-        log.debug("Removing all addresses for doctor {}", doctorId);
-        doctorAddressRepository.deleteByDoctorId(doctorId);
+        log.info("Setting all doctor addresses to INACTIVE for doctorId: {}", doctorId);
+        doctorAddressRepository.updateStatusByDoctorId(doctorId, Status.INACTIVE);
     }
 
     @Override
     @Transactional
     public void removeAllAddressDoctors(UUID addressId) {
-        log.debug("Removing all doctors for address {}", addressId);
-        doctorAddressRepository.deleteByAddressId(addressId);
+        log.info("Setting all address doctors to INACTIVE for addressId: {}", addressId);
+        doctorAddressRepository.updateStatusByAddressId(addressId, Status.INACTIVE);
     }
 
     @Override
     public long countByDoctorId(UUID doctorId) {
         log.debug("Counting addresses for doctor {}", doctorId);
         return doctorAddressRepository.countByDoctorId(doctorId);
+    }
+
+    @Override
+    public long countActiveDoctorAddresses(UUID doctorId) {
+        log.info("Counting active doctor addresses for doctorId: {}", doctorId);
+        return doctorAddressRepository.countByDoctorIdAndStatus(doctorId, Status.ACTIVE);
     }
 
     @Override
@@ -161,6 +190,9 @@ public class DoctorAddressServiceImpl implements DoctorAddressService {
                     doctorAddress.setDoctorId(doctorId);
                     doctorAddress.setAddressId(dto.addressId());
                     doctorAddress.setPracticeRole(PracticeRole.valueOf(dto.practiceRole()));
+                    // Set status from DTO or default to ACTIVE
+                    doctorAddress.setStatus(dto.status() != null ? 
+                        Status.valueOf(dto.status().toUpperCase()) : Status.ACTIVE);
                     return doctorAddress;
                 })
                 .toList();

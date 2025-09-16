@@ -1,7 +1,8 @@
 package com.tinysteps.doctorservice.mapper;
 
 import com.tinysteps.doctorservice.entity.DoctorAddress;
-import com.tinysteps.doctorservice.entity.PracticeRole; // changed import
+import com.tinysteps.doctorservice.entity.PracticeRole;
+import com.tinysteps.doctorservice.entity.Status;
 import com.tinysteps.doctorservice.model.DoctorAddressRequestDto;
 import com.tinysteps.doctorservice.model.DoctorAddressResponseDto;
 import org.mapstruct.*;
@@ -19,12 +20,14 @@ public interface DoctorAddressMapper {
     @Mapping(target = "doctorId", source = "doctorId", qualifiedByName = "uuidToString")
     @Mapping(target = "addressId", source = "addressId", qualifiedByName = "uuidToString")
     @Mapping(target = "practiceRole", source = "practiceRole")
+    @Mapping(target = "status", source = "status", qualifiedByName = "statusToString")
     @Mapping(target = "createdAt", ignore = true) // Not available in entity
     @Mapping(target = "updatedAt", ignore = true) // Not available in entity
     DoctorAddressResponseDto toResponseDto(DoctorAddress doctorAddress);
 
     @Mapping(target = "addressId", source = "addressId")
     @Mapping(target = "practiceRole", source = "practiceRole", qualifiedByName = "stringToPracticeRole")
+    @Mapping(target = "status", source = "status", qualifiedByName = "stringToStatus")
     @Mapping(target = "doctorId", ignore = true) // Will be set separately
     @Mapping(target = "doctor", ignore = true)
     DoctorAddress fromRequestDto(DoctorAddressRequestDto requestDto);
@@ -36,6 +39,7 @@ public interface DoctorAddressMapper {
     // Update entity from DTO
     @Mapping(target = "addressId", source = "addressId")
     @Mapping(target = "practiceRole", source = "practiceRole", qualifiedByName = "stringToPracticeRole")
+    @Mapping(target = "status", source = "status", qualifiedByName = "stringToStatus")
     @Mapping(target = "doctorId", ignore = true)
     @Mapping(target = "doctor", ignore = true)
     void updateEntityFromDto(DoctorAddressRequestDto requestDto, @MappingTarget DoctorAddress doctorAddress);
@@ -56,5 +60,17 @@ public interface DoctorAddressMapper {
     @Named("stringToPracticeRole")
     default PracticeRole stringToPracticeRole(String str) {
         return str != null ? PracticeRole.valueOf(str.toUpperCase()) : null;
+    }
+
+    // Helper method to convert Status to String
+    @Named("statusToString")
+    default String statusToString(Status status) {
+        return status != null ? status.name() : null;
+    }
+
+    // Helper method to convert String to Status
+    @Named("stringToStatus")
+    default Status stringToStatus(String str) {
+        return str != null && !str.trim().isEmpty() ? Status.valueOf(str.toUpperCase()) : Status.ACTIVE;
     }
 }

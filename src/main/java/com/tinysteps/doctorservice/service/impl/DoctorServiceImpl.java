@@ -2,11 +2,14 @@ package com.tinysteps.doctorservice.service.impl;
 
 import com.tinysteps.doctorservice.entity.Doctor;
 import com.tinysteps.doctorservice.entity.DoctorAddress;
+import com.tinysteps.doctorservice.entity.Status;
 import com.tinysteps.doctorservice.repository.DoctorAddressRepository;
 import com.tinysteps.doctorservice.exception.DoctorNotFoundException;
+import com.tinysteps.doctorservice.exception.DoctorSoftDeleteException;
 import com.tinysteps.doctorservice.integration.model.UserModel;
 import com.tinysteps.doctorservice.mapper.*;
 import com.tinysteps.doctorservice.model.*;
+import com.tinysteps.doctorservice.model.DoctorAddressRequestDto;
 import com.tinysteps.doctorservice.repository.*;
 import com.tinysteps.doctorservice.service.DoctorService;
 import com.tinysteps.doctorservice.service.DoctorAddressService;
@@ -15,6 +18,7 @@ import com.tinysteps.doctorservice.integration.service.AuthServiceIntegration;
 import com.tinysteps.doctorservice.integration.service.UserIntegrationService;
 import com.tinysteps.doctorservice.integration.model.UserUpdateRequest;
 import com.tinysteps.doctorservice.service.SecurityService;
+import com.tinysteps.common.entity.EntityStatus;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -59,6 +63,7 @@ public class DoctorServiceImpl implements DoctorService {
 
     private final RecommendationMapper recommendationMapper;
     private final RecommendationRepository recommendationRepository;
+    private final DoctorAddressMapper doctorAddressMapper;
     private final AuthServiceIntegration authServiceIntegration;
     private final UserIntegrationService userIntegrationService;
     private final DoctorAddressService doctorAddressService;
@@ -79,7 +84,8 @@ public class DoctorServiceImpl implements DoctorService {
             PhotoMapper photoMapper, PhotoRepository photoRepository,
 
             RecommendationMapper recommendationMapper, RecommendationRepository recommendationRepository,
-            AuthServiceIntegration authServiceIntegration, UserIntegrationService userIntegrationService,
+            DoctorAddressMapper doctorAddressMapper, AuthServiceIntegration authServiceIntegration,
+            UserIntegrationService userIntegrationService,
             DoctorAddressService doctorAddressService, SecurityService securityService,
             DoctorAddressRepository doctorAddressRepository) {
         this.doctorRepository = doctorRepository;
@@ -103,6 +109,7 @@ public class DoctorServiceImpl implements DoctorService {
 
         this.recommendationMapper = recommendationMapper;
         this.recommendationRepository = recommendationRepository;
+        this.doctorAddressMapper = doctorAddressMapper;
         this.authServiceIntegration = authServiceIntegration;
         this.userIntegrationService = userIntegrationService;
         this.doctorAddressService = doctorAddressService;
@@ -116,6 +123,13 @@ public class DoctorServiceImpl implements DoctorService {
      * and properly populating related entities to avoid empty lists
      */
     private DoctorResponseDto createDoctorResponseDto(Doctor doctor) {
+        return createDoctorResponseDto(doctor, null);
+    }
+
+    /**
+     * Creates DoctorResponseDto with branch-specific context
+     */
+    private DoctorResponseDto createDoctorResponseDto(Doctor doctor, UUID branchContext) {
         // Fetch user data for email and phone
         String email = "";
         String phone = "";
@@ -187,10 +201,36 @@ public class DoctorServiceImpl implements DoctorService {
                 .map(UUID::toString)
                 .collect(Collectors.toList());
 
+        // Get doctor addresses with status information
+        List<DoctorAddressResponseDto> doctorAddresses = doctorAddressRepository.findByDoctorId(doctor.getId())
+                .stream()
+                .map(doctorAddressMapper::toResponseDto)
+                .collect(Collectors.toList());
+
         List<RecommendationResponseDto> recommendations = recommendationRepository.findByDoctorId(doctor.getId())
                 .stream()
                 .map(recommendationMapper::toResponseDto)
                 .collect(Collectors.toList());
+
+        // Determine doctor status based on context
+        String doctorStatus = doctor.getStatus() != null ? doctor.getStatus().name() : "ACTIVE";
+
+        // If we have a branch context, check if doctor is active in that specific
+        // branch
+        if (branchContext != null) {
+            List<DoctorAddress> branchAssociations = doctorAddressRepository.findByDoctorIdAndAddressId(doctor.getId(),
+                    branchContext);
+            if (!branchAssociations.isEmpty()) {
+                // If doctor has association with this branch, use the branch-specific status
+                Status branchStatus = branchAssociations.get(0).getStatus();
+                if (branchStatus == Status.INACTIVE) {
+                    doctorStatus = "INACTIVE";
+                }
+            } else if (!doctor.getPrimaryBranchId().equals(branchContext)) {
+                // Doctor is not associated with this branch and it's not their primary branch
+                doctorStatus = "INACTIVE";
+            }
+        }
 
         return DoctorResponseDto.builder()
                 .id(doctor.getId() != null ? doctor.getId().toString() : null)
@@ -207,7 +247,7 @@ public class DoctorServiceImpl implements DoctorService {
                 .isVerified(doctor.getIsVerified() != null ? doctor.getIsVerified() : false)
                 .ratingAverage(doctor.getRatingAverage() != null ? doctor.getRatingAverage() : BigDecimal.ZERO)
                 .reviewCount(doctor.getReviewCount() != null ? doctor.getReviewCount() : 0)
-                .status(doctor.getStatus() != null ? doctor.getStatus() : "INACTIVE")
+                .status(doctorStatus) // Use computed status instead of raw doctor status
                 .primaryBranchId(doctor.getPrimaryBranchId() != null ? doctor.getPrimaryBranchId().toString() : null)
                 .isMultiBranch(doctor.getIsMultiBranch() != null ? doctor.getIsMultiBranch() : false)
                 .createdAt(doctor.getCreatedAt() != null ? doctor.getCreatedAt().toString() : "")
@@ -221,6 +261,7 @@ public class DoctorServiceImpl implements DoctorService {
                 .specializations(specializations) // Properly populated specializations
                 .photos(photos) // Properly populated photos
                 .addressIds(addressIds) // Properly populated address IDs
+                .doctorAddresses(doctorAddresses) // Properly populated doctor addresses with status
                 .recommendations(recommendations) // Properly populated recommendations
                 .build();
     }
@@ -257,7 +298,7 @@ public class DoctorServiceImpl implements DoctorService {
         // Store original values for comparison
         String originalName = existingDoctor.getName();
         String originalAvatar = existingDoctor.getImageUrl();
-        String originalStatus = existingDoctor.getStatus();
+        String originalStatus = existingDoctor.getStatus() != null ? existingDoctor.getStatus().name() : null;
 
         // Get current user information for comparison
         String originalEmail = null;
@@ -301,7 +342,8 @@ public class DoctorServiceImpl implements DoctorService {
                             .email(originalEmail) // Keep current email
                             .phone(originalPhone) // Keep current phone
                             .avatar(updatedDoctor.getImageUrl())
-                            .status(updatedDoctor.getStatus())
+                            .status(updatedDoctor.getStatus() != null ? updatedDoctor.getStatus().name()
+                                    : EntityStatus.INACTIVE.name())
                             .build();
 
                     userIntegrationService.updateUser(existingDoctor.getUserId(), userUpdateRequest)
@@ -328,7 +370,7 @@ public class DoctorServiceImpl implements DoctorService {
         // Store original values for comparison
         String originalName = existingDoctor.getName();
         String originalAvatar = existingDoctor.getImageUrl();
-        String originalStatus = existingDoctor.getStatus();
+        String originalStatus = existingDoctor.getStatus() != null ? existingDoctor.getStatus().name() : null;
 
         // Get current user information for comparison
         String originalEmail = null;
@@ -372,7 +414,8 @@ public class DoctorServiceImpl implements DoctorService {
                             .email(originalEmail) // Keep current email
                             .phone(originalPhone) // Keep current phone
                             .avatar(updatedDoctor.getImageUrl())
-                            .status(updatedDoctor.getStatus())
+                            .status(updatedDoctor.getStatus() != null ? updatedDoctor.getStatus().name()
+                                    : EntityStatus.INACTIVE.name())
                             .build();
 
                     userIntegrationService.updateUser(existingDoctor.getUserId(), userUpdateRequest)
@@ -469,7 +512,8 @@ public class DoctorServiceImpl implements DoctorService {
 
     @Override
     public Page<DoctorResponseDto> findByStatus(String status, Pageable pageable) {
-        return doctorRepository.findByStatus(status, pageable).map(this::createDoctorResponseDto);
+        EntityStatus entityStatus = EntityStatus.valueOf(status.toUpperCase());
+        return doctorRepository.findByStatus(entityStatus, pageable).map(this::createDoctorResponseDto);
     }
 
     @Override
@@ -557,7 +601,7 @@ public class DoctorServiceImpl implements DoctorService {
     public DoctorResponseDto activateDoctor(UUID id) {
         var doctor = doctorRepository.findById(id)
                 .orElseThrow(() -> new DoctorNotFoundException("Doctor not found with ID: " + id));
-        doctor.setStatus("ACTIVE");
+        doctor.setStatus(EntityStatus.ACTIVE);
         var updatedDoctor = doctorRepository.save(doctor);
         return createDoctorResponseDto(updatedDoctor);
     }
@@ -566,7 +610,7 @@ public class DoctorServiceImpl implements DoctorService {
     public DoctorResponseDto deactivateDoctor(UUID id) {
         var doctor = doctorRepository.findById(id)
                 .orElseThrow(() -> new DoctorNotFoundException("Doctor not found with ID: " + id));
-        doctor.setStatus("INACTIVE");
+        doctor.setStatus(EntityStatus.INACTIVE);
         var updatedDoctor = doctorRepository.save(doctor);
         return createDoctorResponseDto(updatedDoctor);
     }
@@ -575,9 +619,257 @@ public class DoctorServiceImpl implements DoctorService {
     public DoctorResponseDto suspendDoctor(UUID id) {
         var doctor = doctorRepository.findById(id)
                 .orElseThrow(() -> new DoctorNotFoundException("Doctor not found with ID: " + id));
-        doctor.setStatus("SUSPENDED");
+        doctor.setStatus(EntityStatus.INACTIVE);
         var updatedDoctor = doctorRepository.save(doctor);
         return createDoctorResponseDto(updatedDoctor);
+    }
+
+    // Enhanced Soft Delete Operations
+    @Override
+    @Transactional
+    public DoctorSoftDeleteResponseDto deactivateDoctorFromBranches(UUID doctorId,
+            DoctorBranchDeactivationRequestDto request) {
+        log.info("Deactivating doctor {} from branches: {}", doctorId, request.getBranchIds());
+
+        // Input validation
+        if (request.getBranchIds() == null || request.getBranchIds().isEmpty()) {
+            throw new DoctorSoftDeleteException("Branch IDs list cannot be null or empty");
+        }
+
+        if (request.getBranchIds().size() > 50) {
+            throw new DoctorSoftDeleteException("Cannot deactivate from more than 50 branches at once");
+        }
+
+        // Validate doctor exists
+        var doctor = doctorRepository.findById(doctorId)
+                .orElseThrow(() -> new DoctorNotFoundException("Doctor not found with ID: " + doctorId));
+
+        // Validate that doctor is associated with all specified branches
+        List<DoctorAddress> doctorAddresses = doctorAddressRepository.findByDoctorIdAndAddressIdIn(doctorId,
+                request.getBranchIds());
+        List<UUID> foundBranchIds = doctorAddresses.stream().map(DoctorAddress::getAddressId).toList();
+
+        if (foundBranchIds.size() != request.getBranchIds().size()) {
+            List<UUID> missingBranches = request.getBranchIds().stream()
+                    .filter(branchId -> !foundBranchIds.contains(branchId))
+                    .toList();
+            throw new DoctorSoftDeleteException("Doctor is not associated with branches: " + missingBranches);
+        }
+
+        // Validate that we're not trying to deactivate from all branches without
+        // explicit global deactivation
+        long totalBranches = doctorAddressRepository.countByDoctorId(doctorId);
+        if (request.getBranchIds().size() == totalBranches && totalBranches > 1) {
+            log.warn(
+                    "Attempting to deactivate doctor {} from all {} branches. Consider using global deactivation instead.",
+                    doctorId, totalBranches);
+        }
+
+        try {
+            // Deactivate doctor from specified branches
+            doctorAddressRepository.updateStatusByDoctorIdAndAddressIdIn(doctorId, request.getBranchIds(),
+                    Status.INACTIVE);
+
+            // Check if doctor should be globally deactivated
+            boolean globalStatusChanged = false;
+            String newGlobalStatus = doctor.getStatus().name();
+
+            if (request.getUpdateGlobalStatus()) {
+                long activeBranchCount = doctorAddressRepository.countActiveBranchesByDoctorId(doctorId);
+                if (activeBranchCount == 0 && doctor.getStatus() == EntityStatus.ACTIVE) {
+                    doctor.setStatus(EntityStatus.INACTIVE);
+                    doctorRepository.save(doctor);
+                    globalStatusChanged = true;
+                    newGlobalStatus = EntityStatus.INACTIVE.name();
+                    log.info("Doctor {} global status changed to INACTIVE as they are no longer active in any branch",
+                            doctorId);
+                }
+            }
+
+            // Gather response information
+            long remainingActiveBranches = doctorAddressRepository.countActiveBranchesByDoctorId(doctorId);
+
+            log.info("Successfully deactivated doctor {} from {} branches. Remaining active branches: {}",
+                    doctorId, request.getBranchIds().size(), remainingActiveBranches);
+
+            return DoctorSoftDeleteResponseDto.builder()
+                    .doctorId(doctorId)
+                    .success(true)
+                    .message(String.format("Doctor successfully deactivated from %d branch(es). %s",
+                            request.getBranchIds().size(),
+                            globalStatusChanged ? "Global status changed to INACTIVE." : ""))
+                    .affectedBranches(request.getBranchIds())
+                    .globalStatusChanged(globalStatusChanged)
+                    .newGlobalStatus(newGlobalStatus)
+                    .remainingActiveBranches((int) remainingActiveBranches)
+                    .totalBranches((int) totalBranches)
+                    .operationType("BRANCH_SPECIFIC_DEACTIVATION")
+                    .build();
+
+        } catch (DoctorSoftDeleteException e) {
+            throw e; // Re-throw validation exceptions
+        } catch (Exception e) {
+            log.error("Failed to deactivate doctor {} from branches {}: {}", doctorId, request.getBranchIds(),
+                    e.getMessage(), e);
+            throw new DoctorSoftDeleteException("Failed to deactivate doctor from branches: " + e.getMessage(), e);
+        }
+    }
+
+    @Override
+    @Transactional
+    public DoctorSoftDeleteResponseDto deactivateDoctorGlobally(UUID doctorId) {
+        log.info("Deactivating doctor {} globally", doctorId);
+
+        // Validate doctor exists
+        var doctor = doctorRepository.findById(doctorId)
+                .orElseThrow(() -> new DoctorNotFoundException("Doctor not found with ID: " + doctorId));
+
+        try {
+            // Get all branch IDs for this doctor
+            List<UUID> allBranchIds = doctorAddressRepository.findAddressIdsByDoctorId(doctorId);
+
+            // Deactivate doctor from all branches
+            if (!allBranchIds.isEmpty()) {
+                doctorAddressRepository.updateStatusByDoctorId(doctorId, Status.INACTIVE);
+            }
+
+            // Set global status to inactive
+            boolean globalStatusChanged = doctor.getStatus() == EntityStatus.ACTIVE;
+            doctor.setStatus(EntityStatus.INACTIVE);
+            doctorRepository.save(doctor);
+
+            log.info("Successfully deactivated doctor {} globally from {} branches", doctorId, allBranchIds.size());
+
+            return DoctorSoftDeleteResponseDto.builder()
+                    .doctorId(doctorId)
+                    .success(true)
+                    .message(String.format("Doctor successfully deactivated globally from %d branch(es)",
+                            allBranchIds.size()))
+                    .affectedBranches(allBranchIds)
+                    .globalStatusChanged(globalStatusChanged)
+                    .newGlobalStatus(EntityStatus.INACTIVE.name())
+                    .remainingActiveBranches(0)
+                    .totalBranches(allBranchIds.size())
+                    .operationType("GLOBAL_DEACTIVATION")
+                    .build();
+
+        } catch (Exception e) {
+            log.error("Failed to deactivate doctor {} globally: {}", doctorId, e.getMessage(), e);
+            throw new RuntimeException("Failed to deactivate doctor globally: " + e.getMessage(), e);
+        }
+    }
+
+    @Override
+    @Transactional
+    public DoctorSoftDeleteResponseDto activateDoctorInBranch(UUID doctorId, UUID branchId) {
+        log.info("Activating doctor {} in branch {}", doctorId, branchId);
+
+        // Validate doctor exists
+        var doctor = doctorRepository.findById(doctorId)
+                .orElseThrow(() -> new DoctorNotFoundException("Doctor not found with ID: " + doctorId));
+
+        // Validate that doctor is associated with the branch
+        List<DoctorAddress> doctorAddresses = doctorAddressRepository.findByDoctorIdAndAddressId(doctorId, branchId);
+        if (doctorAddresses.isEmpty()) {
+            throw new IllegalArgumentException("Doctor is not associated with branch: " + branchId);
+        }
+
+        try {
+            // Activate doctor in the specific branch
+            doctorAddressRepository.updateStatusByDoctorIdAndAddressIdAndPracticeRole(
+                    doctorId, branchId, doctorAddresses.get(0).getPracticeRole(), Status.ACTIVE);
+
+            // If doctor's global status is INACTIVE, activate it
+            boolean globalStatusChanged = false;
+            String newGlobalStatus = doctor.getStatus().name();
+
+            if (doctor.getStatus() == EntityStatus.INACTIVE) {
+                doctor.setStatus(EntityStatus.ACTIVE);
+                doctorRepository.save(doctor);
+                globalStatusChanged = true;
+                newGlobalStatus = EntityStatus.ACTIVE.name();
+                log.info("Doctor {} global status changed to ACTIVE", doctorId);
+            }
+
+            // Gather response information
+            long activeBranchCount = doctorAddressRepository.countActiveBranchesByDoctorId(doctorId);
+            long totalBranches = doctorAddressRepository.countByDoctorId(doctorId);
+
+            log.info("Successfully activated doctor {} in branch {}. Total active branches: {}",
+                    doctorId, branchId, activeBranchCount);
+
+            return DoctorSoftDeleteResponseDto.builder()
+                    .doctorId(doctorId)
+                    .success(true)
+                    .message(String.format("Doctor successfully activated in branch. %s",
+                            globalStatusChanged ? "Global status changed to ACTIVE." : ""))
+                    .affectedBranches(List.of(branchId))
+                    .globalStatusChanged(globalStatusChanged)
+                    .newGlobalStatus(newGlobalStatus)
+                    .remainingActiveBranches((int) activeBranchCount)
+                    .totalBranches((int) totalBranches)
+                    .operationType("BRANCH_ACTIVATION")
+                    .build();
+
+        } catch (Exception e) {
+            log.error("Failed to activate doctor {} in branch {}: {}", doctorId, branchId, e.getMessage(), e);
+            throw new RuntimeException("Failed to activate doctor in branch: " + e.getMessage(), e);
+        }
+    }
+
+    @Override
+    public Map<UUID, Boolean> getDoctorBranchStatus(UUID doctorId) {
+        log.debug("Getting branch status for doctor {}", doctorId);
+
+        // Validate doctor exists
+        if (!doctorRepository.existsById(doctorId)) {
+            throw new DoctorNotFoundException("Doctor not found with ID: " + doctorId);
+        }
+
+        List<Object[]> branchStatusList = doctorAddressRepository.findBranchStatusByDoctorId(doctorId);
+
+        Map<UUID, Boolean> branchStatusMap = new HashMap<>();
+        for (Object[] row : branchStatusList) {
+            UUID branchId = (UUID) row[0];
+            Status status = (Status) row[1];
+            branchStatusMap.put(branchId, status == Status.ACTIVE);
+        }
+
+        return branchStatusMap;
+    }
+
+    // Soft Delete Utility Methods
+    @Override
+    public boolean isDoctorActiveInAnyBranch(UUID doctorId) {
+        log.debug("Checking if doctor {} is active in any branch", doctorId);
+
+        if (!doctorRepository.existsById(doctorId)) {
+            throw new DoctorNotFoundException("Doctor not found with ID: " + doctorId);
+        }
+
+        return doctorAddressRepository.hasActiveBranches(doctorId);
+    }
+
+    @Override
+    public long getActiveBranchCount(UUID doctorId) {
+        log.debug("Getting active branch count for doctor {}", doctorId);
+
+        if (!doctorRepository.existsById(doctorId)) {
+            throw new DoctorNotFoundException("Doctor not found with ID: " + doctorId);
+        }
+
+        return doctorAddressRepository.countActiveBranchesByDoctorId(doctorId);
+    }
+
+    @Override
+    public List<UUID> getActiveBranches(UUID doctorId) {
+        log.debug("Getting active branches for doctor {}", doctorId);
+
+        if (!doctorRepository.existsById(doctorId)) {
+            throw new DoctorNotFoundException("Doctor not found with ID: " + doctorId);
+        }
+
+        return doctorAddressRepository.findActiveBranchIdsByDoctorId(doctorId);
     }
 
     @Override
@@ -619,7 +911,7 @@ public class DoctorServiceImpl implements DoctorService {
     @Override
     public boolean isDoctorActive(UUID id) {
         return doctorRepository.findById(id)
-                .map(doctor -> "ACTIVE".equalsIgnoreCase(doctor.getStatus()))
+                .map(doctor -> doctor.getStatus() == EntityStatus.ACTIVE)
                 .orElse(false);
     }
 
@@ -630,7 +922,8 @@ public class DoctorServiceImpl implements DoctorService {
 
     @Override
     public long countByStatus(String status) {
-        return doctorRepository.countByStatus(status);
+        EntityStatus entityStatus = EntityStatus.valueOf(status.toUpperCase());
+        return doctorRepository.countByStatus(entityStatus);
     }
 
     @Override
@@ -746,6 +1039,24 @@ public class DoctorServiceImpl implements DoctorService {
             log.info("Doctor from mapper :{}", doctor);
             // doctor.setUserId(UUID.fromString(userResponse.id()));
             var savedDoctor = doctorRepository.save(doctor);
+
+            // Create doctor-address relationship if branchId is provided
+            if (requestDto.branchId() != null) {
+                try {
+                    UUID branchUUID = UUID.fromString(requestDto.branchId());
+                    DoctorAddressRequestDto addressRequest = new DoctorAddressRequestDto(
+                            branchUUID,
+                            "CONSULTANT", // Default practice role
+                            "ACTIVE");
+                    doctorAddressService.addDoctorAddress(savedDoctor.getId(), addressRequest);
+                    log.info("Created doctor-address relationship for doctor {} and branch {}",
+                            savedDoctor.getId(), requestDto.branchId());
+                } catch (Exception e) {
+                    log.warn("Failed to create doctor-address relationship for doctor {} and branch {}: {}",
+                            savedDoctor.getId(), requestDto.branchId(), e.getMessage());
+                }
+            }
+
             return createDoctorResponseDto(savedDoctor);
         } catch (Exception e) {
 
@@ -761,7 +1072,8 @@ public class DoctorServiceImpl implements DoctorService {
 
     @Override
     public long countByBranchAndStatus(UUID branchId, String status) {
-        return doctorRepository.countByPrimaryBranchIdAndStatus(branchId, status);
+        EntityStatus entityStatus = EntityStatus.valueOf(status.toUpperCase());
+        return doctorRepository.countByPrimaryBranchIdAndStatus(branchId, entityStatus);
     }
 
     @Override
@@ -786,13 +1098,15 @@ public class DoctorServiceImpl implements DoctorService {
 
     @Override
     public Page<DoctorResponseDto> findByBranchAndStatus(UUID branchId, String status, Pageable pageable) {
-        Page<Doctor> doctors = doctorRepository.findByPrimaryBranchIdAndStatus(branchId, status, pageable);
+        EntityStatus entityStatus = EntityStatus.valueOf(status.toUpperCase());
+        Page<Doctor> doctors = doctorRepository.findByPrimaryBranchIdAndStatus(branchId, entityStatus, pageable);
         return doctors.map(this::createDoctorResponseDto);
     }
 
     @Override
     public List<DoctorResponseDto> findByBranchAndStatus(UUID branchId, String status) {
-        List<Doctor> doctors = doctorRepository.findByPrimaryBranchIdAndStatus(branchId, status);
+        EntityStatus entityStatus = EntityStatus.valueOf(status.toUpperCase());
+        List<Doctor> doctors = doctorRepository.findByPrimaryBranchIdAndStatus(branchId, entityStatus);
         return doctors.stream()
                 .map(this::createDoctorResponseDto)
                 .collect(Collectors.toList());
@@ -895,6 +1209,23 @@ public class DoctorServiceImpl implements DoctorService {
     }
 
     @Override
+    public Page<DoctorResponseDto> findByBranchWithStatusFilter(UUID branchId, boolean includeInactive,
+            Pageable pageable) {
+        log.debug("Finding doctors for branch {} with includeInactive={}", branchId, includeInactive);
+
+        Page<Doctor> doctors;
+        if (includeInactive) {
+            // Include both active and inactive doctors associated with the branch
+            doctors = doctorRepository.findByPrimaryOrAssociatedBranchAllStatuses(branchId, pageable);
+        } else {
+            // Only include doctors with active status in the branch
+            doctors = doctorRepository.findByPrimaryOrAssociatedBranch(branchId, pageable);
+        }
+
+        return doctors.map(doctor -> createDoctorResponseDto(doctor, branchId));
+    }
+
+    @Override
     public Map<String, Object> getBranchStatistics(UUID branchId) {
         Map<String, Object> statistics = new HashMap<>();
 
@@ -907,7 +1238,7 @@ public class DoctorServiceImpl implements DoctorService {
         statistics.put("verifiedDoctors", verifiedDoctors);
 
         // Active doctors
-        long activeDoctors = doctorRepository.countByPrimaryBranchIdAndStatus(branchId, "ACTIVE");
+        long activeDoctors = doctorRepository.countByPrimaryBranchIdAndStatus(branchId, EntityStatus.ACTIVE);
         statistics.put("activeDoctors", activeDoctors);
 
         // Doctors by gender
@@ -954,7 +1285,7 @@ public class DoctorServiceImpl implements DoctorService {
         statistics.put("verifiedDoctors", verifiedDoctors);
 
         // Active doctors across all branches
-        long activeDoctors = doctorRepository.countByPrimaryBranchIdInAndStatus(branchIds, "ACTIVE");
+        long activeDoctors = doctorRepository.countByPrimaryBranchIdInAndStatus(branchIds, EntityStatus.ACTIVE);
         statistics.put("activeDoctors", activeDoctors);
 
         // Doctors by gender across all branches

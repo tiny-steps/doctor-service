@@ -7,6 +7,7 @@ public record DoctorAddressResponseDto(
         String doctorId,
         String addressId,
         String practiceRole,
+        String status,
         LocalDateTime createdAt,
         LocalDateTime updatedAt
 ) {

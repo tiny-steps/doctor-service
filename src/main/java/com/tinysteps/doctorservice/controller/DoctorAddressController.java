@@ -51,9 +51,9 @@ public class DoctorAddressController {
                 .body(ResponseModel.success("Address added to doctor successfully", response));
     }
 
-    @Operation(summary = "Remove address from doctor", description = "Removes an address association from a doctor")
+    @Operation(summary = "Remove address from doctor", description = "Deactivates an address association from a doctor (sets status to INACTIVE)")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "204", description = "Address removed from doctor successfully"),
+            @ApiResponse(responseCode = "204", description = "Address deactivated from doctor successfully"),
             @ApiResponse(responseCode = "400", description = "Relationship does not exist"),
             @ApiResponse(responseCode = "401", description = "Unauthorized"),
             @ApiResponse(responseCode = "403", description = "Access denied")
@@ -68,15 +68,49 @@ public class DoctorAddressController {
         return ResponseEntity.noContent().build();
     }
 
-    @Operation(summary = "Get doctor addresses", description = "Retrieves all addresses associated with a doctor")
+    @Operation(summary = "Activate address for doctor", description = "Activates an address association for a doctor (sets status to ACTIVE)")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Doctor addresses retrieved successfully")
+            @ApiResponse(responseCode = "204", description = "Address activated for doctor successfully"),
+            @ApiResponse(responseCode = "400", description = "Relationship does not exist"),
+            @ApiResponse(responseCode = "401", description = "Unauthorized"),
+            @ApiResponse(responseCode = "403", description = "Access denied")
+    })
+    @PutMapping("/{doctorId}/addresses/{addressId}/activate")
+    @PreAuthorize("@doctorSecurity.isDoctorOwner(authentication, #doctorId) or hasRole('ADMIN')")
+    public ResponseEntity<Void> activateDoctorAddress(
+            @Parameter(description = "Doctor ID", required = true) @PathVariable UUID doctorId,
+            @Parameter(description = "Address ID", required = true) @PathVariable UUID addressId,
+            @Parameter(description = "Practice role", required = true) @RequestParam String practiceRole) {
+        doctorAddressService.activateDoctorAddress(doctorId, addressId, practiceRole);
+        return ResponseEntity.noContent().build();
+    }
+
+    @Operation(summary = "Get doctor addresses", description = "Retrieves all active addresses associated with a doctor")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Doctor addresses retrieved successfully"),
+            @ApiResponse(responseCode = "401", description = "Unauthorized"),
+            @ApiResponse(responseCode = "403", description = "Access denied")
     })
     @GetMapping("/{doctorId}/addresses")
-    public ResponseEntity<ResponseModel<List<DoctorAddressResponseDto>>> getDoctorAddresses(
+    @PreAuthorize("@doctorSecurity.isDoctorOwner(authentication, #doctorId) or hasRole('ADMIN')")
+    public ResponseEntity<List<DoctorAddressResponseDto>> getDoctorAddresses(
+            @Parameter(description = "Doctor ID", required = true) @PathVariable UUID doctorId) {
+        List<DoctorAddressResponseDto> addresses = doctorAddressService.findActiveDoctorAddresses(doctorId);
+        return ResponseEntity.ok(addresses);
+    }
+
+    @Operation(summary = "Get all doctor addresses", description = "Retrieves all addresses (active and inactive) associated with a doctor")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "All doctor addresses retrieved successfully"),
+            @ApiResponse(responseCode = "401", description = "Unauthorized"),
+            @ApiResponse(responseCode = "403", description = "Access denied")
+    })
+    @GetMapping("/{doctorId}/addresses/all")
+    @PreAuthorize("@doctorSecurity.isDoctorOwner(authentication, #doctorId) or hasRole('ADMIN')")
+    public ResponseEntity<List<DoctorAddressResponseDto>> getAllDoctorAddresses(
             @Parameter(description = "Doctor ID", required = true) @PathVariable UUID doctorId) {
         List<DoctorAddressResponseDto> addresses = doctorAddressService.findByDoctorId(doctorId);
-        return ResponseEntity.ok(ResponseModel.success("Doctor addresses retrieved successfully", addresses));
+        return ResponseEntity.ok(addresses);
     }
 
     @Operation(summary = "Get doctor addresses with pagination", description = "Retrieves addresses associated with a doctor with pagination")
