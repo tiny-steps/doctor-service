@@ -34,5 +34,6 @@ public class DoctorAddress {
     @JoinColumn(name = "doctor_id", referencedColumnName = "id", insertable = false, updatable = false)
     private Doctor doctor;
 
+    @Enumerated(EnumType.STRING)
     private Status status;
 }
