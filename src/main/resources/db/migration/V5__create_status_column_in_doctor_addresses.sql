@@ -1,5 +1,3 @@
-create type doctor_status as enum ('ACTIVE','INACTIVE');
-
-
-ALTER TABLE doctors.public.doctor_addresses
-ADD column if not exists status doctor_status;
+CREATE TYPE IF NOT EXISTS doctor_status AS ENUM ('ACTIVE', 'INACTIVE');
+ALTER TABLE doctor_addresses
+ADD COLUMN IF NOT EXISTS status doctor_status DEFAULT 'ACTIVE';
