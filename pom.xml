@@ -13,6 +13,15 @@
 	<version>0.0.1-SNAPSHOT</version>
 	<name>ts-doctor-service</name>
 	<description>Demo project for Spring Boot</description>
+	<repositories>
+		<repository>
+			<id>github</id>
+			<url>https://maven.pkg.github.com/tiny-steps/common</url>
+			<snapshots>
+				<enabled>true</enabled>
+			</snapshots>
+		</repository>
+	</repositories>
 	<url/>
 	<licenses>
 		<license/>
