@@ -11,5 +11,6 @@ public record UserUpdateRequest(
         String email,
         String phone,
         String avatar,
+        String imageData, // Added imageData field
         String status) {
 }

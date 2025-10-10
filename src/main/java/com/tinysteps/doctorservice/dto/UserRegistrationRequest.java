@@ -15,4 +15,5 @@ public class UserRegistrationRequest {
     private String password;
     private String phone;
     private String role;
+    private String imageData; // Base64 image data for avatar
 }

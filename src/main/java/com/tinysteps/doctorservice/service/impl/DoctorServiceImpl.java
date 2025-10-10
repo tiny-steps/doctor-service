@@ -130,9 +130,10 @@ public class DoctorServiceImpl implements DoctorService {
      * Creates DoctorResponseDto with branch-specific context
      */
     private DoctorResponseDto createDoctorResponseDto(Doctor doctor, UUID branchContext) {
-        // Fetch user data for email and phone
+        // Fetch user data for email, phone, and avatar
         String email = "";
         String phone = "";
+        String avatar = "";
         if (doctor.getUserId() != null) {
             try {
                 log.info("Fetching user data for doctor {} with userId: {}", doctor.getId(), doctor.getUserId());
@@ -140,8 +141,10 @@ public class DoctorServiceImpl implements DoctorService {
                 if (user != null) {
                     email = user.email() != null ? user.email() : "";
                     phone = user.phone() != null ? user.phone() : "";
-                    log.info("Successfully fetched user data for doctor {}: email={}, phone={}", doctor.getId(), email,
-                            phone);
+                    avatar = user.avatar() != null ? user.avatar() : "";
+                    log.info("Successfully fetched user data for doctor {}: email={}, phone={}, avatar={}",
+                            doctor.getId(), email,
+                            phone, avatar);
                 } else {
                     log.warn("User service returned null for userId: {} (doctor: {})", doctor.getUserId(),
                             doctor.getId());
@@ -242,7 +245,7 @@ public class DoctorServiceImpl implements DoctorService {
                 .gender(doctor.getGender() != null ? doctor.getGender() : "")
                 .summary(doctor.getSummary() != null ? doctor.getSummary() : "")
                 .about(doctor.getAbout() != null ? doctor.getAbout() : "")
-                .imageUrl(doctor.getImageUrl() != null ? doctor.getImageUrl() : "")
+                .imageUrl(avatar) // Use avatar from user service instead of doctor.getImageUrl()
                 .experienceYears(doctor.getExperienceYears() != null ? doctor.getExperienceYears() : 0)
                 .isVerified(doctor.getIsVerified() != null ? doctor.getIsVerified() : false)
                 .ratingAverage(doctor.getRatingAverage() != null ? doctor.getRatingAverage() : BigDecimal.ZERO)
@@ -315,6 +318,11 @@ public class DoctorServiceImpl implements DoctorService {
             }
         }
 
+        // If imageData is present, clear imageUrl for now; user-service will return new
+        // avatar
+        // Note: imageData is handled by user-service via auth/user flows. We keep
+        // current URL until propagated.
+
         // Update doctor entity
         doctorMapper.updateEntityFromDto(requestDto, existingDoctor);
         var updatedDoctor = doctorRepository.save(existingDoctor);
@@ -337,11 +345,21 @@ public class DoctorServiceImpl implements DoctorService {
                             existingDoctor.getUserId());
 
                     // Update user in user service with current values
+                    String avatarToSend = updatedDoctor.getImageUrl();
+                    try {
+                        var imageDataMethod = requestDto.getClass().getMethod("imageData");
+                        Object img = imageDataMethod.invoke(requestDto);
+                        if (img instanceof String s && !s.isEmpty()) {
+                            avatarToSend = s; // pass data URL
+                        }
+                    } catch (Exception ignore) {
+                    }
+
                     UserUpdateRequest userUpdateRequest = UserUpdateRequest.builder()
                             .name(updatedDoctor.getName())
                             .email(originalEmail) // Keep current email
                             .phone(originalPhone) // Keep current phone
-                            .avatar(updatedDoctor.getImageUrl())
+                            .avatar(avatarToSend)
                             .status(updatedDoctor.getStatus() != null ? updatedDoctor.getStatus().name()
                                     : EntityStatus.INACTIVE.name())
                             .build();
@@ -409,11 +427,22 @@ public class DoctorServiceImpl implements DoctorService {
                             existingDoctor.getUserId());
 
                     // Update user in user service with current values
+                    String avatarToSend = updatedDoctor.getImageUrl();
+                    // If client sent base64 image via requestDto.imageData embedded in avatar flow
+                    try {
+                        var imageDataField = requestDto.getClass().getMethod("imageData");
+                        Object img = imageDataField.invoke(requestDto);
+                        if (img instanceof String s && !s.isEmpty()) {
+                            avatarToSend = s; // pass data URL to user-service which will persist and return URL
+                        }
+                    } catch (Exception ignore) {
+                    }
+
                     UserUpdateRequest userUpdateRequest = UserUpdateRequest.builder()
                             .name(updatedDoctor.getName())
                             .email(originalEmail) // Keep current email
                             .phone(originalPhone) // Keep current phone
-                            .avatar(updatedDoctor.getImageUrl())
+                            .avatar(avatarToSend)
                             .status(updatedDoctor.getStatus() != null ? updatedDoctor.getStatus().name()
                                     : EntityStatus.INACTIVE.name())
                             .build();
@@ -1006,6 +1035,7 @@ public class DoctorServiceImpl implements DoctorService {
                     .phone(requestDto.phone())
                     .password(requestDto.password())
                     .role("DOCTOR")
+                    .imageData(requestDto.imageData()) // Pass image data for avatar
                     .build();
 
             UserModel userResponse = authServiceIntegration.registerUser(userRequest).block();
@@ -1026,6 +1056,7 @@ public class DoctorServiceImpl implements DoctorService {
                     requestDto.summary(),
                     requestDto.about(),
                     requestDto.imageUrl(),
+                    requestDto.imageData(), // Now support imageData during registration
                     requestDto.experienceYears(),
                     requestDto.isVerified(),
                     requestDto.ratingAverage(),
@@ -1039,6 +1070,26 @@ public class DoctorServiceImpl implements DoctorService {
             log.info("Doctor from mapper :{}", doctor);
             // doctor.setUserId(UUID.fromString(userResponse.id()));
             var savedDoctor = doctorRepository.save(doctor);
+
+            // Handle imageData if provided - update user avatar in user service
+            if (StringUtils.hasText(requestDto.imageData())) {
+                try {
+                    log.info("Updating user avatar with imageData for doctor ID: {} with userId: {}",
+                            savedDoctor.getId(), userResponse.id());
+
+                    UserUpdateRequest userUpdateRequest = UserUpdateRequest.builder()
+                            .name(savedDoctor.getName())
+                            .avatar(requestDto.imageData()) // Pass the base64 data URL
+                            .imageData(requestDto.imageData()) // Also pass as imageData
+                            .build();
+
+                    userIntegrationService.updateUser(UUID.fromString(userResponse.id()), userUpdateRequest).block();
+                    log.info("Successfully updated user avatar for doctor ID: {}", savedDoctor.getId());
+                } catch (Exception e) {
+                    log.warn("Failed to update user avatar for doctor ID: {}: {}",
+                            savedDoctor.getId(), e.getMessage());
+                }
+            }
 
             // Create doctor-address relationship if branchId is provided
             if (requestDto.branchId() != null) {

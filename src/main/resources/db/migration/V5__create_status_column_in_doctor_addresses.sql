@@ -1,11 +1,6 @@
--- Create enum type for doctor status if it doesn't exist
-DO $$
-BEGIN
-    IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'doctor_status') THEN
-        CREATE TYPE doctor_status AS ENUM ('ACTIVE', 'INACTIVE');
-    END IF;
-END $$;
-
 -- Add status column to doctor_addresses table
-ALTER TABLE doctor_addresses 
-ADD COLUMN IF NOT EXISTS status doctor_status DEFAULT 'ACTIVE';
+-- Uses SMALLINT to store enum ordinal values: 0=ACTIVE, 1=INACTIVE
+ALTER TABLE doctor_addresses
+ADD COLUMN IF NOT EXISTS status SMALLINT DEFAULT 0;
+-- Add comment for clarity
+COMMENT ON COLUMN doctor_addresses.status IS 'Status of doctor-address relationship: 0=ACTIVE, 1=INACTIVE';

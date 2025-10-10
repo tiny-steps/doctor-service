@@ -3,7 +3,7 @@
 
 -- Create the new doctor_addresses junction table
 -- Supports multiple roles per doctor across different branches
-CREATE TABLE doctor_addresses (
+CREATE TABLE if not exists doctor_addresses (
     doctor_id UUID NOT NULL REFERENCES doctors(id) ON DELETE CASCADE,
     address_id UUID NOT NULL,
     practice_role VARCHAR(50) NOT NULL DEFAULT 'CONSULTANT',
@@ -12,8 +12,8 @@ CREATE TABLE doctor_addresses (
 );
 
 -- Create index for efficient querying
-CREATE INDEX idx_doctor_addresses_doctor_id ON doctor_addresses(doctor_id);
-CREATE INDEX idx_doctor_addresses_address_id ON doctor_addresses(address_id);
+CREATE INDEX if not exists idx_doctor_addresses_doctor_id ON doctor_addresses(doctor_id);
+CREATE INDEX if not exists idx_doctor_addresses_address_id ON doctor_addresses(address_id);
 
 -- No data migration needed since practice table is empty
 -- Drop the old practice table immediately
