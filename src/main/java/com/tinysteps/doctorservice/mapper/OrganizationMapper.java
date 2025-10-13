@@ -14,9 +14,7 @@ import java.sql.Date;
 import java.util.List;
 import java.util.UUID;
 
-@Mapper(componentModel = "spring",
-        unmappedTargetPolicy = ReportingPolicy.IGNORE,
-        nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
+@Mapper(componentModel = "spring", unmappedTargetPolicy = ReportingPolicy.IGNORE, nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
 public interface OrganizationMapper {
 
     @Mapping(target = "id", source = "id", qualifiedByName = "uuidToString")
@@ -37,7 +35,7 @@ public interface OrganizationMapper {
 
     // Update entity from DTO
     @Mapping(target = "id", ignore = true)
-    @Mapping(target = "doctor", ignore = true)
+    @Mapping(target = "doctor", ignore = true) // Doctor will be handled separately in service
     @Mapping(target = "tenureStart", source = "tenureStart", qualifiedByName = "stringToDate")
     @Mapping(target = "tenureEnd", source = "tenureEnd", qualifiedByName = "stringToDate")
     void updateEntityFromDto(OrganizationRequestDto requestDto, @MappingTarget Organization organization);

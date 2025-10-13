@@ -6,8 +6,8 @@ import lombok.Builder;
 
 @Builder
 public record MembershipRequestDto(
-        @NotBlank(message = "Membership council name is required")
-        @Size(max = 255, message = "Membership council name must not exceed 255 characters")
-        String membershipCouncilName
-) {
+                @NotBlank(message = "Membership council name is required") @Size(max = 255, message = "Membership council name must not exceed 255 characters") String membershipCouncilName,
+
+                // Optional doctor ID to allow reassigning membership to different doctor
+                String doctorId) {
 }

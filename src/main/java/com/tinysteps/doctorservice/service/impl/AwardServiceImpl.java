@@ -65,6 +65,22 @@ public class AwardServiceImpl implements AwardService {
     public AwardResponseDto update(UUID id, AwardRequestDto requestDto) {
         var existingAward = awardRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Award not found with ID: " + id));
+
+        // Handle doctor reassignment if doctorId is provided
+        UUID originalDoctorId = existingAward.getDoctor().getId();
+        if (requestDto.doctorId() != null && !requestDto.doctorId().isEmpty()) {
+            try {
+                UUID newDoctorId = UUID.fromString(requestDto.doctorId());
+                var newDoctor = doctorRepository.findById(newDoctorId)
+                        .orElseThrow(() -> new DoctorNotFoundException(newDoctorId));
+                existingAward.setDoctor(newDoctor);
+                log.info("Reassigned award {} from doctor {} to doctor {}",
+                        id, originalDoctorId, newDoctorId);
+            } catch (IllegalArgumentException e) {
+                throw new IllegalArgumentException("Invalid doctor ID format: " + requestDto.doctorId());
+            }
+        }
+
         awardMapper.updateEntityFromDto(requestDto, existingAward);
         var updatedAward = awardRepository.save(existingAward);
         log.info("Updated award {} for doctor {}", id, existingAward.getDoctor().getId());
@@ -76,6 +92,22 @@ public class AwardServiceImpl implements AwardService {
     public AwardResponseDto partialUpdate(UUID id, AwardRequestDto requestDto) {
         var existingAward = awardRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Award not found with ID: " + id));
+
+        // Handle doctor reassignment if doctorId is provided
+        UUID originalDoctorId = existingAward.getDoctor().getId();
+        if (requestDto.doctorId() != null && !requestDto.doctorId().isEmpty()) {
+            try {
+                UUID newDoctorId = UUID.fromString(requestDto.doctorId());
+                var newDoctor = doctorRepository.findById(newDoctorId)
+                        .orElseThrow(() -> new DoctorNotFoundException(newDoctorId));
+                existingAward.setDoctor(newDoctor);
+                log.info("Reassigned award {} from doctor {} to doctor {}",
+                        id, originalDoctorId, newDoctorId);
+            } catch (IllegalArgumentException e) {
+                throw new IllegalArgumentException("Invalid doctor ID format: " + requestDto.doctorId());
+            }
+        }
+
         awardMapper.updateEntityFromDto(requestDto, existingAward);
         var updatedAward = awardRepository.save(existingAward);
         log.info("Partially updated award {} for doctor {}", id, existingAward.getDoctor().getId());

@@ -3,6 +3,7 @@ package com.tinysteps.doctorservice.controller;
 import com.tinysteps.doctorservice.model.DoctorDto;
 import com.tinysteps.doctorservice.model.DoctorRequestDto;
 import com.tinysteps.doctorservice.model.DoctorResponseDto;
+import com.tinysteps.doctorservice.model.DoctorBranchActivationRequestDto;
 import com.tinysteps.doctorservice.model.DoctorBranchDeactivationRequestDto;
 import com.tinysteps.doctorservice.model.DoctorSoftDeleteResponseDto;
 import com.tinysteps.doctorservice.model.ResponseModel;
@@ -485,6 +486,27 @@ public class DoctorController {
                         @Parameter(description = "Doctor ID", required = true) @PathVariable UUID doctorId,
                         @Parameter(description = "Branch ID", required = true) @PathVariable UUID branchId) {
                 DoctorSoftDeleteResponseDto response = doctorService.activateDoctorInBranch(doctorId, branchId);
+                return ResponseEntity.ok(ResponseModel.<DoctorSoftDeleteResponseDto>builder()
+                                .status(HttpStatus.OK)
+                                .message("Doctor activation operation completed")
+                                .data(response)
+                                .build());
+        }
+
+        @Operation(summary = "Activate doctor in multiple branches", description = "Activates a doctor in multiple branches and updates global status if needed")
+        @ApiResponses(value = {
+                        @ApiResponse(responseCode = "200", description = "Doctor successfully activated in branches"),
+                        @ApiResponse(responseCode = "400", description = "Doctor not associated with specified branches"),
+                        @ApiResponse(responseCode = "401", description = "Unauthorized"),
+                        @ApiResponse(responseCode = "403", description = "Access denied"),
+                        @ApiResponse(responseCode = "404", description = "Doctor not found")
+        })
+        @PutMapping("/{doctorId}/activate-branches")
+        @PreAuthorize("hasRole('ADMIN') or hasRole('BRANCH_MANAGER')")
+        public ResponseEntity<ResponseModel<DoctorSoftDeleteResponseDto>> activateDoctorInBranches(
+                        @Parameter(description = "Doctor ID", required = true) @PathVariable UUID doctorId,
+                        @Valid @RequestBody DoctorBranchActivationRequestDto request) {
+                DoctorSoftDeleteResponseDto response = doctorService.activateDoctorInBranches(doctorId, request);
                 return ResponseEntity.ok(ResponseModel.<DoctorSoftDeleteResponseDto>builder()
                                 .status(HttpStatus.OK)
                                 .message("Doctor activation operation completed")

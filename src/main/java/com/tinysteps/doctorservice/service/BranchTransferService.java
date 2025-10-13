@@ -2,7 +2,8 @@ package com.tinysteps.doctorservice.service;
 
 import com.tinysteps.doctorservice.entity.Doctor;
 import com.tinysteps.doctorservice.entity.DoctorAddress;
-import com.tinysteps.doctorservice.entity.PracticeRole; // added
+import com.tinysteps.doctorservice.entity.PracticeRole;
+import com.tinysteps.doctorservice.entity.Status;
 import com.tinysteps.doctorservice.repository.DoctorRepository;
 import com.tinysteps.doctorservice.repository.DoctorAddressRepository;
 import com.tinysteps.doctorservice.service.SecurityService;
@@ -66,6 +67,7 @@ public class BranchTransferService {
                     newRelationship.setDoctorId(doctorId);
                     newRelationship.setAddressId(targetBranchId);
                     newRelationship.setPracticeRole(sourceRelationship.getPracticeRole());
+                    newRelationship.setStatus(Status.ACTIVE); // Automatically activate the doctor in the target branch
                     doctorAddressRepository.save(newRelationship);
                 }
             }
@@ -120,6 +122,7 @@ public class BranchTransferService {
             newRelationship.setDoctorId(doctorId);
             newRelationship.setAddressId(branchId);
             newRelationship.setPracticeRole(role);
+            newRelationship.setStatus(Status.ACTIVE); // Automatically activate the doctor in the new branch
             doctorAddressRepository.save(newRelationship);
 
             log.info("Successfully added doctor {} to branch {} with role {}", doctorId, branchId, role);

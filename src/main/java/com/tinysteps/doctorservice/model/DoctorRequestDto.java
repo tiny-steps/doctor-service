@@ -1,9 +1,11 @@
 package com.tinysteps.doctorservice.model;
 
 import jakarta.validation.constraints.*;
+import jakarta.validation.Valid;
 import lombok.Builder;
 
 import java.math.BigDecimal;
+import java.util.List;
 
 @Builder
 public record DoctorRequestDto(
@@ -11,16 +13,17 @@ public record DoctorRequestDto(
 
         String name,
 
-        @Size(max = 200, message = "Slug must not exceed 200 characters") @Pattern(regexp = "^[a-z0-9-]+$", message = "Slug must contain only lowercase letters, numbers, and hyphens") String slug,
+        @Size(max = 200, message = "Slug must not exceed 200 characters") @Pattern(regexp = "^(|[a-z0-9-]+)$", message = "Slug must be empty or contain only lowercase letters, numbers, and hyphens") String slug,
 
-        @Pattern(regexp = "^(MALE|FEMALE|OTHER)$", message = "Gender must be MALE, FEMALE, or OTHER") String gender,
+        @Pattern(regexp = "^(|MALE|FEMALE|OTHER)$", message = "Gender must be empty, MALE, FEMALE, or OTHER") String gender,
 
-        String summary,
+        String remarks,
 
         String about,
 
-        // Either imageUrl (public URL, relative path, or base64 data URL) or imageData can be provided
-        @Pattern(regexp = "^((https?|ftp)://[^\\s/$.?#].[^\\s]*|/[^\\s]*)?$", message = "Image URL must be a valid URL, relative path, or empty") String imageUrl,
+        // Either imageUrl (public URL, relative path, or base64 data URL) or imageData
+        // can be provided
+        @Pattern(regexp = "^(|(https?|ftp)://[^\\s/$.?#].[^\\s]*|/[^\\s]*|data:image/[^;]+;base64,[A-Za-z0-9+/=]+)$", message = "Image URL must be empty, a valid URL, relative path, or base64 data URL") String imageUrl,
 
         // Optional base64 data URL (e.g., data:image/jpeg;base64,....)
         String imageData,
@@ -33,9 +36,13 @@ public record DoctorRequestDto(
 
         @Min(value = 0, message = "Review count must be non-negative") Integer reviewCount,
 
-        @Pattern(regexp = "^(ACTIVE|INACTIVE|SUSPENDED)$", message = "Status must be ACTIVE, INACTIVE, or SUSPENDED") String status,
+        @Pattern(regexp = "^(|ACTIVE|INACTIVE|SUSPENDED)$", message = "Status must be empty, ACTIVE, INACTIVE, or SUSPENDED") String status,
 
         String primaryBranchId,
 
-        Boolean isMultiBranch) {
+        Boolean isMultiBranch,
+
+        // List of specialization IDs (references to existing specializations in master
+        // table)
+        @Valid List<DoctorSpecializationRequestDto> specializations) {
 }

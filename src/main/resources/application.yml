@@ -68,6 +68,12 @@ resilience4j:
               wait-duration-in-open-state: 10s
               permitted-number-of-calls-in-half-open-state: 2
               register-health-indicator: true
+              ignore-exceptions:
+                - org.springframework.web.reactive.function.client.WebClientResponseException$Conflict
+                - org.springframework.web.reactive.function.client.WebClientResponseException$BadRequest
+                - org.springframework.web.reactive.function.client.WebClientResponseException$NotFound
+                - org.springframework.web.reactive.function.client.WebClientResponseException$Unauthorized
+                - org.springframework.web.reactive.function.client.WebClientResponseException$Forbidden
       ts-user-service:
         registerHealthIndicator: true
         slidingWindowSize: 10
@@ -100,6 +106,16 @@ resilience4j:
       auth-service:
         max-attempts: 3
         wait-duration: 500ms
+        retry-exceptions:
+          - java.io.IOException
+          - java.util.concurrent.TimeoutException
+          - org.springframework.web.reactive.function.client.WebClientRequestException
+        ignore-exceptions:
+          - org.springframework.web.reactive.function.client.WebClientResponseException$Conflict
+          - org.springframework.web.reactive.function.client.WebClientResponseException$BadRequest
+          - org.springframework.web.reactive.function.client.WebClientResponseException$NotFound
+          - org.springframework.web.reactive.function.client.WebClientResponseException$Unauthorized
+          - org.springframework.web.reactive.function.client.WebClientResponseException$Forbidden
 
       ts-user-service:
         maxAttempts: 3
@@ -127,6 +143,9 @@ resilience4j:
         timeoutDuration: 5s
       ts-session-service:
         timeoutDuration: 5s
+flyway:
+  enabled: false
+
 internal:
   api:
     secret: "902ffc52f4ab670361e543008a5f8e86005edadfbc1df36f5cc375b433448aff"

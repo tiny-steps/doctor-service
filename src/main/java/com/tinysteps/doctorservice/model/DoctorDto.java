@@ -1,9 +1,11 @@
 package com.tinysteps.doctorservice.model;
 
 import jakarta.validation.constraints.*;
+import jakarta.validation.Valid;
 import lombok.Builder;
 
 import java.math.BigDecimal;
+import java.util.List;
 
 @Builder
 public record DoctorDto(
@@ -19,7 +21,7 @@ public record DoctorDto(
 
         @Pattern(regexp = "^(MALE|FEMALE|OTHER)$", message = "Gender must be MALE, FEMALE, or OTHER") String gender,
 
-        String summary,
+        String remarks,
 
         String about,
 
@@ -38,5 +40,9 @@ public record DoctorDto(
 
         @Pattern(regexp = "^(ACTIVE|INACTIVE|SUSPENDED)$", message = "Status must be ACTIVE, INACTIVE, or SUSPENDED") String status,
 
-        String branchId) {
+        String branchId,
+
+        // List of specialization IDs (references to existing specializations in master
+        // table)
+        @Valid List<DoctorSpecializationRequestDto> specializations) {
 }

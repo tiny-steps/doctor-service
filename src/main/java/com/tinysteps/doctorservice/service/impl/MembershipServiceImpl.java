@@ -65,6 +65,22 @@ public class MembershipServiceImpl implements MembershipService {
     public MembershipResponseDto update(UUID id, MembershipRequestDto requestDto) {
         var existingMembership = membershipRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Membership not found with ID: " + id));
+
+        // Handle doctor reassignment if doctorId is provided
+        UUID originalDoctorId = existingMembership.getDoctor().getId();
+        if (requestDto.doctorId() != null && !requestDto.doctorId().isEmpty()) {
+            try {
+                UUID newDoctorId = UUID.fromString(requestDto.doctorId());
+                var newDoctor = doctorRepository.findById(newDoctorId)
+                        .orElseThrow(() -> new DoctorNotFoundException(newDoctorId));
+                existingMembership.setDoctor(newDoctor);
+                log.info("Reassigned membership {} from doctor {} to doctor {}",
+                        id, originalDoctorId, newDoctorId);
+            } catch (IllegalArgumentException e) {
+                throw new IllegalArgumentException("Invalid doctor ID format: " + requestDto.doctorId());
+            }
+        }
+
         membershipMapper.updateEntityFromDto(requestDto, existingMembership);
         var updatedMembership = membershipRepository.save(existingMembership);
         log.info("Updated membership {} for doctor {}", id, existingMembership.getDoctor().getId());
@@ -76,6 +92,22 @@ public class MembershipServiceImpl implements MembershipService {
     public MembershipResponseDto partialUpdate(UUID id, MembershipRequestDto requestDto) {
         var existingMembership = membershipRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Membership not found with ID: " + id));
+
+        // Handle doctor reassignment if doctorId is provided
+        UUID originalDoctorId = existingMembership.getDoctor().getId();
+        if (requestDto.doctorId() != null && !requestDto.doctorId().isEmpty()) {
+            try {
+                UUID newDoctorId = UUID.fromString(requestDto.doctorId());
+                var newDoctor = doctorRepository.findById(newDoctorId)
+                        .orElseThrow(() -> new DoctorNotFoundException(newDoctorId));
+                existingMembership.setDoctor(newDoctor);
+                log.info("Reassigned membership {} from doctor {} to doctor {}",
+                        id, originalDoctorId, newDoctorId);
+            } catch (IllegalArgumentException e) {
+                throw new IllegalArgumentException("Invalid doctor ID format: " + requestDto.doctorId());
+            }
+        }
+
         membershipMapper.updateEntityFromDto(requestDto, existingMembership);
         var updatedMembership = membershipRepository.save(existingMembership);
         log.info("Partially updated membership {} for doctor {}", id, existingMembership.getDoctor().getId());

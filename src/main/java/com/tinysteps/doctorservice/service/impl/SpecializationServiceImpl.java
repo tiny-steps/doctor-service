@@ -1,5 +1,7 @@
 package com.tinysteps.doctorservice.service.impl;
 
+import com.tinysteps.doctorservice.entity.DoctorSpecialization;
+import com.tinysteps.doctorservice.entity.SpecializationMaster;
 import com.tinysteps.doctorservice.exception.DoctorNotFoundException;
 import com.tinysteps.doctorservice.exception.EntityNotFoundException;
 import com.tinysteps.doctorservice.mapper.SpecializationMapper;
@@ -8,6 +10,7 @@ import com.tinysteps.doctorservice.model.SpecializationResponseDto;
 import com.tinysteps.doctorservice.repository.DoctorRepository;
 import com.tinysteps.doctorservice.repository.SpecializationRepository;
 import com.tinysteps.doctorservice.service.SpecializationService;
+import com.tinysteps.doctorservice.service.SpecializationMasterService;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -28,12 +31,15 @@ public class SpecializationServiceImpl implements SpecializationService {
     private final SpecializationRepository specializationRepository;
     private final DoctorRepository doctorRepository;
     private final SpecializationMapper specializationMapper;
+    private final SpecializationMasterService specializationMasterService;
 
     public SpecializationServiceImpl(SpecializationRepository specializationRepository,
-            DoctorRepository doctorRepository, SpecializationMapper specializationMapper) {
+            DoctorRepository doctorRepository, SpecializationMapper specializationMapper,
+            SpecializationMasterService specializationMasterService) {
         this.specializationRepository = specializationRepository;
         this.doctorRepository = doctorRepository;
         this.specializationMapper = specializationMapper;
+        this.specializationMasterService = specializationMasterService;
     }
 
     @Override
@@ -41,8 +47,18 @@ public class SpecializationServiceImpl implements SpecializationService {
     public SpecializationResponseDto create(UUID doctorId, SpecializationRequestDto requestDto) {
         var doctor = doctorRepository.findById(doctorId)
                 .orElseThrow(() -> new DoctorNotFoundException("Doctor not found with ID: " + doctorId));
-        var specialization = specializationMapper.fromRequestDto(requestDto);
+
+        // Get or create the specialization master record
+        SpecializationMaster master = specializationMasterService.getOrCreate(requestDto.speciality());
+
+        // Create the junction record
+        DoctorSpecialization specialization = new DoctorSpecialization();
         specialization.setDoctor(doctor);
+        specialization.setSpecializationMaster(master);
+        specialization.setSubspecialization(requestDto.subspecialization());
+        // Populate deprecated speciality field for backward compatibility
+        specialization.setSpeciality(master.getName());
+
         var savedSpecialization = specializationRepository.save(specialization);
         log.info("Created specialization {} for doctor {}", savedSpecialization.getId(), doctorId);
         return specializationMapper.toResponseDto(savedSpecialization);
@@ -67,7 +83,20 @@ public class SpecializationServiceImpl implements SpecializationService {
     public SpecializationResponseDto update(UUID id, SpecializationRequestDto requestDto) {
         var existingSpecialization = specializationRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Specialization not found with ID: " + id));
-        specializationMapper.updateEntityFromDto(requestDto, existingSpecialization);
+
+        // Update specialization master if changed
+        if (requestDto.speciality() != null && !requestDto.speciality().isEmpty()) {
+            SpecializationMaster master = specializationMasterService.getOrCreate(requestDto.speciality());
+            existingSpecialization.setSpecializationMaster(master);
+            // Update deprecated speciality field for backward compatibility
+            existingSpecialization.setSpeciality(master.getName());
+        }
+
+        // Update subspecialization
+        if (requestDto.subspecialization() != null) {
+            existingSpecialization.setSubspecialization(requestDto.subspecialization());
+        }
+
         var updatedSpecialization = specializationRepository.save(existingSpecialization);
         log.info("Updated specialization {} for doctor {}", id, existingSpecialization.getDoctor().getId());
         return specializationMapper.toResponseDto(updatedSpecialization);
@@ -78,7 +107,20 @@ public class SpecializationServiceImpl implements SpecializationService {
     public SpecializationResponseDto partialUpdate(UUID id, SpecializationRequestDto requestDto) {
         var existingSpecialization = specializationRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Specialization not found with ID: " + id));
-        specializationMapper.updateEntityFromDto(requestDto, existingSpecialization);
+
+        // Update specialization master if provided
+        if (requestDto.speciality() != null && !requestDto.speciality().isEmpty()) {
+            SpecializationMaster master = specializationMasterService.getOrCreate(requestDto.speciality());
+            existingSpecialization.setSpecializationMaster(master);
+            // Update deprecated speciality field for backward compatibility
+            existingSpecialization.setSpeciality(master.getName());
+        }
+
+        // Update subspecialization if provided
+        if (requestDto.subspecialization() != null) {
+            existingSpecialization.setSubspecialization(requestDto.subspecialization());
+        }
+
         var updatedSpecialization = specializationRepository.save(existingSpecialization);
         log.info("Partially updated specialization {} for doctor {}", id, existingSpecialization.getDoctor().getId());
         return specializationMapper.toResponseDto(updatedSpecialization);
@@ -216,10 +258,24 @@ public class SpecializationServiceImpl implements SpecializationService {
     public List<SpecializationResponseDto> createBatch(UUID doctorId, List<SpecializationRequestDto> requestDtos) {
         var doctor = doctorRepository.findById(doctorId)
                 .orElseThrow(() -> new DoctorNotFoundException("Doctor not found with ID: " + doctorId));
+
         var specializations = requestDtos.stream()
-                .map(specializationMapper::fromRequestDto)
-                .peek(spec -> spec.setDoctor(doctor))
+                .map(requestDto -> {
+                    // Get or create the specialization master record
+                    SpecializationMaster master = specializationMasterService.getOrCreate(requestDto.speciality());
+
+                    // Create the junction record
+                    DoctorSpecialization specialization = new DoctorSpecialization();
+                    specialization.setDoctor(doctor);
+                    specialization.setSpecializationMaster(master);
+                    specialization.setSubspecialization(requestDto.subspecialization());
+                    // Populate deprecated speciality field for backward compatibility
+                    specialization.setSpeciality(master.getName());
+
+                    return specialization;
+                })
                 .collect(Collectors.toList());
+
         var savedSpecializations = specializationRepository.saveAll(specializations);
         log.info("Created {} specializations for doctor {}", savedSpecializations.size(), doctorId);
         return savedSpecializations.stream()

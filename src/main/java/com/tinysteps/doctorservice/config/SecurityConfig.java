@@ -33,18 +33,19 @@ public class SecurityConfig {
         http
                 .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(authorize -> authorize
-                        // Explicitly permit the public endpoints for user creation and internal service calls.
+                        // Explicitly permit the public endpoints for user creation and internal service
+                        // calls.
                         // These rules are checked first.
-//                        .requestMatchers(HttpMethod.POST, "/api/v1/users").permitAll()
-//                        .requestMatchers(HttpMethod.GET, "/api/v1/users/email/**").permitAll()
+                        // .requestMatchers(HttpMethod.POST, "/api/v1/users").permitAll()
+                        // .requestMatchers(HttpMethod.GET, "/api/v1/users/email/**").permitAll()
+                        // Public endpoints for specializations
+                        .requestMatchers(HttpMethod.GET, "/api/v1/specializations").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/v1/specializations/**").permitAll()
                         // All other requests must be authenticated.
-                        .anyRequest().authenticated()
-                )
+                        .anyRequest().authenticated())
                 .oauth2ResourceServer(oauth2 -> oauth2
                         .jwt(jwt -> jwt
-                                .jwtAuthenticationConverter(jwtAuthenticationConverter())
-                        )
-                )
+                                .jwtAuthenticationConverter(jwtAuthenticationConverter())))
                 .addFilterBefore(internalApiAuthenticationFilter,
                         UsernamePasswordAuthenticationFilter.class);
 
@@ -54,6 +55,7 @@ public class SecurityConfig {
     /**
      * Creates a converter to extract roles from the 'role' claim in the JWT
      * and map them to Spring Security's GrantedAuthority objects.
+     * 
      * @return A configured JwtAuthenticationConverter.
      */
     @Bean

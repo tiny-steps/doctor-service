@@ -10,13 +10,21 @@ import org.hibernate.annotations.GenericGenerator;
 
 import java.util.UUID;
 
+/**
+ * Junction table for many-to-many relationship between Doctor and
+ * SpecializationMaster
+ * One doctor can have multiple specializations
+ * One specialization can belong to multiple doctors
+ */
 @Entity
-@Table(name = "doctor_specializations")
+@Table(name = "doctor_specializations", uniqueConstraints = {
+        @UniqueConstraint(columnNames = { "doctor_id", "specialization_id" })
+})
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class Specialization {
+public class DoctorSpecialization {
 
     @Id
     @GeneratedValue(generator = "UUID")
@@ -29,9 +37,16 @@ public class Specialization {
     @JsonManagedReference
     private Doctor doctor;
 
-    @Column(nullable = false, length = 100)
-    private String speciality;
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "specialization_id", referencedColumnName = "id", nullable = false)
+    private SpecializationMaster specializationMaster;
 
     @Column(length = 100)
     private String subspecialization;
+
+    // For backward compatibility during migration - will be removed after data
+    // migration
+    @Column(length = 100)
+    @Deprecated
+    private String speciality;
 }

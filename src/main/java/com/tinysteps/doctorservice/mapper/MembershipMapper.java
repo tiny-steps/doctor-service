@@ -13,9 +13,7 @@ import org.mapstruct.ReportingPolicy;
 import java.util.List;
 import java.util.UUID;
 
-@Mapper(componentModel = "spring",
-        unmappedTargetPolicy = ReportingPolicy.IGNORE,
-        nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
+@Mapper(componentModel = "spring", unmappedTargetPolicy = ReportingPolicy.IGNORE, nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
 public interface MembershipMapper {
 
     @Mapping(target = "id", source = "id", qualifiedByName = "uuidToString")
@@ -32,7 +30,7 @@ public interface MembershipMapper {
 
     // Update entity from DTO
     @Mapping(target = "id", ignore = true)
-    @Mapping(target = "doctor", ignore = true)
+    @Mapping(target = "doctor", ignore = true) // Doctor will be handled separately in service
     void updateEntityFromDto(MembershipRequestDto requestDto, @MappingTarget Membership membership);
 
     // Helper methods for type conversion

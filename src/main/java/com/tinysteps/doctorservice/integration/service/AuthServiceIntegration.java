@@ -51,13 +51,32 @@ public class AuthServiceIntegration {
                 .transformDeferred(RetryOperator.of(authServiceRetry))
                 .transformDeferred(CircuitBreakerOperator.of(authServiceCircuitBreaker))
                 .transformDeferred(TimeLimiterOperator.of(authServiceTimeLimiter))
-                .onErrorMap(throwable -> new AuthenticationServiceException("Auth service is unavailable", throwable));
+                .onErrorResume(throwable -> {
+                    // Only wrap actual connectivity/timeout issues, not business logic errors
+                    if (throwable instanceof org.springframework.web.reactive.function.client.WebClientResponseException) {
+                        // Re-throw WebClientResponseException so GlobalExceptionHandler can parse the
+                        // error details
+                        log.warn("Auth service returned error response: {}", throwable.getMessage());
+                        return Mono.error(throwable);
+                    }
+                    // Wrap only connectivity issues
+                    log.error("Auth service connectivity error", throwable);
+                    return Mono.error(new AuthenticationServiceException("Auth service is unavailable", throwable));
+                });
     }
 
-    // Fallback method
+    // Fallback method - only for circuit breaker scenarios
     public Mono<UserModel> registerUserFallback(UserRegistrationRequest request, Throwable t) {
-        log.warn("Fallback for registerUser: {}", request.getEmail(), t);
-        return Mono.error(new RuntimeException("User registration failed", t));
+        log.warn("Circuit breaker fallback for registerUser: {}", request.getEmail(), t);
+
+        // If it's a WebClientResponseException, preserve it
+        if (t instanceof org.springframework.web.reactive.function.client.WebClientResponseException) {
+            return Mono.error(t);
+        }
+
+        // Only wrap actual circuit breaker failures
+        return Mono.error(
+                new RuntimeException("User registration service is currently unavailable. Please try again later.", t));
     }
 
     /**

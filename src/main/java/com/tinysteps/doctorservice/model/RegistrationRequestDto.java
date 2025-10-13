@@ -7,14 +7,12 @@ import lombok.Builder;
 
 @Builder
 public record RegistrationRequestDto(
-        @Size(max = 255, message = "Registration council name must not exceed 255 characters")
-        String registrationCouncilName,
+                @Size(max = 255, message = "Registration council name must not exceed 255 characters") String registrationCouncilName,
 
-        @Size(max = 100, message = "Registration number must not exceed 100 characters")
-        String registrationNumber,
+                @Size(max = 100, message = "Registration number must not exceed 100 characters") String registrationNumber,
 
-        @Min(value = 1900, message = "Registration year must be after 1900")
-        @Max(value = 2100, message = "Registration year must be before 2100")
-        Integer registrationYear
-) {
+                @Min(value = 1900, message = "Registration year must be after 1900") @Max(value = 2100, message = "Registration year must be before 2100") Integer registrationYear,
+
+                // Optional doctor ID to allow reassigning registration to different doctor
+                String doctorId) {
 }

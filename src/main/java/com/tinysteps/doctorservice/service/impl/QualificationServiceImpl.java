@@ -65,6 +65,22 @@ public class QualificationServiceImpl implements QualificationService {
     public QualificationResponseDto update(UUID id, QualificationRequestDto requestDto) {
         var existingQualification = qualificationRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Qualification not found with ID: " + id));
+
+        // Handle doctor reassignment if doctorId is provided
+        UUID originalDoctorId = existingQualification.getDoctor().getId();
+        if (requestDto.doctorId() != null && !requestDto.doctorId().isEmpty()) {
+            try {
+                UUID newDoctorId = UUID.fromString(requestDto.doctorId());
+                var newDoctor = doctorRepository.findById(newDoctorId)
+                        .orElseThrow(() -> new DoctorNotFoundException(newDoctorId));
+                existingQualification.setDoctor(newDoctor);
+                log.info("Reassigned qualification {} from doctor {} to doctor {}",
+                        id, originalDoctorId, newDoctorId);
+            } catch (IllegalArgumentException e) {
+                throw new IllegalArgumentException("Invalid doctor ID format: " + requestDto.doctorId());
+            }
+        }
+
         qualificationMapper.updateEntityFromDto(requestDto, existingQualification);
         var updatedQualification = qualificationRepository.save(existingQualification);
         log.info("Updated qualification {} for doctor {}", id, existingQualification.getDoctor().getId());
@@ -76,6 +92,22 @@ public class QualificationServiceImpl implements QualificationService {
     public QualificationResponseDto partialUpdate(UUID id, QualificationRequestDto requestDto) {
         var existingQualification = qualificationRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Qualification not found with ID: " + id));
+
+        // Handle doctor reassignment if doctorId is provided
+        UUID originalDoctorId = existingQualification.getDoctor().getId();
+        if (requestDto.doctorId() != null && !requestDto.doctorId().isEmpty()) {
+            try {
+                UUID newDoctorId = UUID.fromString(requestDto.doctorId());
+                var newDoctor = doctorRepository.findById(newDoctorId)
+                        .orElseThrow(() -> new DoctorNotFoundException(newDoctorId));
+                existingQualification.setDoctor(newDoctor);
+                log.info("Reassigned qualification {} from doctor {} to doctor {}",
+                        id, originalDoctorId, newDoctorId);
+            } catch (IllegalArgumentException e) {
+                throw new IllegalArgumentException("Invalid doctor ID format: " + requestDto.doctorId());
+            }
+        }
+
         qualificationMapper.updateEntityFromDto(requestDto, existingQualification);
         var updatedQualification = qualificationRepository.save(existingQualification);
         log.info("Partially updated qualification {} for doctor {}", id, existingQualification.getDoctor().getId());

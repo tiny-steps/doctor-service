@@ -2,10 +2,14 @@ package com.tinysteps.doctorservice.service.impl;
 
 import com.tinysteps.doctorservice.entity.Doctor;
 import com.tinysteps.doctorservice.entity.DoctorAddress;
+import com.tinysteps.doctorservice.entity.DoctorSpecialization;
+import com.tinysteps.doctorservice.entity.PracticeRole;
+import com.tinysteps.doctorservice.entity.SpecializationMaster;
 import com.tinysteps.doctorservice.entity.Status;
 import com.tinysteps.doctorservice.repository.DoctorAddressRepository;
 import com.tinysteps.doctorservice.exception.DoctorNotFoundException;
 import com.tinysteps.doctorservice.exception.DoctorSoftDeleteException;
+import com.tinysteps.doctorservice.exception.IntegrationException;
 import com.tinysteps.doctorservice.integration.model.UserModel;
 import com.tinysteps.doctorservice.mapper.*;
 import com.tinysteps.doctorservice.model.*;
@@ -13,6 +17,7 @@ import com.tinysteps.doctorservice.model.DoctorAddressRequestDto;
 import com.tinysteps.doctorservice.repository.*;
 import com.tinysteps.doctorservice.service.DoctorService;
 import com.tinysteps.doctorservice.service.DoctorAddressService;
+import com.tinysteps.doctorservice.service.SpecializationMasterService;
 import com.tinysteps.doctorservice.dto.UserRegistrationRequest;
 import com.tinysteps.doctorservice.integration.service.AuthServiceIntegration;
 import com.tinysteps.doctorservice.integration.service.UserIntegrationService;
@@ -20,12 +25,14 @@ import com.tinysteps.doctorservice.integration.model.UserUpdateRequest;
 import com.tinysteps.doctorservice.service.SecurityService;
 import com.tinysteps.common.entity.EntityStatus;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
+import org.springframework.web.reactive.function.client.WebClientResponseException;
 
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
@@ -45,7 +52,8 @@ public class DoctorServiceImpl implements DoctorService {
     private final DoctorRepository doctorRepository;
     private final DoctorMapper doctorMapper;
     private final SpecializationMapper specializationMapper;
-    private final SpecializationRepository specializationRepository;
+    private final DoctorSpecializationRepository doctorSpecializationRepository;
+    private final SpecializationMasterService specializationMasterService;
     private final AwardMapper awardMapper;
     private final AwardRepository awardRepository;
     private final QualificationMapper qualificationMapper;
@@ -74,7 +82,8 @@ public class DoctorServiceImpl implements DoctorService {
     private EntityManager entityManager;
 
     public DoctorServiceImpl(DoctorRepository doctorRepository, DoctorMapper doctorMapper,
-            SpecializationMapper specializationMapper, SpecializationRepository specializationRepository,
+            SpecializationMapper specializationMapper, DoctorSpecializationRepository doctorSpecializationRepository,
+            SpecializationMasterService specializationMasterService,
             AwardMapper awardMapper, AwardRepository awardRepository,
             QualificationMapper qualificationMapper, QualificationRepository qualificationRepository,
             MembershipMapper membershipMapper, MembershipRepository membershipRepository,
@@ -91,7 +100,8 @@ public class DoctorServiceImpl implements DoctorService {
         this.doctorRepository = doctorRepository;
         this.doctorMapper = doctorMapper;
         this.specializationMapper = specializationMapper;
-        this.specializationRepository = specializationRepository;
+        this.doctorSpecializationRepository = doctorSpecializationRepository;
+        this.specializationMasterService = specializationMasterService;
         this.awardMapper = awardMapper;
         this.awardRepository = awardRepository;
         this.qualificationMapper = qualificationMapper;
@@ -158,7 +168,7 @@ public class DoctorServiceImpl implements DoctorService {
         }
 
         // Fetch all related entities for this doctor
-        List<SpecializationResponseDto> specializations = specializationRepository.findByDoctorId(doctor.getId())
+        List<SpecializationResponseDto> specializations = doctorSpecializationRepository.findByDoctorId(doctor.getId())
                 .stream()
                 .map(specializationMapper::toResponseDto)
                 .collect(Collectors.toList());
@@ -243,7 +253,7 @@ public class DoctorServiceImpl implements DoctorService {
                 .phone(phone)
                 .slug(doctor.getSlug() != null ? doctor.getSlug() : "")
                 .gender(doctor.getGender() != null ? doctor.getGender() : "")
-                .summary(doctor.getSummary() != null ? doctor.getSummary() : "")
+                .remarks(doctor.getRemarks() != null ? doctor.getRemarks() : "")
                 .about(doctor.getAbout() != null ? doctor.getAbout() : "")
                 .imageUrl(avatar) // Use avatar from user service instead of doctor.getImageUrl()
                 .experienceYears(doctor.getExperienceYears() != null ? doctor.getExperienceYears() : 0)
@@ -294,9 +304,12 @@ public class DoctorServiceImpl implements DoctorService {
     }
 
     @Override
+    @Transactional
     public DoctorResponseDto update(UUID id, DoctorRequestDto requestDto) {
         var existingDoctor = doctorRepository.findById(id)
                 .orElseThrow(() -> new DoctorNotFoundException("Doctor not found with ID: " + id));
+
+        log.info("Updating doctor with ID: {}, existing userId: {}", id, existingDoctor.getUserId());
 
         // Store original values for comparison
         String originalName = existingDoctor.getName();
@@ -325,7 +338,12 @@ public class DoctorServiceImpl implements DoctorService {
 
         // Update doctor entity
         doctorMapper.updateEntityFromDto(requestDto, existingDoctor);
+
+        log.info("After mapper update - ID: {}, userId: {}", existingDoctor.getId(), existingDoctor.getUserId());
+
         var updatedDoctor = doctorRepository.save(existingDoctor);
+
+        log.info("After save - ID: {}, userId: {}", updatedDoctor.getId(), updatedDoctor.getUserId());
 
         // Update user information if doctor has a userId
         if (existingDoctor.getUserId() != null) {
@@ -374,6 +392,49 @@ public class DoctorServiceImpl implements DoctorService {
             } catch (Exception e) {
                 log.error("Error updating user information for doctor ID: {}", id, e);
                 // Don't fail the doctor update if user update fails
+            }
+        }
+
+        // Handle specializations update if provided (using specialization IDs)
+        if (requestDto.specializations() != null && !requestDto.specializations().isEmpty()) {
+            try {
+                // Delete all existing specializations for this doctor
+                doctorSpecializationRepository.deleteByDoctorId(id);
+                entityManager.flush(); // Flush delete before insert to avoid constraint violations
+                log.info("Deleted existing specializations for doctor {}", id);
+
+                // Create new specializations
+                if (!requestDto.specializations().isEmpty()) {
+                    List<DoctorSpecialization> newSpecializations = requestDto.specializations().stream()
+                            .map(specDto -> {
+                                // Validate and get the specialization master by ID
+                                UUID specializationId = UUID.fromString(specDto.specializationId());
+                                SpecializationMaster master = specializationMasterService
+                                        .validateAndGet(specializationId);
+
+                                // Create the junction record
+                                DoctorSpecialization spec = new DoctorSpecialization();
+                                spec.setDoctor(updatedDoctor);
+                                spec.setSpecializationMaster(master);
+                                spec.setSubspecialization(specDto.subspecialization());
+                                // Populate deprecated speciality field for backward compatibility
+                                spec.setSpeciality(master.getName());
+                                return spec;
+                            })
+                            .collect(Collectors.toList());
+
+                    doctorSpecializationRepository.saveAll(newSpecializations);
+                    log.info("Created {} new specializations for doctor {}",
+                            newSpecializations.size(), id);
+                }
+            } catch (IllegalArgumentException e) {
+                log.error("Invalid specialization ID or inactive specialization for doctor {}: {}",
+                        id, e.getMessage());
+                throw e; // Fail update if specialization validation fails
+            } catch (Exception e) {
+                log.error("Failed to update specializations for doctor {}: {}",
+                        id, e.getMessage());
+                throw new RuntimeException("Failed to update specializations: " + e.getMessage());
             }
         }
 
@@ -847,6 +908,101 @@ public class DoctorServiceImpl implements DoctorService {
     }
 
     @Override
+    @Transactional
+    public DoctorSoftDeleteResponseDto activateDoctorInBranches(UUID doctorId,
+            DoctorBranchActivationRequestDto request) {
+        log.info("Activating doctor {} in branches: {}", doctorId, request.branchIds());
+
+        // Validate doctor exists
+        var doctor = doctorRepository.findById(doctorId)
+                .orElseThrow(() -> new DoctorNotFoundException("Doctor not found with ID: " + doctorId));
+
+        // Get existing associations
+        List<DoctorAddress> existingAssociations = doctorAddressRepository.findByDoctorIdAndAddressIdIn(doctorId,
+                request.branchIds());
+
+        // Determine which branches need new associations
+        List<UUID> existingBranchIds = existingAssociations.stream()
+                .map(DoctorAddress::getAddressId)
+                .toList();
+        List<UUID> newBranchIds = request.branchIds().stream()
+                .filter(branchId -> !existingBranchIds.contains(branchId))
+                .toList();
+
+        try {
+            // Activate existing associations
+            if (!existingBranchIds.isEmpty()) {
+                doctorAddressRepository.updateStatusByDoctorIdAndAddressIdIn(doctorId, existingBranchIds,
+                        Status.ACTIVE);
+                log.info("Activated doctor {} in {} existing branches: {}", doctorId, existingBranchIds.size(),
+                        existingBranchIds);
+            }
+
+            // Create new associations for branches the doctor was never associated with
+            if (!newBranchIds.isEmpty()) {
+                String practiceRole = request.practiceRole() != null ? request.practiceRole() : "CONSULTANT";
+                PracticeRole role = PracticeRole.valueOf(practiceRole.toUpperCase());
+
+                for (UUID branchId : newBranchIds) {
+                    // Check if relationship already exists (shouldn't happen, but safety check)
+                    if (!doctorAddressRepository.existsByDoctorIdAndAddressIdAndPracticeRole(doctorId, branchId,
+                            role)) {
+                        DoctorAddress newAssociation = new DoctorAddress();
+                        newAssociation.setDoctorId(doctorId);
+                        newAssociation.setAddressId(branchId);
+                        newAssociation.setPracticeRole(role);
+                        newAssociation.setStatus(Status.ACTIVE);
+                        doctorAddressRepository.save(newAssociation);
+                        log.info("Created new association for doctor {} in branch {} with role {}", doctorId, branchId,
+                                role);
+                    }
+                }
+                log.info("Created {} new branch associations for doctor {}", newBranchIds.size(), doctorId);
+            }
+
+            // If doctor's global status is INACTIVE, activate it
+            boolean globalStatusChanged = false;
+            String newGlobalStatus = doctor.getStatus().name();
+
+            if (doctor.getStatus() == EntityStatus.INACTIVE) {
+                doctor.setStatus(EntityStatus.ACTIVE);
+                doctorRepository.save(doctor);
+                globalStatusChanged = true;
+                newGlobalStatus = EntityStatus.ACTIVE.name();
+                log.info("Doctor {} global status changed to ACTIVE", doctorId);
+            }
+
+            // Gather response information
+            long activeBranchCount = doctorAddressRepository.countActiveBranchesByDoctorId(doctorId);
+            long totalBranches = doctorAddressRepository.countByDoctorId(doctorId);
+
+            String message = String.format("Doctor successfully activated in %d branches (%d existing, %d new). %s",
+                    request.branchIds().size(), existingBranchIds.size(), newBranchIds.size(),
+                    globalStatusChanged ? "Global status changed to ACTIVE." : "");
+
+            log.info("Successfully activated doctor {} in {} branches. Total active branches: {}",
+                    doctorId, request.branchIds().size(), activeBranchCount);
+
+            return DoctorSoftDeleteResponseDto.builder()
+                    .doctorId(doctorId)
+                    .success(true)
+                    .message(message)
+                    .affectedBranches(request.branchIds())
+                    .globalStatusChanged(globalStatusChanged)
+                    .newGlobalStatus(newGlobalStatus)
+                    .remainingActiveBranches((int) activeBranchCount)
+                    .totalBranches((int) totalBranches)
+                    .operationType("MULTI_BRANCH_ACTIVATION")
+                    .build();
+
+        } catch (Exception e) {
+            log.error("Failed to activate doctor {} in branches {}: {}", doctorId, request.branchIds(), e.getMessage(),
+                    e);
+            throw new RuntimeException("Failed to activate doctor in branches: " + e.getMessage(), e);
+        }
+    }
+
+    @Override
     public Map<UUID, Boolean> getDoctorBranchStatus(UUID doctorId) {
         log.debug("Getting branch status for doctor {}", doctorId);
 
@@ -1053,7 +1209,7 @@ public class DoctorServiceImpl implements DoctorService {
                     requestDto.name(), // Use requestDto.name() as fallback
                     requestDto.slug(),
                     requestDto.gender(),
-                    requestDto.summary(),
+                    requestDto.remarks(),
                     requestDto.about(),
                     requestDto.imageUrl(),
                     requestDto.imageData(), // Now support imageData during registration
@@ -1063,7 +1219,8 @@ public class DoctorServiceImpl implements DoctorService {
                     requestDto.reviewCount(),
                     StringUtils.hasText(requestDto.status()) ? requestDto.status() : "ACTIVE",
                     requestDto.branchId(), // Use branchId from request
-                    false // isMultiBranch - default to false
+                    false, // isMultiBranch - default to false
+                    null // specializations - will be handled separately below
             );
             log.info("Creating doctor with request: {}", doctorRequestDto);
             var doctor = doctorMapper.fromRequestDto(doctorRequestDto);
@@ -1108,10 +1265,55 @@ public class DoctorServiceImpl implements DoctorService {
                 }
             }
 
-            return createDoctorResponseDto(savedDoctor);
-        } catch (Exception e) {
+            // Step 3: Create specializations if provided (using specialization IDs)
+            if (requestDto.specializations() != null && !requestDto.specializations().isEmpty()) {
+                try {
+                    List<DoctorSpecialization> specializations = requestDto.specializations().stream()
+                            .map(specDto -> {
+                                // Validate and get the specialization master by ID
+                                UUID specializationId = UUID.fromString(specDto.specializationId());
+                                SpecializationMaster master = specializationMasterService
+                                        .validateAndGet(specializationId);
 
-            throw new RuntimeException("Failed to register doctor", e);
+                                // Create the junction record
+                                DoctorSpecialization spec = new DoctorSpecialization();
+                                spec.setDoctor(savedDoctor);
+                                spec.setSpecializationMaster(master);
+                                spec.setSubspecialization(specDto.subspecialization());
+                                // Populate deprecated speciality field for backward compatibility
+                                spec.setSpeciality(master.getName());
+                                return spec;
+                            })
+                            .collect(Collectors.toList());
+
+                    doctorSpecializationRepository.saveAll(specializations);
+                    log.info("Created {} specializations for doctor {}",
+                            specializations.size(), savedDoctor.getId());
+                } catch (IllegalArgumentException e) {
+                    log.error("Invalid specialization ID or inactive specialization for doctor {}: {}",
+                            savedDoctor.getId(), e.getMessage());
+                    throw e; // Fail doctor creation if specialization validation fails
+                } catch (Exception e) {
+                    log.error("Failed to create specializations for doctor {}: {}",
+                            savedDoctor.getId(), e.getMessage());
+                    throw new RuntimeException("Failed to assign specializations: " + e.getMessage());
+                }
+            }
+
+            return createDoctorResponseDto(savedDoctor);
+        } catch (WebClientResponseException e) {
+            // Re-throw WebClient exceptions without wrapping so GlobalExceptionHandler can
+            // handle them
+            log.error("WebClient error during doctor registration: {}", e.getMessage());
+            throw e;
+        } catch (DataIntegrityViolationException e) {
+            // Re-throw data integrity violations without wrapping
+            log.error("Data integrity violation during doctor registration: {}", e.getMessage());
+            throw e;
+        } catch (Exception e) {
+            // Log and re-throw as IntegrationException for unexpected errors
+            log.error("Unexpected error during doctor registration", e);
+            throw new IntegrationException("Doctor Registration", e.getMessage(), e);
         }
     }
 

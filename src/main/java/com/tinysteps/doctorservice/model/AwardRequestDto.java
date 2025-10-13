@@ -8,15 +8,12 @@ import lombok.Builder;
 
 @Builder
 public record AwardRequestDto(
-        @NotBlank(message = "Award title is required")
-        @Size(max = 255, message = "Award title must not exceed 255 characters")
-        String title,
+                @NotBlank(message = "Award title is required") @Size(max = 255, message = "Award title must not exceed 255 characters") String title,
 
-        @Min(value = 1900, message = "Awarded year must be after 1900")
-        @Max(value = 2100, message = "Awarded year must be before 2100")
-        Integer awardedYear,
+                @Min(value = 1900, message = "Awarded year must be after 1900") @Max(value = 2100, message = "Awarded year must be before 2100") Integer awardedYear,
 
-        @Size(max = 255, message = "Award summary must not exceed 255 characters")
-        String summary
-) {
+                @Size(max = 500, message = "Award summary must not exceed 500 characters") String summary,
+
+                // Optional doctor ID to allow reassigning award to different doctor
+                String doctorId) {
 }

@@ -3,6 +3,7 @@ package com.tinysteps.doctorservice.service;
 import com.tinysteps.doctorservice.model.DoctorDto;
 import com.tinysteps.doctorservice.model.DoctorRequestDto;
 import com.tinysteps.doctorservice.model.DoctorResponseDto;
+import com.tinysteps.doctorservice.model.DoctorBranchActivationRequestDto;
 import com.tinysteps.doctorservice.model.DoctorBranchDeactivationRequestDto;
 import com.tinysteps.doctorservice.model.DoctorSoftDeleteResponseDto;
 import org.springframework.data.domain.Page;
@@ -219,4 +220,13 @@ public interface DoctorService {
          * @return list of active branch IDs
          */
         List<UUID> getActiveBranches(UUID doctorId);
+
+        /**
+         * Activate doctor in multiple branches
+         * 
+         * @param doctorId The doctor's ID
+         * @param request  The activation request containing branch IDs
+         * @return response with activation details
+         */
+        DoctorSoftDeleteResponseDto activateDoctorInBranches(UUID doctorId, DoctorBranchActivationRequestDto request);
 }

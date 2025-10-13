@@ -80,8 +80,6 @@ public class ApplicationSecurityConfig {
         return isOwner(userId, photo.getDoctor());
     }
 
-
-
     public boolean isPricingOwner(Authentication authentication, UUID doctorId) {
         // Pricing is directly linked to doctor, so we can reuse isDoctorOwner
         return isDoctorOwner(authentication, doctorId);
@@ -110,7 +108,7 @@ public class ApplicationSecurityConfig {
 
     public boolean isSpecializationOwner(Authentication authentication, UUID specializationId) {
         String userId = authentication.getName();
-        Specialization specialization = specializationRepository.findByIdWithDoctor(specializationId)
+        DoctorSpecialization specialization = specializationRepository.findByIdWithDoctor(specializationId)
                 .orElseThrow(() -> new EntityNotFoundException("Specialization", "id", specializationId.toString()));
         return isOwner(userId, specialization.getDoctor());
     }

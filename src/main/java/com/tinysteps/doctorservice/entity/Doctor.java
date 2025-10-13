@@ -37,7 +37,7 @@ public class Doctor extends BaseEntity {
     private String gender;
 
     @Column(columnDefinition = "TEXT")
-    private String summary;
+    private String remarks;
 
     @Column(columnDefinition = "TEXT")
     private String about;
@@ -83,7 +83,7 @@ public class Doctor extends BaseEntity {
 
     @OneToMany(mappedBy = "doctor", cascade = CascadeType.ALL, orphanRemoval = true)
     @JsonBackReference
-    private List<Specialization> specializations;
+    private List<DoctorSpecialization> doctorSpecializations;
 
     @OneToMany(mappedBy = "doctor", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Photo> photos;

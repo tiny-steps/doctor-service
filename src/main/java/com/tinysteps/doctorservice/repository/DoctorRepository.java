@@ -50,7 +50,7 @@ public interface DoctorRepository extends JpaRepository<Doctor, UUID> {
         List<Doctor> findTopRatedDoctors();
 
         // Find doctors by specialization
-        @Query("SELECT DISTINCT d FROM Doctor d JOIN d.specializations s WHERE s.speciality = :speciality")
+        @Query("SELECT DISTINCT d FROM Doctor d JOIN d.doctorSpecializations s WHERE s.speciality = :speciality")
         List<Doctor> findBySpeciality(@Param("speciality") String speciality);
 
         // Find doctors by address location using DoctorAddress relationship with ACTIVE
@@ -75,7 +75,7 @@ public interface DoctorRepository extends JpaRepository<Doctor, UUID> {
 
         // Search doctors by multiple criteria
         @Query("SELECT DISTINCT d FROM Doctor d " +
-                        "LEFT JOIN d.specializations s " +
+                        "LEFT JOIN d.doctorSpecializations s " +
                         "WHERE (:name IS NULL OR LOWER(d.name) LIKE LOWER(CONCAT('%', :name, '%'))) " +
                         "AND (:speciality IS NULL OR s.speciality = :speciality) " +
                         "AND (:isVerified IS NULL OR d.isVerified = :isVerified) " +

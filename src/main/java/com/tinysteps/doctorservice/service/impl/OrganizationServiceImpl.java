@@ -68,6 +68,22 @@ public class OrganizationServiceImpl implements OrganizationService {
     public OrganizationResponseDto update(UUID id, OrganizationRequestDto requestDto) {
         var existingOrganization = organizationRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Organization not found with ID: " + id));
+
+        // Handle doctor reassignment if doctorId is provided
+        UUID originalDoctorId = existingOrganization.getDoctor().getId();
+        if (requestDto.doctorId() != null && !requestDto.doctorId().isEmpty()) {
+            try {
+                UUID newDoctorId = UUID.fromString(requestDto.doctorId());
+                var newDoctor = doctorRepository.findById(newDoctorId)
+                        .orElseThrow(() -> new DoctorNotFoundException(newDoctorId));
+                existingOrganization.setDoctor(newDoctor);
+                log.info("Reassigned organization {} from doctor {} to doctor {}",
+                        id, originalDoctorId, newDoctorId);
+            } catch (IllegalArgumentException e) {
+                throw new IllegalArgumentException("Invalid doctor ID format: " + requestDto.doctorId());
+            }
+        }
+
         organizationMapper.updateEntityFromDto(requestDto, existingOrganization);
         var updatedOrganization = organizationRepository.save(existingOrganization);
         log.info("Updated organization {} for doctor {}", id, existingOrganization.getDoctor().getId());
@@ -79,6 +95,22 @@ public class OrganizationServiceImpl implements OrganizationService {
     public OrganizationResponseDto partialUpdate(UUID id, OrganizationRequestDto requestDto) {
         var existingOrganization = organizationRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Organization not found with ID: " + id));
+
+        // Handle doctor reassignment if doctorId is provided
+        UUID originalDoctorId = existingOrganization.getDoctor().getId();
+        if (requestDto.doctorId() != null && !requestDto.doctorId().isEmpty()) {
+            try {
+                UUID newDoctorId = UUID.fromString(requestDto.doctorId());
+                var newDoctor = doctorRepository.findById(newDoctorId)
+                        .orElseThrow(() -> new DoctorNotFoundException(newDoctorId));
+                existingOrganization.setDoctor(newDoctor);
+                log.info("Reassigned organization {} from doctor {} to doctor {}",
+                        id, originalDoctorId, newDoctorId);
+            } catch (IllegalArgumentException e) {
+                throw new IllegalArgumentException("Invalid doctor ID format: " + requestDto.doctorId());
+            }
+        }
+
         organizationMapper.updateEntityFromDto(requestDto, existingOrganization);
         var updatedOrganization = organizationRepository.save(existingOrganization);
         log.info("Partially updated organization {} for doctor {}", id, existingOrganization.getDoctor().getId());
