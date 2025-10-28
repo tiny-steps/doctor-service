@@ -65,3 +65,4 @@ DROP INDEX IF EXISTS idx_doctor_specializations_specialization_id;
 DROP INDEX IF EXISTS idx_doctor_specializations_doctor_id;
 -- Note: We don't drop specializations table indexes as they might be used elsewhere
 RAISE NOTICE 'Rollback completed - please verify your application works correctly';
+

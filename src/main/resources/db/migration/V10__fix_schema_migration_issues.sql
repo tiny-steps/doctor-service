@@ -216,3 +216,4 @@ ELSE RAISE WARNING '✗ Foreign key constraint missing';
 END IF;
 RAISE NOTICE 'Migration verification completed';
 END $$;
+
